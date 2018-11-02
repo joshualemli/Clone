@@ -1,9 +1,21 @@
+/*
+    CLONE
+
+    by Joshua A. Lemli
+    2018
+    
+    JavaScript file
+    */const CLONE_VERSION = "0.1.0";/*
+    */const CLONE_RELEASE = "dev";/*
+    */const CLONE_EDITION = "jailmate";/*
+*/
+
 
 "use strict";
 
-
-
 const Clone = (function(){
+
+    console.log(` \nCLONE v${CLONE_VERSION} [${CLONE_RELEASE}] "${CLONE_EDITION}"\n  by Joshua A. Lemli\n  2018\n `)
 
     var Artist = (function(){
         var canvas, context
