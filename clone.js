@@ -5,9 +5,9 @@
     2018
     
     JavaScript file
-    */const CLONE_VERSION = "0.1.0";/*
+    */const CLONE_VERSION = "0.1.1";/*
     */const CLONE_RELEASE = "dev";/*
-    */const CLONE_EDITION = "jailmate";/*
+    */const CLONE_EDITION = "jailhouse rock";/*
 */
 
 
@@ -15,7 +15,7 @@
 
 const Clone = (function(){
 
-    console.log(` \nCLONE v${CLONE_VERSION} [${CLONE_RELEASE}] "${CLONE_EDITION}"\n  by Joshua A. Lemli\n  2018\n `)
+    console.log(` \nCLONE v${CLONE_VERSION} [${CLONE_RELEASE}] "${CLONE_EDITION}" edtion\n \n  by Joshua A. Lemli\n  2018\n `)
 
     var Artist = (function(){
         var canvas, context
@@ -25,7 +25,7 @@ const Clone = (function(){
             let resizeContext = () => {
                 context.canvas.width = canvas.offsetWidth
                 context.canvas.height = canvas.offsetHeight
-                context.setTransform(20,0,0,-20,context.canvas.width/2,context.canvas.height/2)
+                context.setTransform(4,0,0,-4,context.canvas.width/2,context.canvas.height/2)
                 cloneMap.forEach( clone => clone.draw() )
             }
             resizeContext()
@@ -48,11 +48,12 @@ const Clone = (function(){
 
     var cloneMap = new Map()
 
-    function Clone(xHash,yHash) {
+    function Clone(xHash,yHash,override) {
+        override = override || {}
         this.age = 0
-        this.maxAge = 45
-        this.fertileAge = 13
-        this.cloningFailureChance = 0.96
+        this.maxAge = override.maxAge || 31
+        this.fertileAge = override.fertileAge || 7
+        this.cloningFailureChance = override.cloningFailureChance || 0.95
         this.radius = this.maxRadius*0.95
         this.xHash = xHash
         this.yHash = yHash
@@ -72,7 +73,7 @@ const Clone = (function(){
             y: parseInt(this.yHash) * this.yMultiplier
         }
     }
-    Clone.prototype._randomPosition = () => Math.floor( Math.random() * 777 ) % 6
+    Clone.prototype._randomPosition = () => Math.floor( Math.random() * 7771 ) % 6
     Clone.prototype._getHashFromPosition = function(p) {
         var xHash,yHash
         switch(p) {
@@ -136,10 +137,20 @@ const Clone = (function(){
     window.addEventListener("keydown",event=>window.fail=true)
     
     const step = () => {
+        // start microtime
         var tStart = performance.now()
+        // perform `step` for each clone
         cloneMap.forEach( (value,key) => value.step() )
-        if (Math.random() > 0.96) console.log(performance.now() - tStart)
-        if (cloneMap.size === 0) cloneMap.set("0_0",new Clone(0,0))
+        // create a new clone if the `cloneMap` is empty
+        if (cloneMap.size === 0) {
+            var one = new Clone(0,0)
+            cloneMap.set(one.id,one)
+        }
+        // 
+        if (performance.now() - tStart > 10) {
+            throw new Error(cloneMap.size)
+        }
+        if (Math.random() > 0.99) console.log(performance.now() - tStart)
         // loop
         if (!window.fail) window.requestAnimationFrame(step)
         else console.log("stopping")
@@ -147,11 +158,6 @@ const Clone = (function(){
 
     return function() {
         Artist.init()
-
-        //testing
-        var one = new Clone(0,0)
-        cloneMap.set(one.id,one)
-
         step()
     }
 
