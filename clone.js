@@ -17,6 +17,64 @@ const Clone = (function(){
 
     console.log(` \nCLONE v${CLONE_VERSION} [${CLONE_RELEASE}] "${CLONE_EDITION}" edtion\n \n  by Joshua A. Lemli\n  2018\n `)
 
+
+    var cloneMap = new Map()
+
+    var view = {
+        scale:4,
+        xPos:0,
+        yPos:0
+    }
+
+    var game = {
+        steps:0,
+        pause:false,
+    }
+
+
+    var Input = (function(){
+        var bindings = {
+            "+" : "zoomIn",
+            "-" : "zoomOut",
+            "ArrowUp" : "panUp",
+            "ArrowDown" : "panDown",
+            "ArrowLeft" : "panLeft",
+            "ArrowRight" : "panRight",
+            " " : "pause"
+        }
+        var state = {}
+        const toggle = action => {
+            switch(action) {
+                case "pause":
+                    game.pause = !game.pause
+                    if (game.pause === false) step()
+                    break
+            }
+        }
+        const apply = () => {
+            // zoom
+            if (state.zoomIn) {}
+            else if (state.zoomOut) {}
+            // pan
+            if (state.panUp) {}
+            else if (state.panDown) {}
+            if (state.panLeft) {}
+            else if (state.panRight) {}
+        }
+        const init = function(){
+            window.addEventListener("keyup", event => state[bindings[event.key]] = false)
+            window.addEventListener("keydown", event => {
+                let action = bindings[event.key]
+                state[action] = true
+                toggle(action)
+            })
+        }
+        return {
+            init : init,
+            apply : apply
+        }
+    })()
+
     var Artist = (function(){
         var canvas, context
         const init = () => {
@@ -25,7 +83,7 @@ const Clone = (function(){
             let resizeContext = () => {
                 context.canvas.width = canvas.offsetWidth
                 context.canvas.height = canvas.offsetHeight
-                context.setTransform(4,0,0,-4,context.canvas.width/2,context.canvas.height/2)
+                context.setTransform(view.scale,0,0,-view.scale, context.canvas.width/2 + view.xPos, context.canvas.height/2 - view.yPos)
                 cloneMap.forEach( clone => clone.draw() )
             }
             resizeContext()
@@ -39,14 +97,12 @@ const Clone = (function(){
             },
             fillCircle: (x,y,r,color) => {
                 context.fillStyle = color
-                context.beginPath();
+                context.beginPath()
                 context.arc(x,y,r,0,Math.PI*2)
-                context.fill();
+                context.fill()
             }
         }
     })()
-
-    var cloneMap = new Map()
 
     function Clone(xHash,yHash,override) {
         override = override || {}
@@ -152,12 +208,12 @@ const Clone = (function(){
         }
         if (Math.random() > 0.99) console.log(performance.now() - tStart)
         // loop
-        if (!window.fail) window.requestAnimationFrame(step)
-        else console.log("stopping")
+        if (!game.pause) window.requestAnimationFrame(step)
     }
 
     return function() {
         Artist.init()
+        Input.init()
         step()
     }
 
