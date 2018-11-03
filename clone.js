@@ -23,7 +23,8 @@ const Clone = (function(){
     var view = {
         scale:4,
         xPos:0,
-        yPos:0
+        yPos:0,
+        bounds: {}
     }
 
     var game = {
@@ -34,7 +35,7 @@ const Clone = (function(){
 
     var Input = (function(){
         var bindings = {
-            "+" : "zoomIn",
+            "=" : "zoomIn",
             "-" : "zoomOut",
             "ArrowUp" : "panUp",
             "ArrowDown" : "panDown",
@@ -47,19 +48,41 @@ const Clone = (function(){
             switch(action) {
                 case "pause":
                     game.pause = !game.pause
-                    if (game.pause === false) step()
                     break
             }
         }
         const apply = () => {
+            var redraw = false
             // zoom
-            if (state.zoomIn) {}
-            else if (state.zoomOut) {}
+            if (state.zoomIn) {
+                redraw = true
+                view.scale *= 1.01
+            }
+            else if (state.zoomOut) {
+                redraw = true
+                view.scale *= 0.99
+            }
             // pan
-            if (state.panUp) {}
-            else if (state.panDown) {}
-            if (state.panLeft) {}
-            else if (state.panRight) {}
+            if (state.panUp) {
+                redraw = true
+                view.yPos += 4 / view.scale
+            }
+            else if (state.panDown) {
+                redraw = true
+                view.yPos -= 4 / view.scale
+            }
+            if (state.panLeft) {
+                redraw = true
+                view.xPos -= 4 / view.scale
+            }
+            else if (state.panRight) {
+                redraw = true
+                view.xPos += 4 / view.scale
+            }
+            // redraw ?
+            if (redraw) {
+                Artist.redraw()
+            }
         }
         const init = function(){
             window.addEventListener("keyup", event => state[bindings[event.key]] = false)
@@ -77,20 +100,37 @@ const Clone = (function(){
 
     var Artist = (function(){
         var canvas, context
+        const resizeContext = () => {
+            context.canvas.width = canvas.offsetWidth
+            context.canvas.height = canvas.offsetHeight
+            redraw()
+        }
+        const redraw = () => {
+            context.setTransform(1,0,0,1,0,0)
+            context.clearRect(0,0,context.canvas.width,context.canvas.height)
+            context.setTransform(view.scale,0,0,-view.scale, context.canvas.width/2 - view.xPos*view.scale, context.canvas.height/2 + view.yPos*view.scale)
+            Artist.setBounds()
+            cloneMap.forEach( clone => clone.draw() )
+        }
         const init = () => {
             canvas = document.querySelector("#mainCanvas")
             context = canvas.getContext("2d")
-            let resizeContext = () => {
-                context.canvas.width = canvas.offsetWidth
-                context.canvas.height = canvas.offsetHeight
-                context.setTransform(view.scale,0,0,-view.scale, context.canvas.width/2 + view.xPos, context.canvas.height/2 - view.yPos)
-                cloneMap.forEach( clone => clone.draw() )
-            }
             resizeContext()
             window.addEventListener("resize",resizeContext)
         }
         return {
-            init:init,
+            init : init,
+            redraw : redraw,
+            setBounds: () => {
+                let xOffset = context.canvas.width / view.scale / 2
+                let yOffset = context.canvas.height / view.scale / 2
+                view.bounds = {
+                    xMin: view.xPos - xOffset,
+                    xMax: view.xPos + xOffset,
+                    yMin: view.yPos - yOffset,
+                    yMax: view.yPos + yOffset,
+                }
+            },
             fillRect: (xCenter,yCenter,xDim,yDim,color) => {
                 context.fillStyle = color
                 context.fillRect(xCenter-xDim/2,yCenter-yDim/2,xDim,yDim)
@@ -174,7 +214,14 @@ const Clone = (function(){
         cloneMap.set(child.id,child)
     }
     Clone.prototype.draw = function(){
-        Artist.fillCircle(this.worldPosition.x,this.worldPosition.y,this.radius,this._color)
+        if (
+            this.worldPosition.x + this.radius > view.bounds.xMin &&
+            this.worldPosition.x - this.radius < view.bounds.xMax &&
+            this.worldPosition.y + this.radius > view.bounds.yMin &&
+            this.worldPosition.y - this.radius < view.bounds.yMax
+        ) {
+            Artist.fillCircle(this.worldPosition.x,this.worldPosition.y,this.radius,this._color)
+        }
         this._drawn = true
     }
     Clone.prototype.step = function(){
@@ -188,27 +235,25 @@ const Clone = (function(){
         cloneMap.delete(this.id)
     }
 
-
-    window.fail = false
-    window.addEventListener("keydown",event=>window.fail=true)
     
     const step = () => {
         // start microtime
         var tStart = performance.now()
-        // perform `step` for each clone
-        cloneMap.forEach( (value,key) => value.step() )
-        // create a new clone if the `cloneMap` is empty
-        if (cloneMap.size === 0) {
-            var one = new Clone(0,0)
-            cloneMap.set(one.id,one)
+        // input
+        Input.apply()
+        if (!game.pause) {
+            // perform `step` for each clone
+            cloneMap.forEach( (value,key) => value.step() )
+            // create a new clone if the `cloneMap` is empty
+            if (cloneMap.size === 0) {
+                var one = new Clone(0,0)
+                cloneMap.set(one.id,one)
+            }
         }
-        // 
-        if (performance.now() - tStart > 10) {
-            throw new Error(cloneMap.size)
-        }
+        // debug: frame time
         if (Math.random() > 0.99) console.log(performance.now() - tStart)
         // loop
-        if (!game.pause) window.requestAnimationFrame(step)
+        window.requestAnimationFrame(step)
     }
 
     return function() {
