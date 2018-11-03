@@ -1,22 +1,41 @@
-/*
-    CLONE
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-    by Joshua A. Lemli
-    2018
-    
-    JavaScript file
-    */const CLONE_VERSION = "0.1.1";/*
-    */const CLONE_RELEASE = "dev";/*
-    */const CLONE_EDITION = "jailhouse rock";/*
+    CLONE - Automata html5+javascript game
+    Copyright (C) 2018  Joshua A. Lemli
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.    
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+    CLONE JavaScript file
+    - - - - - - - - - - - - - - - - - - - */
+        const
+        CLONE_VERSION = "0.1.1",
+        CLONE_RELEASE = "dev",
+        CLONE_EDITION = "jailhouse rock";
+    /* - - - - - - - - - - - - - - - - - - -
+
+
 */
 
 
 "use strict";
 
-const Clone = (function(){
+console.log(` \nCLONE v${CLONE_VERSION} [${CLONE_RELEASE}] "${CLONE_EDITION}" edtion\n \n  by Joshua A. Lemli\n  2018\n `)
 
-    console.log(` \nCLONE v${CLONE_VERSION} [${CLONE_RELEASE}] "${CLONE_EDITION}" edtion\n \n  by Joshua A. Lemli\n  2018\n `)
-
+const CLONE_Game = (function(){
 
     var cloneMap = new Map()
 
@@ -30,9 +49,18 @@ const Clone = (function(){
 
     var game = {
         steps:0,
-        pause:false,
+        points:0,
+        clonesCreated:0,
+        pause:false
     }
 
+    
+    const setLayout = layout => {
+        document.getElementById("mainCanvas").classList = layout==="gameplay" ? "size-full" : "size-twoRow"
+        document.getElementById("cloneUI").classList = layout==="gameplay" ? "occlude" : "size-twoRow"
+        Artist.resize()
+        Artist.redraw()
+    }
 
     var Input = (function(){
         var bindings = {
@@ -93,17 +121,20 @@ const Clone = (function(){
                 toggle(action)
             })
             document.querySelector("#mainCanvas").addEventListener("mousedown", event => {
-                console.log(event)
                 let x = (event.clientX - view.screenSize.x/2) / view.scale + view.xPos
                 let y = (view.screenSize.y/2 - event.clientY) / view.scale + view.yPos
                 let yHash = Math.round(y / Clone.prototype.yMultiplier)
                 let yOdd = yHash % 2 !== 0 ? Clone.prototype.xStagger : 0
                 let xHash = Math.round((x - yOdd) / Clone.prototype.xMultiplier)
-                console.log(cloneMap.get(`${xHash}_${yHash}`))
+                let id = `${xHash}_${yHash}`
+                let clone = cloneMap.has(id)
+                if (clone) {
+                    game.pause = true
+                    CloneUI.load(id)
+                    setLayout("cloneUI")
+                }
             })
-            document.querySelector("#mainCanvas").addEventListener("mousemove", event => {
-                // console.log(event)
-            })
+            // document.querySelector("#mainCanvas").addEventListener("mousemove", event => null)
         }
         return {
             init : init,
@@ -113,7 +144,7 @@ const Clone = (function(){
 
     var Artist = (function(){
         var canvas, context
-        const resizeContext = () => {
+        const resize = () => {
             context.canvas.width = view.screenSize.x = canvas.offsetWidth
             context.canvas.height = view.screenSize.y = canvas.offsetHeight
             redraw()
@@ -128,12 +159,12 @@ const Clone = (function(){
         const init = () => {
             canvas = document.querySelector("#mainCanvas")
             context = canvas.getContext("2d")
-            resizeContext()
-            window.addEventListener("resize",resizeContext)
+            window.addEventListener("resize",resize)
         }
         return {
             init : init,
             redraw : redraw,
+            resize : resize,
             setBounds: () => {
                 let xOffset = context.canvas.width / view.scale / 2
                 let yOffset = context.canvas.height / view.scale / 2
@@ -153,6 +184,34 @@ const Clone = (function(){
                 context.beginPath()
                 context.arc(x,y,r,0,Math.PI*2)
                 context.fill()
+            }
+        }
+    })()
+
+    const CloneUI = (function() {
+        var uiContainer, statisticsContainer, attributesContainer
+        const createHtmlElement = (type,options,styles) => {
+            var key, e = document.createElement(type)
+            if (options) for (key in options) e[key] = options[key]
+            if (styles) for (key in styles) e.style[key] = styles[key]
+            return e
+        }
+        const _makeSectionContainers = () => {
+            uiContainer.appendChild(createHtmlElement("div",{id:"cloneUI-statistics",innerHTML:`<div class="cloneUI-section-label">Statistics</div>`}))
+            uiContainer.appendChild(createHtmlElement("div",{id:"cloneUI-attributes",innerHTML:`<div class="cloneUI-section-label">Attributes</div>`}))
+        }
+        const statistic = (name,value) => createHtmlElement("div",{className:"cloneUI-statistic",innerHTML:`<span>${name}</span><span>${value}</span>`})
+        const attribute = (name,value) => {}
+        const item = () => {}
+        return {
+            init : () => {
+                uiContainer = document.querySelector("#cloneUI")
+            },
+            load : id => {
+                let clone = cloneMap.get(id)
+                console.log(clone)
+                while (uiContainer.firstElementChild) uiContainer.removeChild(uiContainer.firstElementChild)
+                _makeSectionContainers()
             }
         }
     })()
@@ -270,11 +329,13 @@ const Clone = (function(){
     }
 
     return function() {
+        CloneUI.init()
         Artist.init()
         Input.init()
+        setLayout("gameplay")
         step()
     }
 
 })()
 
-window.onload = Clone
+window.onload = CLONE_Game

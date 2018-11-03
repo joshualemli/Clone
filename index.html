@@ -1,17 +1,31 @@
 <!DOCTYPE html>
 <html>
-    <!-- ' ' ' ' ' ' ' ' ' ' ' '
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-        CLONE
-        
-        by Joshua A. Lemli
-        2018
+    CLONE - Automata html5+javascript game
+    Copyright (C) 2018  Joshua A. Lemli
 
-        html file
-        v0.1
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    CLONE html file
+    v0.2
 
     . . . . . . . . . . . . -->
     <head>
+        <title>CLONE</title>
         <style>
             html,body {
                 margin:0;
@@ -19,22 +33,29 @@
                 width:100%;
                 height:100%;
             }
-            #controls {
-                position:fixed;
-            }
-            #mainCanvas {
-                display:block;
+            #mainCanvas {display:block;}
+            .size-full {
                 width:100%;
                 height:100%;
             }
+            .size-twoCol {
+                width:50%;
+                height:100%;
+            }
+            .size-twoRow {
+                width:100%;
+                height:50%;
+            }
             .occlude {
+                width:0;
+                height:0;
                 display:none;
             }
         </style>
         <script src="clone.js"></script>
     </head>
     <body>
-        <div id="controls"></div>
         <canvas id="mainCanvas"></canvas>
+        <div id="cloneUI"></div>
     </body>
 </html>
