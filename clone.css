@@ -1,0 +1,95 @@
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    CLONE - Automata html5+javascript game
+    Copyright (C) 2018  Joshua A. Lemli
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.    
+
+    
+
+        C O N T A C T    I N F O R M A T I O N
+
+            Joshua A. Lemli
+            joshualemli@gmail.com
+
+
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    CLONE Cascading Stylesheet file
+    v0.1
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+html,body {
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+}
+
+#container {
+    display:flex;
+    flex:0 0 0;
+    flex-direction:column;
+    width:100vw;
+    height:100vh;
+}
+#menu {
+    display:flex;
+    flex:0 1 content;
+}
+
+#mainCanvasContainer {
+    display:flex;
+    flex:1 1 auto;
+    flex-direction:column;
+    overflow:hidden;
+}
+    #mainCanvas {}
+
+#cloneUI {
+    display:flex;
+    flex:0 1 content;
+}
+
+
+
+#cloneUI-statistics {}
+#cloneUI-attributes {}
+.cloneUI-section-label {
+    font-weight:bold;
+    margin:0.5em;
+}
+
+
+
+.size-full {
+    width:100%;
+    height:100%;
+}
+.size-twoCol {
+    width:50%;
+    height:100%;
+}
+.size-twoRow {
+    width:100%;
+    height:50%;
+}
+.occlude {
+    width:0;
+    height:0;
+    display:none;
+}

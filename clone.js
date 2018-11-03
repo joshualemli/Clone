@@ -16,6 +16,15 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.    
 
+    
+
+        C O N T A C T    I N F O R M A T I O N
+
+            Joshua A. Lemli
+            joshualemli@gmail.com
+
+
+
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
@@ -56,10 +65,9 @@ const CLONE_Game = (function(){
 
     
     const setLayout = layout => {
-        document.getElementById("mainCanvas").classList = layout==="gameplay" ? "size-full" : "size-twoRow"
-        document.getElementById("cloneUI").classList = layout==="gameplay" ? "occlude" : "size-twoRow"
+        // document.getElementById("mainCanvas").classList = layout==="gameplay" ? "size-full" : "size-twoRow"
+        // document.getElementById("cloneUI").classList = layout==="gameplay" ? "occlude" : "size-twoRow"
         Artist.resize()
-        Artist.redraw()
     }
 
     var Input = (function(){
@@ -70,7 +78,8 @@ const CLONE_Game = (function(){
             "ArrowDown" : "panDown",
             "ArrowLeft" : "panLeft",
             "ArrowRight" : "panRight",
-            " " : "pause"
+            " " : "pause",
+            "0" : "recenterView"
         }
         var state = {}
         const toggle = action => {
@@ -78,40 +87,24 @@ const CLONE_Game = (function(){
                 case "pause":
                     game.pause = !game.pause
                     break
+                case "recenterView":
+                    view.xPos = view.yPos = 0
+                    view.scale = 4
+                    Artist.redraw()
+                    break
             }
         }
         const apply = () => {
-            var redraw = false
             // zoom
-            if (state.zoomIn) {
-                redraw = true
-                view.scale *= 1.02
-            }
-            else if (state.zoomOut) {
-                redraw = true
-                view.scale *= 0.98
-            }
+            if (state.zoomIn) view.scale *= 1.02
+            else if (state.zoomOut) view.scale *= 0.98
             // pan
-            if (state.panUp) {
-                redraw = true
-                view.yPos += 4 / view.scale
-            }
-            else if (state.panDown) {
-                redraw = true
-                view.yPos -= 4 / view.scale
-            }
-            if (state.panLeft) {
-                redraw = true
-                view.xPos -= 4 / view.scale
-            }
-            else if (state.panRight) {
-                redraw = true
-                view.xPos += 4 / view.scale
-            }
-            // redraw ?
-            if (redraw) {
-                Artist.redraw()
-            }
+            if (state.panUp) view.yPos += 4 / view.scale
+            else if (state.panDown) view.yPos -= 4 / view.scale
+            if (state.panLeft) view.xPos -= 4 / view.scale
+            else if (state.panRight) view.xPos += 4 / view.scale
+            // redraw
+            if (state.zoomIn||state.zoomOut||state.panUp||state.panDown||state.panLeft||state.panRight) Artist.redraw()
         }
         const init = function(){
             window.addEventListener("keyup", event => state[bindings[event.key]] = false)
@@ -121,8 +114,8 @@ const CLONE_Game = (function(){
                 toggle(action)
             })
             document.querySelector("#mainCanvas").addEventListener("mousedown", event => {
-                let x = (event.clientX - view.screenSize.x/2) / view.scale + view.xPos
-                let y = (view.screenSize.y/2 - event.clientY) / view.scale + view.yPos
+                let x = (event.offsetX - view.screenSize.x/2) / view.scale + view.xPos
+                let y = (view.screenSize.y/2 - event.offsetY) / view.scale + view.yPos
                 let yHash = Math.round(y / Clone.prototype.yMultiplier)
                 let yOdd = yHash % 2 !== 0 ? Clone.prototype.xStagger : 0
                 let xHash = Math.round((x - yOdd) / Clone.prototype.xMultiplier)
@@ -135,6 +128,13 @@ const CLONE_Game = (function(){
                 }
             })
             // document.querySelector("#mainCanvas").addEventListener("mousemove", event => null)
+            document.querySelector("#mainCanvas").addEventListener("wheel", event => {
+                if (event.deltaY) {
+                    if (Math.sign(event.deltaY) < 0) view.scale *= 1.1
+                    else view.scale *= 0.9
+                    Artist.redraw()
+                }
+            })
         }
         return {
             init : init,
@@ -145,6 +145,8 @@ const CLONE_Game = (function(){
     var Artist = (function(){
         var canvas, context
         const resize = () => {
+            canvas.width = canvas.parentElement.offsetWidth
+            canvas.height = canvas.parentElement.offsetHeight
             context.canvas.width = view.screenSize.x = canvas.offsetWidth
             context.canvas.height = view.screenSize.y = canvas.offsetHeight
             redraw()
@@ -196,12 +198,27 @@ const CLONE_Game = (function(){
             if (styles) for (key in styles) e.style[key] = styles[key]
             return e
         }
-        const _makeSectionContainers = () => {
-            uiContainer.appendChild(createHtmlElement("div",{id:"cloneUI-statistics",innerHTML:`<div class="cloneUI-section-label">Statistics</div>`}))
-            uiContainer.appendChild(createHtmlElement("div",{id:"cloneUI-attributes",innerHTML:`<div class="cloneUI-section-label">Attributes</div>`}))
+        const _reset = () => {
+            while (uiContainer.firstElementChild) uiContainer.removeChild(uiContainer.firstElementChild)
+            uiContainer.appendChild(createHtmlElement("div",{
+                id:"cloneUI-statistics", className:"cloneUI-section",
+                innerHTML:`<div class="cloneUI-section-label">Statistics</div>`
+            }))
+            uiContainer.appendChild(createHtmlElement("div",{
+                id:"cloneUI-attributes", className:"cloneUI-section",
+                innerHTML:`<div class="cloneUI-section-label">Attributes</div>`
+            }))
+            statisticsContainer = uiContainer.children[0]
+            attributesContainer = uiContainer.children[1]
         }
-        const statistic = (name,value) => createHtmlElement("div",{className:"cloneUI-statistic",innerHTML:`<span>${name}</span><span>${value}</span>`})
-        const attribute = (name,value) => {}
+        const statistic = (name,value) => {
+            let e = createHtmlElement("div",{className:"cloneUI-statistic",innerHTML:`<div>${name}</div><div>${value}</div>`})
+            statisticsContainer.appendChild(e)
+            return e
+        }
+        const attribute = (name,value) => {
+
+        }
         const item = () => {}
         return {
             init : () => {
@@ -210,8 +227,10 @@ const CLONE_Game = (function(){
             load : id => {
                 let clone = cloneMap.get(id)
                 console.log(clone)
-                while (uiContainer.firstElementChild) uiContainer.removeChild(uiContainer.firstElementChild)
-                _makeSectionContainers()
+                _reset()
+                statistic("Age",clone.age)
+                statistic("Max age",clone.maxAge)
+                Artist.resize()
             }
         }
     })()
