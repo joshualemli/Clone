@@ -1,2 +1,2 @@
 # Clone
-An automaton-based simulation game with controllable parameters.
+An automaton-based simulation game.
