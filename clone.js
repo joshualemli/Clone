@@ -42,9 +42,12 @@
 
 "use strict";
 
-console.log(` \nCLONE v${CLONE_VERSION} [${CLONE_RELEASE}] "${CLONE_EDITION}" edtion\n \n  by Joshua A. Lemli\n  2018\n `)
+console.log(` \nCLONE v${CLONE_VERSION} [${CLONE_RELEASE}] "${CLONE_EDITION}" edition\n \n  by Joshua A. Lemli\n  2018\n `)
 
 const CLONE_Game = (function(){
+
+
+    // STATE DATA
 
     var cloneMap = new Map()
 
@@ -58,17 +61,13 @@ const CLONE_Game = (function(){
 
     var game = {
         steps:0,
-        points:0,
+        resources:0,
         clonesCreated:0,
         pause:false
     }
 
-    
-    const setLayout = layout => {
-        // document.getElementById("mainCanvas").classList = layout==="gameplay" ? "size-full" : "size-twoRow"
-        // document.getElementById("cloneUI").classList = layout==="gameplay" ? "occlude" : "size-twoRow"
-        Artist.resize()
-    }
+
+    // MODULES
 
     var Input = (function(){
         var bindings = {
@@ -86,6 +85,7 @@ const CLONE_Game = (function(){
             switch(action) {
                 case "pause":
                     game.pause = !game.pause
+                    if (!game.pause) CloneUI.load()
                     break
                 case "recenterView":
                     view.xPos = view.yPos = 0
@@ -124,7 +124,7 @@ const CLONE_Game = (function(){
                 if (clone) {
                     game.pause = true
                     CloneUI.load(id)
-                    setLayout("cloneUI")
+                    Artist.resize()
                 }
             })
             // document.querySelector("#mainCanvas").addEventListener("mousemove", event => null)
@@ -198,8 +198,7 @@ const CLONE_Game = (function(){
             if (styles) for (key in styles) e.style[key] = styles[key]
             return e
         }
-        const _reset = () => {
-            while (uiContainer.firstElementChild) uiContainer.removeChild(uiContainer.firstElementChild)
+        const reset = () => {
             uiContainer.appendChild(createHtmlElement("div",{
                 id:"cloneUI-statistics", className:"cloneUI-section",
                 innerHTML:`<div class="cloneUI-section-label">Statistics</div>`
@@ -224,23 +223,31 @@ const CLONE_Game = (function(){
             init : () => {
                 uiContainer = document.querySelector("#cloneUI")
             },
-            load : id => {
-                let clone = cloneMap.get(id)
-                console.log(clone)
-                _reset()
-                statistic("Age",clone.age)
-                statistic("Max age",clone.maxAge)
+            load : (id) => {
+                while (uiContainer.firstElementChild) uiContainer.removeChild(uiContainer.firstElementChild)
+                if (id) {
+                    reset()
+                    var clone = cloneMap.get(id)
+                    console.log(clone)
+                    statistic("Age",clone.age)
+                    statistic("Max age",clone.maxAge)
+                    statistic("Fertile age",clone.fertileAge)
+                    statistic("Cloning success rate", ((1 - clone.cloningFailureChance) * 100).toFixed(1) + "%")
+                }
                 Artist.resize()
             }
         }
     })()
 
+
+    // CLONE CLASS
+
     function Clone(xHash,yHash,override) {
         override = override || {}
         this.age = 0
-        this.maxAge = override.maxAge || 31
-        this.fertileAge = override.fertileAge || 7
-        this.cloningFailureChance = override.cloningFailureChance || 0.95
+        this.maxAge = override.maxAge || 23
+        this.fertileAge = override.fertileAge || 5
+        this.cloningFailureChance = override.cloningFailureChance || 0.973
         this.radius = this.maxRadius*0.95
         this.xHash = xHash
         this.yHash = yHash
@@ -249,6 +256,7 @@ const CLONE_Game = (function(){
         this.worldPosition = this.getWorldPosition()
         this._drawn = false
         this._color = `rgb(${Math.floor(Math.random()*100)},${Math.floor(Math.random()*100 + 75)},${Math.floor(Math.random()*150)})`
+        cloneMap.set(this.id,this)
     }
     Clone.prototype.maxRadius = 0.5
     Clone.prototype.xMultiplier = Clone.prototype.maxRadius * 2
@@ -301,8 +309,7 @@ const CLONE_Game = (function(){
             else break
             if (!attempted.some(x=>x===0)) return null
         }
-        let child = new Clone(hash.x,hash.y)
-        cloneMap.set(child.id,child)
+        new Clone(hash.x,hash.y)
     }
     Clone.prototype.draw = function(){
         if (
@@ -317,6 +324,7 @@ const CLONE_Game = (function(){
     }
     Clone.prototype.step = function(){
         this.age += 1
+        game.resources += 1
         if (this.age > this.maxAge) return this.perish()
         if (this.age > this.fertileAge && Math.random() > this.cloningFailureChance) this.clone()
         if (!this._drawn) this.draw()
@@ -326,23 +334,25 @@ const CLONE_Game = (function(){
         cloneMap.delete(this.id)
     }
 
+
+    // GAMEPLAY LOOP
     
     const step = () => {
         // start microtime
         var tStart = performance.now()
+        // game step
+        game.steps += 1
         // input
         Input.apply()
+        // clones
         if (!game.pause) {
             // perform `step` for each clone
             cloneMap.forEach( (value,key) => value.step() )
             // create a new clone if the `cloneMap` is empty
-            if (cloneMap.size === 0) {
-                var one = new Clone(0,0)
-                cloneMap.set(one.id,one)
-            }
+            if (cloneMap.size === 0) new Clone(0,0)
         }
         // debug: frame time
-        if (Math.random() > 0.99) console.log(performance.now() - tStart)
+        if (game.steps % 120 == 0) console.log(performance.now() - tStart)
         // loop
         window.requestAnimationFrame(step)
     }
@@ -351,7 +361,8 @@ const CLONE_Game = (function(){
         CloneUI.init()
         Artist.init()
         Input.init()
-        setLayout("gameplay")
+        // start gameplay
+        Artist.resize()
         step()
     }
 
