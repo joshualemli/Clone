@@ -31,7 +31,7 @@
     CLONE JavaScript file
     - - - - - - - - - - - - - - - - - - - */
         const
-        CLONE_VERSION = "0.1.1",
+        CLONE_VERSION = "0.1.2",
         CLONE_RELEASE = "dev",
         CLONE_EDITION = "jailhouse rock";
     /* - - - - - - - - - - - - - - - - - - -
@@ -63,13 +63,31 @@ const CLONE_Game = (function(){
         steps:0,
         resources:0,
         clonesCreated:0,
+        items:{
+            genesisPod: 10,
+        },
+        artifacts:[], // array of strings
         pause:false
+    }
+    window.gg = () => console.log(game.steps,game.resources,game.clonesCreated)
+
+
+    // MACROS
+
+    const createHtmlElement = (type,options,styles) => {
+        var key, e = document.createElement(type)
+        if (options) for (key in options) e[key] = options[key]
+        if (styles) for (key in styles) e.style[key] = styles[key]
+        return e
     }
 
 
     // MODULES
 
     var Input = (function(){
+        
+        var clickMode = 0 // 0=inspect, 1=useItem
+
         var bindings = {
             "=" : "zoomIn",
             "-" : "zoomOut",
@@ -92,6 +110,7 @@ const CLONE_Game = (function(){
                     view.scale = 4
                     Artist.redraw()
                     break
+                
             }
         }
         const apply = () => {
@@ -119,12 +138,23 @@ const CLONE_Game = (function(){
                 let yHash = Math.round(y / Clone.prototype.yMultiplier)
                 let yOdd = yHash % 2 !== 0 ? Clone.prototype.xStagger : 0
                 let xHash = Math.round((x - yOdd) / Clone.prototype.xMultiplier)
-                let id = `${xHash}_${yHash}`
-                let clone = cloneMap.has(id)
-                if (clone) {
-                    game.pause = true
-                    CloneUI.load(id)
-                    Artist.resize()
+                switch (clickMode) {
+                    case 0:
+                        let id = `${xHash}_${yHash}`
+                        if (cloneMap.has(id)) {
+                            game.pause = true
+                            CloneUI.load(id)
+                            Artist.resize()
+                        }
+                        break
+                    case 1:
+                        let item = Menu.getSelectedItem()
+                        if (game.items[item] > 0) {
+                            Items[item].use(xHash,yHash)
+                            game.items[item] -= 1
+                            Menu.refresh()
+                        }
+                        break
                 }
             })
             // document.querySelector("#mainCanvas").addEventListener("mousemove", event => null)
@@ -138,7 +168,8 @@ const CLONE_Game = (function(){
         }
         return {
             init : init,
-            apply : apply
+            apply : apply,
+            setClickMode : n => clickMode = n
         }
     })()
 
@@ -190,14 +221,39 @@ const CLONE_Game = (function(){
         }
     })()
 
+    const Menu = (function(){
+        var itemsContainer, selectedItem = null
+        const refresh = () => {
+            while (itemsContainer.firstElementChild) itemsContainer.removeChild(itemsContainer.firstElementChild)
+            for (var key in game.items) (function(key){
+                itemsContainer.appendChild(createHtmlElement("div",{
+                    innerHTML: Items[key].name + "..." + game.items[key],
+                    onclick: function(event) {
+                        if (selectedItem === key) {
+                            selectedItem = null
+                            Input.setClickMode(0)
+                            event.target.style.background = ""
+                        }
+                        else {
+                            selectedItem = key
+                            Input.setClickMode(1)
+                            event.target.style.background = "yellow"
+                        }
+                    }
+                }))
+            })(key)
+        }
+        return {
+            init : () => {
+                itemsContainer = document.querySelector("#menu-items")
+            },
+            refresh : refresh,
+            getSelectedItem : () => selectedItem
+        }
+    })()
+
     const CloneUI = (function() {
         var uiContainer, statisticsContainer, attributesContainer
-        const createHtmlElement = (type,options,styles) => {
-            var key, e = document.createElement(type)
-            if (options) for (key in options) e[key] = options[key]
-            if (styles) for (key in styles) e.style[key] = styles[key]
-            return e
-        }
         const reset = () => {
             uiContainer.appendChild(createHtmlElement("div",{
                 id:"cloneUI-statistics", className:"cloneUI-section",
@@ -228,7 +284,6 @@ const CLONE_Game = (function(){
                 if (id) {
                     reset()
                     var clone = cloneMap.get(id)
-                    console.log(clone)
                     statistic("Age",clone.age)
                     statistic("Max age",clone.maxAge)
                     statistic("Fertile age",clone.fertileAge)
@@ -245,7 +300,7 @@ const CLONE_Game = (function(){
     function Clone(xHash,yHash,override) {
         override = override || {}
         this.age = 0
-        this.maxAge = override.maxAge || 23
+        this.maxAge = override.maxAge || 30
         this.fertileAge = override.fertileAge || 5
         this.cloningFailureChance = override.cloningFailureChance || 0.973
         this.radius = this.maxRadius*0.95
@@ -335,21 +390,36 @@ const CLONE_Game = (function(){
     }
 
 
+    // ITEMS
+    const Items = {
+        genesisPod: {
+            use: (xHash,yHash) => {
+                let id = `${xHash}_${yHash}`
+                if (!cloneMap.has(id)) new Clone(xHash,yHash).draw()
+            },
+            name: "Genesis Pod",
+            icon: "1_20"
+        }
+    }
+    // ARTIFACTS
+
+
+
     // GAMEPLAY LOOP
     
     const step = () => {
         // start microtime
         var tStart = performance.now()
-        // game step
-        game.steps += 1
         // input
         Input.apply()
         // clones
         if (!game.pause) {
+            // game step
+            game.steps += 1
             // perform `step` for each clone
             cloneMap.forEach( (value,key) => value.step() )
             // create a new clone if the `cloneMap` is empty
-            if (cloneMap.size === 0) new Clone(0,0)
+            // if (cloneMap.size === 0) new Clone(0,0)
         }
         // debug: frame time
         if (game.steps % 120 == 0) console.log(performance.now() - tStart)
@@ -361,11 +431,15 @@ const CLONE_Game = (function(){
         CloneUI.init()
         Artist.init()
         Input.init()
+        Menu.init()
         // start gameplay
         Artist.resize()
+        Menu.refresh()
         step()
     }
 
 })()
 
 window.onload = CLONE_Game
+
+
