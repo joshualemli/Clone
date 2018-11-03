@@ -24,7 +24,8 @@ const Clone = (function(){
         scale:4,
         xPos:0,
         yPos:0,
-        bounds: {}
+        bounds: {},
+        screenSize: {}
     }
 
     var game = {
@@ -56,11 +57,11 @@ const Clone = (function(){
             // zoom
             if (state.zoomIn) {
                 redraw = true
-                view.scale *= 1.01
+                view.scale *= 1.02
             }
             else if (state.zoomOut) {
                 redraw = true
-                view.scale *= 0.99
+                view.scale *= 0.98
             }
             // pan
             if (state.panUp) {
@@ -91,6 +92,18 @@ const Clone = (function(){
                 state[action] = true
                 toggle(action)
             })
+            document.querySelector("#mainCanvas").addEventListener("mousedown", event => {
+                console.log(event)
+                let x = (event.clientX - view.screenSize.x/2) / view.scale + view.xPos
+                let y = (view.screenSize.y/2 - event.clientY) / view.scale + view.yPos
+                let yHash = Math.round(y / Clone.prototype.yMultiplier)
+                let yOdd = yHash % 2 !== 0 ? Clone.prototype.xStagger : 0
+                let xHash = Math.round((x - yOdd) / Clone.prototype.xMultiplier)
+                console.log(cloneMap.get(`${xHash}_${yHash}`))
+            })
+            document.querySelector("#mainCanvas").addEventListener("mousemove", event => {
+                // console.log(event)
+            })
         }
         return {
             init : init,
@@ -101,8 +114,8 @@ const Clone = (function(){
     var Artist = (function(){
         var canvas, context
         const resizeContext = () => {
-            context.canvas.width = canvas.offsetWidth
-            context.canvas.height = canvas.offsetHeight
+            context.canvas.width = view.screenSize.x = canvas.offsetWidth
+            context.canvas.height = view.screenSize.y = canvas.offsetHeight
             redraw()
         }
         const redraw = () => {
