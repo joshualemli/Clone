@@ -132,18 +132,22 @@ const CLONE_Game = (function(){
             if (state.zoomIn||state.zoomOut||state.panUp||state.panDown||state.panLeft||state.panRight) Artist.redraw()
         }
         const init = function(){
+            // keyboard input
             window.addEventListener("keyup", event => state[bindings[event.key]] = false)
             window.addEventListener("keydown", event => {
                 let action = bindings[event.key]
                 state[action] = true
                 toggle(action)
             })
+            // clicking on the world
             document.querySelector("#mainCanvas").addEventListener("mousedown", event => {
                 let x = (event.offsetX - view.screenSize.x/2) / view.scale + view.xPos
                 let y = (view.screenSize.y/2 - event.offsetY) / view.scale + view.yPos
+                if (Math.sqrt(x*x+y*y) > game.worldRadius) return console.log("click out of world bounds")
                 let yHash = Math.round(y / Clone.prototype.yMultiplier)
                 let yOdd = yHash % 2 !== 0 ? Clone.prototype.xStagger : 0
                 let xHash = Math.round((x - yOdd) / Clone.prototype.xMultiplier)
+                // 0=inspect, 1=useItem
                 switch (clickMode) {
                     case 0:
                         let id = `${xHash}_${yHash}`
@@ -151,14 +155,18 @@ const CLONE_Game = (function(){
                         break
                     case 1:
                         let item = Menu.getSelectedItem()
-                        if (Items[item].use(xHash,yHash)) {
+                        if (item && Items[item].use(xHash,yHash)) {
                             game.items[item] -= 1
-                            if (game.items[item] === 0) Menu.refresh()
+                            if (game.items[item] === 0) {
+                                clickMode = 0
+                                Menu.refresh()
+                            }
                             else Items[item].menuCountElement.innerHTML = game.items[item]
                         }
                         break
                 }
             })
+            // zooming in on the world (changing `view.scale`) with mouse wheel
             document.querySelector("#mainCanvas").addEventListener("wheel", event => {
                 if (event.deltaY) {
                     if (Math.sign(event.deltaY) < 0) view.scale *= 1.1
@@ -240,7 +248,7 @@ const CLONE_Game = (function(){
             while (itemsContainer.firstElementChild) itemsContainer.removeChild(itemsContainer.firstElementChild)
             // build items
             for (let key in game.items) if (game.items[key] > 0) {
-                var itemContainer = createHtmlElement("div",{
+                let itemContainer = createHtmlElement("div",{
                     className: "menu-items-item",
                     innerHTML: `<div>${Items[key].name}</div><div>${game.items[key]}</div>`,
                 })
@@ -253,7 +261,7 @@ const CLONE_Game = (function(){
                     else {
                         selectedItem = key
                         Input.setClickMode(1)
-                        event.target.classList.add("menu-items-selectedItem")
+                        itemContainer.classList.add("menu-items-selectedItem")
                     }
                 }
                 itemsContainer.appendChild(itemContainer)
@@ -470,7 +478,9 @@ const CLONE_Game = (function(){
             cloneMap.forEach( (value,key) => value.step() )
         }
         // debug: frame time
-        if (game.steps % 120 == 0) console.log(performance.now() - tStart)
+        if (game.steps % 60 === 0) {
+            console.log(performance.now() - tStart)
+        }
         // loop
         window.requestAnimationFrame(step)
     }

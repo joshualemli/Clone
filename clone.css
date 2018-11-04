@@ -64,23 +64,38 @@ html,body {
 
 #cloneUI {
     display:flex;
-    flex:0 1 content;
+    background:#CCF;
 }
 
 
+#menu-items {
+    display:flex;
+    flex-direction:row;
+}
 .menu-items-item {
-    float:left;
+    display:flex;
+    flex-direction:column;
+    flex:1 1 auto;
+    margin:0.2em;
+    padding:0 1em;
+    box-shadow:0.3em 0.3em 0.5em 0 rgba(0,0,0,0.5);
+    border-radius:0.35em;
 }
 .menu-items-selectedItem {
     background:yellow;
 }
 
-#cloneUI-statistics {}
-#cloneUI-attributes {}
-.cloneUI-section-label {
-    font-weight:bold;
-    margin:0.5em;
+.cloneUI-section {
+    display:flex;
 }
+    .cloneUI-section-label {
+        font-weight:bold;
+        margin:0.5em;
+    }
+#cloneUI-statistics {}
+    .cloneUI-statistic {}
+#cloneUI-attributes {}
+    .cloneUI-attribute {}
 
 
 
