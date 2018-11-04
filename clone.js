@@ -65,16 +65,17 @@ const CLONE_Game = (function(){
         clonesCreated:0,
         items:{
             genesisPod: 10,
+            genesisRay: 1
         },
         artifacts:[],
         pause:false,
-        worldRadius:20
+        worldRadius:10
     }
 
 
 
     //DEBUG:
-    window.gg = () => console.log(game.steps,game.resources,game.clonesCreated)
+    window.gg = () => console.log(game)
 
 
     // MACROS
@@ -146,22 +147,18 @@ const CLONE_Game = (function(){
                 switch (clickMode) {
                     case 0:
                         let id = `${xHash}_${yHash}`
-                        if (cloneMap.has(id)) {
-                            game.pause = true
-                            CloneUI.load(id)
-                            Artist.resize()
-                        }
+                        if (cloneMap.has(id)) CloneUI.load(id)
                         break
                     case 1:
                         let item = Menu.getSelectedItem()
-                        if (game.items[item] > 0) {
-                            Items[item].use(xHash,yHash)
-                            Menu.refresh()
+                        if (Items[item].use(xHash,yHash)) {
+                            game.items[item] -= 1
+                            if (game.items[item] === 0) Menu.refresh()
+                            else Items[item].menuCountElement.innerHTML = game.items[item]
                         }
                         break
                 }
             })
-            // document.querySelector("#mainCanvas").addEventListener("mousemove", event => null)
             document.querySelector("#mainCanvas").addEventListener("wheel", event => {
                 if (event.deltaY) {
                     if (Math.sign(event.deltaY) < 0) view.scale *= 1.1
@@ -177,22 +174,23 @@ const CLONE_Game = (function(){
         }
     })()
 
+
     var Artist = (function(){
         var canvas, context
+        const redraw = () => {
+            context.setTransform(1,0,0,1,0,0)
+            context.clearRect(0,0,context.canvas.width,context.canvas.height)
+            context.setTransform(view.scale,0,0,-view.scale, context.canvas.width/2 - view.xPos*view.scale, context.canvas.height/2 + view.yPos*view.scale)
+            Artist.setBounds()
+            Artist.outlineCircle(0, 0, game.worldRadius + Clone.prototype.maxRadius*2, "#F00", 0.2)
+            cloneMap.forEach( clone => clone.draw() )
+        }
         const resize = () => {
             canvas.width = canvas.parentElement.offsetWidth
             canvas.height = canvas.parentElement.offsetHeight
             context.canvas.width = view.screenSize.x = canvas.offsetWidth
             context.canvas.height = view.screenSize.y = canvas.offsetHeight
             redraw()
-        }
-        const redraw = () => {
-            context.setTransform(1,0,0,1,0,0)
-            context.clearRect(0,0,context.canvas.width,context.canvas.height)
-            context.setTransform(view.scale,0,0,-view.scale, context.canvas.width/2 - view.xPos*view.scale, context.canvas.height/2 + view.yPos*view.scale)
-            Artist.setBounds()
-            Artist.outlineCircle(0,0,game.worldRadius,"#F00",0.2)
-            cloneMap.forEach( clone => clone.draw() )
         }
         const init = () => {
             canvas = document.querySelector("#mainCanvas")
@@ -233,28 +231,34 @@ const CLONE_Game = (function(){
         }
     })()
 
+
     const Menu = (function(){
-        var itemsContainer, selectedItem = null
+        var itemsContainer, selectedItem
         const refresh = () => {
+            // clear items
+            selectedItem = null
             while (itemsContainer.firstElementChild) itemsContainer.removeChild(itemsContainer.firstElementChild)
-            for (var _key in game.items) {
-                let key = _key
-                itemsContainer.appendChild(createHtmlElement("div",{
-                    innerHTML: `<div>${Items[key].name}</div><div id="item-${key}">${game.items[key]}</div>`,
-                    onclick: function(event) {
-                        if (selectedItem === key) {
-                            selectedItem = null
-                            Input.setClickMode(0)
-                            event.target.style.background = ""
-                        }
-                        else {
-                            selectedItem = key
-                            Input.setClickMode(1)
-                            event.target.style.background = "yellow"
-                        }
+            // build items
+            for (let key in game.items) if (game.items[key] > 0) {
+                var itemContainer = createHtmlElement("div",{
+                    className: "menu-items-item",
+                    innerHTML: `<div>${Items[key].name}</div><div>${game.items[key]}</div>`,
+                })
+                itemContainer.onclick = function(event) {
+                    document.querySelectorAll(".menu-items-selectedItem").forEach( e => e.classList.remove("menu-items-selectedItem") )
+                    if (selectedItem === key) {
+                        selectedItem = null
+                        Input.setClickMode(0)
                     }
-                }))
-                if (selectedItem === key && game.items[key] === 0) selectedItem = null
+                    else {
+                        selectedItem = key
+                        Input.setClickMode(1)
+                        event.target.classList.add("menu-items-selectedItem")
+                    }
+                }
+                itemsContainer.appendChild(itemContainer)
+                Items[key].menuContainerElement = itemContainer
+                Items[key].menuCountElement = itemContainer.children[1]
             }
         }
         return {
@@ -266,9 +270,10 @@ const CLONE_Game = (function(){
         }
     })()
 
+
     const CloneUI = (function() {
         var uiContainer, statisticsContainer, attributesContainer
-        const reset = () => {
+        const resetElements = () => {
             uiContainer.appendChild(createHtmlElement("div",{
                 id:"cloneUI-statistics", className:"cloneUI-section",
                 innerHTML:`<div class="cloneUI-section-label">Statistics</div>`
@@ -296,8 +301,11 @@ const CLONE_Game = (function(){
             load : (id) => {
                 while (uiContainer.firstElementChild) uiContainer.removeChild(uiContainer.firstElementChild)
                 if (id) {
-                    reset()
+                    game.pause = true
+                    resetElements()
                     var clone = cloneMap.get(id)
+                    view.xPos = clone.worldPosition.x
+                    view.yPos = clone.worldPosition.y
                     statistic("Age",clone.age)
                     statistic("Max age",clone.maxAge)
                     statistic("Fertile age",clone.fertileAge)
@@ -314,11 +322,11 @@ const CLONE_Game = (function(){
     function Clone(xHash,yHash,override) {
         override = override || {}
         this.age = 0
-        this.maxAge = override.maxAge || 60//60
+        this.maxAge = override.maxAge || 25//60
         this.fertileAge = override.fertileAge || 5//20
-        this.cloningFailureChance = override.cloningFailureChance || 0.9//0.973
+        this.cloningFailureChance = override.cloningFailureChance || 0.94//0.973
         this.production = override.production || 0.01
-        this.radius = this.maxRadius*0.95
+        this.radius = this.maxRadius*0.7
         this.xHash = xHash
         this.yHash = yHash
         this.id = `${this.xHash.toString()}_${this.yHash.toString()}`
@@ -414,14 +422,34 @@ const CLONE_Game = (function(){
     const Items = {
         genesisPod: {
             use: (xHash,yHash) => {
-
                 let id = `${xHash}_${yHash}`
                 if (!cloneMap.has(id)) {
                     let clone = new Clone(xHash,yHash)
-                    if (clone.id) clone.draw()
+                    if (clone.id) {
+                        if (game.pause) clone.draw()
+                        return true
+                    }
                 }
+                return false
             },
             name: "Genesis Pod",
+            icon: "1_20"
+        },
+        genesisRay: {
+            use: (xHash,yHash) => {
+                var xShift,yShift,id,clone
+                new Array([0,2],[-1,1],[0,1],[1,1],[-2,0],[-1,0],[0,0],[1,0],[2,0],[-1,-1],[0,-1],[1,-1],[0,-2]).forEach( coord => {
+                    xShift = xHash + coord[0]
+                    yShift = yHash + coord[1]
+                    id = `${xShift}_${yShift}`
+                    if (!cloneMap.has(id)) {
+                        clone = new Clone(xShift,yShift)
+                        if (game.pause && clone.id) clone.draw()
+                    }
+                })
+                return true
+            },
+            name: "Genesis Ray",
             icon: "1_20"
         }
     }

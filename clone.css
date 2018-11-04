@@ -68,6 +68,12 @@ html,body {
 }
 
 
+.menu-items-item {
+    float:left;
+}
+.menu-items-selectedItem {
+    background:yellow;
+}
 
 #cloneUI-statistics {}
 #cloneUI-attributes {}
