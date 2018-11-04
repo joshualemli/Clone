@@ -67,6 +67,10 @@ html,body {
     background:#CCF;
 }
 
+#menu-stats {
+    display:flex;
+    flex-direction:row;
+}
 
 #menu-items {
     display:flex;

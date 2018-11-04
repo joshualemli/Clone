@@ -69,7 +69,7 @@ const CLONE_Game = (function(){
         },
         artifacts:[],
         pause:false,
-        worldRadius:10
+        worldRadius:25
     }
 
 
@@ -89,6 +89,22 @@ const CLONE_Game = (function(){
 
 
     // MODULES
+
+    const Framerate = (function(){
+        var count, start
+        return {
+            reset: () => {
+                count = 0
+                start = performance.now()
+            },
+            fps: () => Math.round(count / (performance.now() - start) * 1000),
+            microtime: () => (performance.now() - start) / count,
+            register: () => {
+                count += 1
+            },
+        }
+    })()
+
 
     var Input = (function(){
         
@@ -242,6 +258,7 @@ const CLONE_Game = (function(){
 
     const Menu = (function(){
         var itemsContainer, selectedItem
+        var stats = {}
         const refresh = () => {
             // clear items
             selectedItem = null
@@ -269,11 +286,22 @@ const CLONE_Game = (function(){
                 Items[key].menuCountElement = itemContainer.children[1]
             }
         }
+        const updateStats = () => {
+            var production = 0
+            cloneMap.forEach( clone => production += clone.production )
+            production *= Framerate.fps()
+            stats.resources.innerHTML = game.resources.toFixed(2)
+            stats.production.innerHTML = production.toFixed(2) + "/s"
+            stats.clones.innerHTML = cloneMap.size
+            stats.clonesCreated.innerHTML = game.clonesCreated
+        }
         return {
             init : () => {
                 itemsContainer = document.querySelector("#menu-items")
+                new Array("resources","production","clones","clonesCreated").forEach( idPart => stats[idPart] = document.querySelector(`#menu-stats-${idPart}`) )
             },
             refresh : refresh,
+            updateStats : updateStats,
             getSelectedItem : () => selectedItem
         }
     })()
@@ -333,7 +361,7 @@ const CLONE_Game = (function(){
         this.maxAge = override.maxAge || 25//60
         this.fertileAge = override.fertileAge || 5//20
         this.cloningFailureChance = override.cloningFailureChance || 0.94//0.973
-        this.production = override.production || 0.01
+        this.production = override.production || 0.01107
         this.radius = this.maxRadius*0.7
         this.xHash = xHash
         this.yHash = yHash
@@ -341,13 +369,17 @@ const CLONE_Game = (function(){
         this.yOdd = Math.abs(this.yHash%2) === 1 ? 1 : 0
         this.worldPosition = this.getWorldPosition()
         this._drawn = false
-        this._color = `rgb(${Math.floor(Math.random()*100)},${Math.floor(Math.random()*100 + 75)},${Math.floor(Math.random()*150)})`
+        // this._color = `rgb(${Math.floor(Math.random()*100)},${Math.floor(Math.random()*100 + 75)},${Math.floor(Math.random()*150)})`
+        this._color = `rgb(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*125 + 75)},${Math.floor(Math.random()*255)})`
         // make sure this is in world bounds
         if (Math.sqrt(this.worldPosition.x*this.worldPosition.x+this.worldPosition.y*this.worldPosition.y) > game.worldRadius) {
             delete this.id
             return null
         }
-        else cloneMap.set(this.id,this)
+        else {
+            cloneMap.set(this.id,this)
+            game.clonesCreated += 1
+        }
     }
     Clone.prototype.maxRadius = 0.5
     Clone.prototype.xMultiplier = Clone.prototype.maxRadius * 2
@@ -466,10 +498,11 @@ const CLONE_Game = (function(){
 
 
     // GAMEPLAY LOOP
+
     
     const step = () => {
-        // start microtime
-        var tStart = performance.now()
+        // register this frame for FPS timer
+        Framerate.register()
         // input
         Input.apply()
         // clones
@@ -479,7 +512,8 @@ const CLONE_Game = (function(){
         }
         // debug: frame time
         if (game.steps % 60 === 0) {
-            console.log(performance.now() - tStart)
+            Menu.updateStats()
+            Framerate.reset()
         }
         // loop
         window.requestAnimationFrame(step)
@@ -493,6 +527,7 @@ const CLONE_Game = (function(){
         // start gameplay
         Artist.resize()
         Menu.refresh()
+        Framerate.reset()
         step()
     }
 
