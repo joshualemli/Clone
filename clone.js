@@ -66,9 +66,14 @@ const CLONE_Game = (function(){
         items:{
             genesisPod: 10,
         },
-        artifacts:[], // array of strings
-        pause:false
+        artifacts:[],
+        pause:false,
+        worldRadius:20
     }
+
+
+
+    //DEBUG:
     window.gg = () => console.log(game.steps,game.resources,game.clonesCreated)
 
 
@@ -151,7 +156,6 @@ const CLONE_Game = (function(){
                         let item = Menu.getSelectedItem()
                         if (game.items[item] > 0) {
                             Items[item].use(xHash,yHash)
-                            game.items[item] -= 1
                             Menu.refresh()
                         }
                         break
@@ -187,6 +191,7 @@ const CLONE_Game = (function(){
             context.clearRect(0,0,context.canvas.width,context.canvas.height)
             context.setTransform(view.scale,0,0,-view.scale, context.canvas.width/2 - view.xPos*view.scale, context.canvas.height/2 + view.yPos*view.scale)
             Artist.setBounds()
+            Artist.outlineCircle(0,0,game.worldRadius,"#F00",0.2)
             cloneMap.forEach( clone => clone.draw() )
         }
         const init = () => {
@@ -212,6 +217,13 @@ const CLONE_Game = (function(){
                 context.fillStyle = color
                 context.fillRect(xCenter-xDim/2,yCenter-yDim/2,xDim,yDim)
             },
+            outlineCircle: (x,y,r,color,width) => {
+                context.strokeStyle = color
+                context.lineWidth = width
+                context.beginPath()
+                context.arc(x,y,r,0,Math.PI*2)
+                context.stroke()
+            },
             fillCircle: (x,y,r,color) => {
                 context.fillStyle = color
                 context.beginPath()
@@ -225,9 +237,10 @@ const CLONE_Game = (function(){
         var itemsContainer, selectedItem = null
         const refresh = () => {
             while (itemsContainer.firstElementChild) itemsContainer.removeChild(itemsContainer.firstElementChild)
-            for (var key in game.items) (function(key){
+            for (var _key in game.items) {
+                let key = _key
                 itemsContainer.appendChild(createHtmlElement("div",{
-                    innerHTML: Items[key].name + "..." + game.items[key],
+                    innerHTML: `<div>${Items[key].name}</div><div id="item-${key}">${game.items[key]}</div>`,
                     onclick: function(event) {
                         if (selectedItem === key) {
                             selectedItem = null
@@ -241,7 +254,8 @@ const CLONE_Game = (function(){
                         }
                     }
                 }))
-            })(key)
+                if (selectedItem === key && game.items[key] === 0) selectedItem = null
+            }
         }
         return {
             init : () => {
@@ -300,9 +314,10 @@ const CLONE_Game = (function(){
     function Clone(xHash,yHash,override) {
         override = override || {}
         this.age = 0
-        this.maxAge = override.maxAge || 30
-        this.fertileAge = override.fertileAge || 5
-        this.cloningFailureChance = override.cloningFailureChance || 0.973
+        this.maxAge = override.maxAge || 60//60
+        this.fertileAge = override.fertileAge || 5//20
+        this.cloningFailureChance = override.cloningFailureChance || 0.9//0.973
+        this.production = override.production || 0.01
         this.radius = this.maxRadius*0.95
         this.xHash = xHash
         this.yHash = yHash
@@ -311,7 +326,12 @@ const CLONE_Game = (function(){
         this.worldPosition = this.getWorldPosition()
         this._drawn = false
         this._color = `rgb(${Math.floor(Math.random()*100)},${Math.floor(Math.random()*100 + 75)},${Math.floor(Math.random()*150)})`
-        cloneMap.set(this.id,this)
+        // make sure this is in world bounds
+        if (Math.sqrt(this.worldPosition.x*this.worldPosition.x+this.worldPosition.y*this.worldPosition.y) > game.worldRadius) {
+            delete this.id
+            return null
+        }
+        else cloneMap.set(this.id,this)
     }
     Clone.prototype.maxRadius = 0.5
     Clone.prototype.xMultiplier = Clone.prototype.maxRadius * 2
@@ -359,7 +379,7 @@ const CLONE_Game = (function(){
         var hash
         while (true) {
             var p = this._randomPosition()
-            hash = this._getHashFromPosition(p) 
+            hash = this._getHashFromPosition(p)
             if (cloneMap.has(`${hash.x.toString()}_${hash.y.toString()}`)) attempted[p] = 1
             else break
             if (!attempted.some(x=>x===0)) return null
@@ -379,7 +399,7 @@ const CLONE_Game = (function(){
     }
     Clone.prototype.step = function(){
         this.age += 1
-        game.resources += 1
+        game.resources += this.production
         if (this.age > this.maxAge) return this.perish()
         if (this.age > this.fertileAge && Math.random() > this.cloningFailureChance) this.clone()
         if (!this._drawn) this.draw()
@@ -394,8 +414,12 @@ const CLONE_Game = (function(){
     const Items = {
         genesisPod: {
             use: (xHash,yHash) => {
+
                 let id = `${xHash}_${yHash}`
-                if (!cloneMap.has(id)) new Clone(xHash,yHash).draw()
+                if (!cloneMap.has(id)) {
+                    let clone = new Clone(xHash,yHash)
+                    if (clone.id) clone.draw()
+                }
             },
             name: "Genesis Pod",
             icon: "1_20"
@@ -414,12 +438,8 @@ const CLONE_Game = (function(){
         Input.apply()
         // clones
         if (!game.pause) {
-            // game step
             game.steps += 1
-            // perform `step` for each clone
             cloneMap.forEach( (value,key) => value.step() )
-            // create a new clone if the `cloneMap` is empty
-            // if (cloneMap.size === 0) new Clone(0,0)
         }
         // debug: frame time
         if (game.steps % 120 == 0) console.log(performance.now() - tStart)
