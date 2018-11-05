@@ -31,7 +31,7 @@
     CLONE JavaScript file
     - - - - - - - - - - - - - - - - - - - */
         const
-        CLONE_VERSION = "0.1.2",
+        CLONE_VERSION = "0.1.3",
         CLONE_RELEASE = "dev",
         CLONE_EDITION = "jailhouse rock";
     /* - - - - - - - - - - - - - - - - - - -
@@ -49,6 +49,7 @@ const CLONE_Game = (function(){
 
     // STATE DATA
 
+
     var cloneMap = new Map()
 
     var view = {
@@ -64,12 +65,13 @@ const CLONE_Game = (function(){
         resources:0,
         clonesCreated:0,
         items:{
-            genesisPod: 10,
-            genesisRay: 1
+            genesisPod: 15,
+            genesisRay: 1,
+            smitingBolt: 1,
         },
         artifacts:[],
         pause:false,
-        worldRadius:25
+        worldRadius:5
     }
 
 
@@ -80,6 +82,7 @@ const CLONE_Game = (function(){
 
     // MACROS
 
+
     const createHtmlElement = (type,options,styles) => {
         var key, e = document.createElement(type)
         if (options) for (key in options) e[key] = options[key]
@@ -89,6 +92,7 @@ const CLONE_Game = (function(){
 
 
     // MODULES
+
 
     const Framerate = (function(){
         var count, start
@@ -185,8 +189,7 @@ const CLONE_Game = (function(){
             // zooming in on the world (changing `view.scale`) with mouse wheel
             document.querySelector("#mainCanvas").addEventListener("wheel", event => {
                 if (event.deltaY) {
-                    if (Math.sign(event.deltaY) < 0) view.scale *= 1.1
-                    else view.scale *= 0.9
+                    view.scale *= (Math.sign(event.deltaY) < 0 ? 1.1 : 0.9)
                     Artist.redraw()
                 }
             })
@@ -290,8 +293,8 @@ const CLONE_Game = (function(){
             var production = 0
             cloneMap.forEach( clone => production += clone.production )
             production *= Framerate.fps()
-            stats.resources.innerHTML = game.resources.toFixed(2)
-            stats.production.innerHTML = production.toFixed(2) + "/s"
+            stats.resources.innerHTML = game.resources.toFixed(3)
+            stats.production.innerHTML = production.toFixed(3) + "/s"
             stats.clones.innerHTML = cloneMap.size
             stats.clonesCreated.innerHTML = game.clonesCreated
         }
@@ -299,6 +302,10 @@ const CLONE_Game = (function(){
             init : () => {
                 itemsContainer = document.querySelector("#menu-items")
                 new Array("resources","production","clones","clonesCreated").forEach( idPart => stats[idPart] = document.querySelector(`#menu-stats-${idPart}`) )
+                document.getElementById("menu-openShop").onclick = () => {
+                    game.pause = true
+                    document.getElementById("store").classList.remove("occlude")
+                }
             },
             refresh : refresh,
             updateStats : updateStats,
@@ -358,10 +365,11 @@ const CLONE_Game = (function(){
     function Clone(xHash,yHash,override) {
         override = override || {}
         this.age = 0
-        this.maxAge = override.maxAge || 25//60
-        this.fertileAge = override.fertileAge || 5//20
-        this.cloningFailureChance = override.cloningFailureChance || 0.94//0.973
-        this.production = override.production || 0.01107
+        this.maxAge = override.maxAge || 40
+        this.fertileAge = override.fertileAge || 20
+        this.cloningFailureChance = override.cloningFailureChance || 0.975
+        this.production = override.production || 0.01
+        this.lifetimeProduction = 0
         this.radius = this.maxRadius*0.7
         this.xHash = xHash
         this.yHash = yHash
@@ -369,8 +377,8 @@ const CLONE_Game = (function(){
         this.yOdd = Math.abs(this.yHash%2) === 1 ? 1 : 0
         this.worldPosition = this.getWorldPosition()
         this._drawn = false
-        // this._color = `rgb(${Math.floor(Math.random()*100)},${Math.floor(Math.random()*100 + 75)},${Math.floor(Math.random()*150)})`
-        this._color = `rgb(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*125 + 75)},${Math.floor(Math.random()*255)})`
+        this._color = `rgb(${Math.floor(Math.random()*100)},${Math.floor(Math.random()*100 + 75)},${Math.floor(Math.random()*150)})`
+        // this._color = `rgb(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*125 + 75)},${Math.floor(Math.random()*255)})`
         // make sure this is in world bounds
         if (Math.sqrt(this.worldPosition.x*this.worldPosition.x+this.worldPosition.y*this.worldPosition.y) > game.worldRadius) {
             delete this.id
@@ -446,10 +454,15 @@ const CLONE_Game = (function(){
         this._drawn = true
     }
     Clone.prototype.step = function(){
+        // aging
         this.age += 1
-        game.resources += this.production
         if (this.age > this.maxAge) return this.perish()
-        if (this.age > this.fertileAge && Math.random() > this.cloningFailureChance) this.clone()
+        // clone self
+        if (this.age > this.fertileAge && Math.random() > this.cloningFailureChance) return this.clone()
+        // production
+        game.resources += this.production
+        this.lifetimeProduction += this.production
+        // graphics
         if (!this._drawn) this.draw()
     }
     Clone.prototype.perish = function(){
@@ -491,7 +504,18 @@ const CLONE_Game = (function(){
             },
             name: "Genesis Ray",
             icon: "1_20"
-        }
+        },
+        smitingBolt: {
+            use: (xHash,yHash) => {
+                let clone = cloneMap.get(`${xHash}_${yHash}`)
+                if (clone) {
+                    clone.perish()
+                    return true
+                }
+                return false
+            },
+            name: "Smiting Bolt"
+        },
     }
     // ARTIFACTS
 
@@ -519,7 +543,9 @@ const CLONE_Game = (function(){
         window.requestAnimationFrame(step)
     }
 
+
     return function() {
+        // initialization
         CloneUI.init()
         Artist.init()
         Input.init()
