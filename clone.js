@@ -50,7 +50,7 @@ const CLONE_Game = (function(){
     // STATE DATA
 
 
-    var cloneMap = new Map()
+    var cloneMap = new Map(), spriteMap = new Map()
 
     var view = {
         scale:4,
@@ -209,8 +209,7 @@ const CLONE_Game = (function(){
             context.clearRect(0,0,context.canvas.width,context.canvas.height)
             context.setTransform(view.scale,0,0,-view.scale, context.canvas.width/2 - view.xPos*view.scale, context.canvas.height/2 + view.yPos*view.scale)
             Artist.setBounds()
-            Artist.outlineCircle(0, 0, game.worldRadius + Clone.prototype.maxRadius*2, "#F00", 0.2)
-            cloneMap.forEach( clone => clone.draw() )
+            draw(false)
         }
         const resize = () => {
             canvas.width = canvas.parentElement.offsetWidth
@@ -242,18 +241,26 @@ const CLONE_Game = (function(){
                 context.fillStyle = color
                 context.fillRect(xCenter-xDim/2,yCenter-yDim/2,xDim,yDim)
             },
-            outlineCircle: (x,y,r,color,width) => {
+            outlineCircle: (x,y,r,width,color) => {
                 context.strokeStyle = color
                 context.lineWidth = width
                 context.beginPath()
-                context.arc(x,y,r,0,Math.PI*2)
+                context.arc(x,y,r,0,2*Math.PI,false)
                 context.stroke()
             },
             fillCircle: (x,y,r,color) => {
                 context.fillStyle = color
                 context.beginPath()
-                context.arc(x,y,r,0,Math.PI*2)
+                context.arc(x,y,r,0,2*Math.PI,false)
                 context.fill()
+            },
+            clipCircle: (x,y,r) => {
+                context.save()
+                context.beginPath()
+                context.arc(x,y,r,0,2*Math.PI,false)
+                context.clip()
+                context.clearRect(x - r - 1, y - r - 1, r * 2 + 2, r * 2 + 2)
+                context.restore()
             }
         }
     })()
@@ -390,6 +397,7 @@ const CLONE_Game = (function(){
                     game.pause = true
                     resetElements()
                     var clone = cloneMap.get(id)
+                    new Sprites.cloneHighlight(clone.worldPosition.x,clone.worldPosition.y,clone.radius)
                     view.xPos = clone.worldPosition.x
                     view.yPos = clone.worldPosition.y
                     statistic("Name",clone.name)
@@ -428,16 +436,16 @@ const CLONE_Game = (function(){
         this.yOdd = Math.abs(this.yHash%2) === 1 ? 1 : 0
         this.worldPosition = this.getWorldPosition()
         this._drawn = false
-        this._color = `rgb(${Math.floor(Math.random()*100)},${Math.floor(Math.random()*100 + 75)},${Math.floor(Math.random()*150)})`
-        // this._color = `rgb(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*125 + 75)},${Math.floor(Math.random()*255)})`
+        this._color = `rgb(${Math.floor(Math.random()*100)},${Math.floor(Math.random()*100 + 100)},${Math.floor(Math.random()*200)})`
         // make sure this is in world bounds
         if (Math.sqrt(this.worldPosition.x*this.worldPosition.x+this.worldPosition.y*this.worldPosition.y) > game.worldRadius) {
             delete this.id
             return null
         }
         else {
-            cloneMap.set(this.id,this)
             game.clonesCreated += 1
+            cloneMap.set(this.id,this)
+            this.draw()
         }
     }
     Clone.prototype.maxRadius = 0.5
@@ -502,7 +510,6 @@ const CLONE_Game = (function(){
         ) {
             Artist.fillCircle(this.worldPosition.x,this.worldPosition.y,this.radius,this._color)
         }
-        this._drawn = true
     }
     Clone.prototype.step = function(){
         // aging
@@ -513,12 +520,40 @@ const CLONE_Game = (function(){
         // production
         game.resources += this.production
         this.lifetimeProduction += this.production
-        // graphics
-        if (!this._drawn) this.draw()
     }
     Clone.prototype.perish = function(){
-        Artist.fillCircle(this.worldPosition.x,this.worldPosition.y,this.maxRadius,"#FFF")
+        // Artist.fillCircle(this.worldPosition.x,this.worldPosition.y,this.maxRadius,"rgba(0,0,0,0)")
+        Artist.clipCircle(this.worldPosition.x,this.worldPosition.y,this.maxRadius)
         cloneMap.delete(this.id)
+    }
+
+
+    // SPRITES
+
+    const Sprites = {}
+    Sprites.worldBoundary = function() {
+        this.id = "worldBoundary"
+        this.draw()
+        spriteMap.set(this.id,this)
+    }
+    Sprites.worldBoundary.prototype.draw = function() {
+        Artist.outlineCircle(0,0,game.worldRadius+1,0.4,"#AA7777")
+    }
+    Sprites.worldBoundary.prototype.step = function() {
+        return null
+    }
+    Sprites.cloneHighlight = function(x,y,r) {
+        this.id = "cloneHighlight"
+        this.x = x
+        this.y = y
+        this.r = r
+        spriteMap.set(this.id,this)
+    }
+    Sprites.cloneHighlight.prototype.draw = function() {
+        Artist.outlineCircle(this.x,this.y,this.r+0.15,0.17,"#0F0")
+    }
+    Sprites.cloneHighlight.prototype.step = function() {
+        if (!game.pause) spriteMap.delete("cloneHighlight")
     }
 
 
@@ -584,23 +619,30 @@ const CLONE_Game = (function(){
 
 
 
-    // GAMEPLAY LOOP
+    // DRAW WORLD
+    const draw = (step) => {
+        if (step) {
+            cloneMap.forEach( clone => clone.step() )
+            spriteMap.forEach( sprite => sprite.step() )
+        }
+        else {
+            cloneMap.forEach( clone => clone.draw() )
+            spriteMap.forEach( sprite => sprite.draw() )
+        }
+    }
 
-    
+    // GAMEPLAY LOOP    
     const step = () => {
-        // register this frame for FPS timer
-        Framerate.register()
-        // input
-        Input.apply()
         // clones
         if (!game.pause) {
+            Framerate.register()
             game.steps += 1
-            cloneMap.forEach( (value,key) => value.step() )
-        }
-        // debug: frame time
-        if (game.steps % 60 === 0) {
-            Menu.updateStats()
-            Framerate.reset()
+            Input.apply()
+            draw(true)
+            if (game.steps % 60 === 0) {
+                Menu.updateStats()
+                Framerate.reset()
+            }
         }
         // loop
         window.requestAnimationFrame(step)
