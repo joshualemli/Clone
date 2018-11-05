@@ -71,7 +71,7 @@ const CLONE_Game = (function(){
         },
         artifacts:[],
         pause:false,
-        worldRadius:5
+        worldRadius:10
     }
 
 
@@ -258,6 +258,52 @@ const CLONE_Game = (function(){
         }
     })()
 
+    
+    const Store = (function(){
+        var order, details, container
+        const open = () => {
+            order = {
+                items: [],
+                augmentations: [],
+                artifacts: []
+            }
+            game.pause = true
+            container.classList.remove("occlude")
+            
+        }
+        const cancel = () => {}
+        const confirm = () => {}
+        const init = () => {
+            container = document.getElementById("store")
+            details = {
+                container: document.getElementById("store-itemDetails"),
+                itemsContainer: document.getElementById("store-section-items"),
+                augmentationsContainer: document.getElementById("store-section-augmentations"),
+                artifactsContainer: document.getElementById("store-section-artifacts"),
+            }
+            new Array("icon","name","details","quanity","cost").forEach( idPart => details[idPart] = document.getElementById(`store-itemDetails-${idPart}`) )
+            document.getElementById("store-itemDetails-minusTen").onclick = event => {}
+            document.querySelectorAll(".store-merchandiseItem").forEach( e => e.onclick = event => {
+                let type = event.target.dataset.type
+                let key = event.target.dataset.key
+            })
+            var key,elem
+            for (key in Items) {
+                elem = createHtmlElement("div",{className:"store-merchandiseItem"})
+                elem.dataset.key = key
+                elem.dataset.type = "item"
+                elem.appendChild(createHtmlElement("div",{className:"store-merchandiseItem-icon"}))
+                elem.appendChild(createHtmlElement("div",{className:"store-merchandiseItem-name",innerHTML:Items[key].name}))
+            }
+        }
+        return {
+            init : init,
+            open : open,
+            cancel : cancel,
+            confirm : confirm
+        }
+    })()
+
 
     const Menu = (function(){
         var itemsContainer, selectedItem
@@ -302,10 +348,7 @@ const CLONE_Game = (function(){
             init : () => {
                 itemsContainer = document.querySelector("#menu-items")
                 new Array("resources","production","clones","clonesCreated").forEach( idPart => stats[idPart] = document.querySelector(`#menu-stats-${idPart}`) )
-                document.getElementById("menu-openShop").onclick = () => {
-                    game.pause = true
-                    document.getElementById("store").classList.remove("occlude")
-                }
+                document.getElementById("menu-openShop").onclick = Store.open
             },
             refresh : refresh,
             updateStats : updateStats,
@@ -349,7 +392,9 @@ const CLONE_Game = (function(){
                     var clone = cloneMap.get(id)
                     view.xPos = clone.worldPosition.x
                     view.yPos = clone.worldPosition.y
+                    statistic("Name",clone.name)
                     statistic("Age",clone.age)
+                    statistic("Generation",clone.generation)
                     statistic("Max age",clone.maxAge)
                     statistic("Fertile age",clone.fertileAge)
                     statistic("Cloning success rate", ((1 - clone.cloningFailureChance) * 100).toFixed(1) + "%")
@@ -361,11 +406,17 @@ const CLONE_Game = (function(){
 
 
     // CLONE CLASS
-
+    
     function Clone(xHash,yHash,override) {
         override = override || {}
+        this.name = [
+            CLONE_NAMES.FIRST[Math.floor(Math.random()*CLONE_NAMES.FIRST.length)],
+            CLONE_NAMES.MIDDLE[Math.floor(Math.random()*CLONE_NAMES.MIDDLE.length)],
+            CLONE_NAMES.LAST[Math.floor(Math.random()*CLONE_NAMES.LAST.length)]
+        ].join(" ")
         this.age = 0
-        this.maxAge = override.maxAge || 40
+        this.generation = override.generation || 1
+        this.maxAge = override.maxAge || 100//40
         this.fertileAge = override.fertileAge || 20
         this.cloningFailureChance = override.cloningFailureChance || 0.975
         this.production = override.production || 0.01
@@ -440,7 +491,7 @@ const CLONE_Game = (function(){
             else break
             if (!attempted.some(x=>x===0)) return null
         }
-        new Clone(hash.x,hash.y)
+        new Clone(hash.x, hash.y, { generation: this.generation+1 })
     }
     Clone.prototype.draw = function(){
         if (
@@ -486,6 +537,7 @@ const CLONE_Game = (function(){
                 return false
             },
             name: "Genesis Pod",
+            description: "Used to spit out... I mean gently bring a new clone into existence.",
             icon: "1_20"
         },
         genesisRay: {
@@ -503,6 +555,7 @@ const CLONE_Game = (function(){
                 return true
             },
             name: "Genesis Ray",
+            description: "By jetisoning organic tissue suspended in a high-energy control ray, an entire group of unfortunate clones can be grotesquely reanimated... I mean beautifully, er, coalesced back to their, uh, intended forms.",
             icon: "1_20"
         },
         smitingBolt: {
@@ -514,8 +567,18 @@ const CLONE_Game = (function(){
                 }
                 return false
             },
-            name: "Smiting Bolt"
+            name: "Smiting Bolt",
+            description: "Painlessly (yes, that should sell these matter-dissolving hell engi... am I saying this out loud?) eliminates a single clone."
         },
+    }
+
+    // AUGMENTATIONS
+    var Augmentations = {
+        longevityX2: {
+            use: null,
+            name: "Longevity (x2)",
+            description: "Prolong... I mean, uh, extend the happy, very happy, life of a clone!"
+        }
     }
     // ARTIFACTS
 
@@ -548,6 +611,7 @@ const CLONE_Game = (function(){
         // initialization
         CloneUI.init()
         Artist.init()
+        Store.init()
         Input.init()
         Menu.init()
         // start gameplay
@@ -558,6 +622,12 @@ const CLONE_Game = (function(){
     }
 
 })()
+
+CLONE_NAMES = {
+    FIRST: ["Aziz","B'ki","Burdo","Chuz","Dogen","Elbert","Fosley","Glag","Gorg","Heinril","Ibben","Justice","Kah'les","Klahn","Lasly","Lore","Monson","Nin","Nurbert","Oz","Peter","Queequeg","Ricker","Simril","Trigger","Xor"],
+    MIDDLE: ["Ansibel","Bartock","Critin","Dollinger","Eribus","Frip","Gojir","Hauser","Iomi","Joruun","Llamama","Mohtel","Nash","Ohm","Prestoni","Quinn","Rho","Rhemmy","Sidar"],
+    LAST: ["Arden","Barden","Cardon","Dardon","Egger","Flohh","Gnoering","Hovenek","Immerman","Ipswich","Jade","Koller","Krizler","Lobo","Mog","Murden","Narlson","Qi-xiao","Rhevkin","Ratjack","Sohbud","Szklyzky","Talax","Ulthu","Xanaxer"],
+}
 
 window.onload = CLONE_Game
 

@@ -53,7 +53,6 @@ html,body {
     flex-direction:row;
     flex:0 1 content;
 }
-
 #mainCanvasContainer {
     display:flex;
     flex:1 1 auto;
@@ -61,11 +60,13 @@ html,body {
     overflow:hidden;
 }
     #mainCanvas {}
-
 #cloneUI {
     display:flex;
     background:#CCF;
 }
+
+
+
 
 #menu-stats {
     display:flex;
@@ -89,6 +90,10 @@ html,body {
     background:yellow;
 }
 
+
+
+
+
 .cloneUI-section {
     display:flex;
 }
@@ -100,6 +105,8 @@ html,body {
     .cloneUI-statistic {}
 #cloneUI-attributes {}
     .cloneUI-attribute {}
+
+
 
 
 
@@ -123,31 +130,47 @@ html,body {
     text-decoration:underline;
 }
 .store-section {
-    margin:1em 8%;
-    width:84%;
+    margin:1em;
 }
 .store-section-label {
     color:#EEE;
     font-size:1.2em;
 }
+
+.store-itemDetails-quantityArrow {
+    text-align:center;
+    padding:0.2em;
+    margin:0.2em;
+    color:#6F2;
+}
+
 .store-section-merchandise {
     display:flex;
     flex-direction:row;
+    align-items: flex-start;
+    position:relative;
 }
 .store-merchandiseItem {
     display:flex;
-    flex:0 1 auto;
-    margin:1em;
-    padding:0.2em 1em;
-    border-radius:1em;
+    flex-direction:column;
+    flex:0 1 content;
+    margin:0.4em;
+    padding:0.1em 0.5em;
+    max-width:25vw;
+    border-radius:0.5em;
     background-color:#FCFED7D5;
     box-shadow:0.3em 0.3em 0.5em 0 #000;
-    font-size:1.1em;
-    transition: background-color 0.3s;
+    transition: background-color 0.2s;
 }
-.store-merchandiseItem:hover {
-    background-color:#FFF;
+    .store-merchandiseItem:hover {
+        background-color:#FFF;
+    }
+.store-merchItem-description {
+    display:none;
 }
+
+
+
 
 
 .size-full {
