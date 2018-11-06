@@ -84,7 +84,7 @@ const CLONE_Game = (function(){
 
     var Input = (function(){
         
-        var clickMode = 0 // 0=inspect, 1=useItem
+        var enabled = false, clickMode = 0
 
         var bindings = {
             "=" : "zoomIn",
@@ -101,7 +101,7 @@ const CLONE_Game = (function(){
             switch(action) {
                 case "pause":
                     game.pause = !game.pause
-                    if (!game.pause) CloneUI.load()
+                    CloneUI.load()
                     break
                 case "recenterView":
                     view.xPos = view.yPos = 0
@@ -123,51 +123,63 @@ const CLONE_Game = (function(){
             // redraw
             if (state.zoomIn||state.zoomOut||state.panUp||state.panDown||state.panLeft||state.panRight) Artist.redraw()
         }
-        const init = function(){
-            // keyboard input
-            window.addEventListener("keyup", event => state[bindings[event.key]] = false)
-            window.addEventListener("keydown", event => {
-                let action = bindings[event.key]
-                state[action] = true
-                if (!game.pause) toggle(action)
-            })
-            // clicking on the world
-            document.querySelector("#mainCanvas").addEventListener("mousedown", event => {
-                let x = (event.offsetX - view.screenSize.x/2) / view.scale + view.xPos
-                let y = (view.screenSize.y/2 - event.offsetY) / view.scale + view.yPos
-                if (Math.sqrt(x*x+y*y) > game.worldRadius) return console.log("click out of world bounds")
-                let yHash = Math.round(y / Clone.prototype.yMultiplier)
-                let yOdd = yHash % 2 !== 0 ? Clone.prototype.xStagger : 0
-                let xHash = Math.round((x - yOdd) / Clone.prototype.xMultiplier)
-                // 0=inspect, 1=useItem
-                switch (clickMode) {
-                    case 0:
-                        let id = `${xHash}_${yHash}`
-                        if (cloneMap.has(id)) CloneUI.load(id)
-                        break
-                    case 1:
-                        let item = Menu.getSelectedItem()
-                        if (item && Items[item].use(xHash,yHash)) {
-                            game.items[item] -= 1
-                            if (game.items[item] === 0) {
-                                clickMode = 0
-                                Menu.refresh()
-                            }
-                            else Items[item].menuCountElement.innerHTML = game.items[item]
-                        }
-                        break
-                }
-            })
-            // zooming in on the world (changing `view.scale`) with mouse wheel
-            document.querySelector("#mainCanvas").addEventListener("wheel", event => {
-                if (event.deltaY) {
-                    view.scale *= (Math.sign(event.deltaY) < 0 ? 1.1 : 0.9)
-                    Artist.redraw()
-                }
-            })
+        const keyupHandler = event => state[bindings[event.key]] = false
+        const keydownHandler = event => {
+            let action = bindings[event.key]
+            state[action] = true
+            toggle(action)
         }
+        const mainCanvasMouseDownHandler = event => {
+            let x = (event.offsetX - view.screenSize.x/2) / view.scale + view.xPos
+            let y = (view.screenSize.y/2 - event.offsetY) / view.scale + view.yPos
+            if (Math.sqrt(x*x+y*y) > game.worldRadius) return console.log("click out of world bounds")
+            let yHash = Math.round(y / Clone.prototype.yMultiplier)
+            let yOdd = yHash % 2 !== 0 ? Clone.prototype.xStagger : 0
+            let xHash = Math.round((x - yOdd) / Clone.prototype.xMultiplier)
+            switch (clickMode) {
+                case 0: // Inspect
+                    let id = `${xHash}_${yHash}`
+                    if (cloneMap.has(id)) CloneUI.load(id)
+                    break
+                case 1: // Use Item
+                    let item = Menu.getSelectedItem()
+                    if (item && Items[item].use(xHash,yHash)) {
+                        game.items[item] -= 1
+                        if (game.items[item] === 0) {
+                            clickMode = 0
+                            Menu.refresh()
+                        }
+                        else Items[item].menuCountElement.innerHTML = game.items[item]
+                    }
+                    break
+            }
+        }
+        const mainCanvasMouseWheelHandler = event => {
+            if (event.deltaY) {
+                view.scale *= (Math.sign(event.deltaY) < 0 ? 1.1 : 0.9)
+                Artist.redraw()
+            }
+        }
+        const enable = () => {
+            if (enabled) return null
+            else enabled = true
+            window.addEventListener("keyup", keyupHandler)
+            window.addEventListener("keydown", keydownHandler)
+            document.querySelector("#mainCanvas").addEventListener("mousedown", mainCanvasMouseDownHandler)
+            document.querySelector("#mainCanvas").addEventListener("wheel", mainCanvasMouseWheelHandler)
+        }
+        const disable = () => {
+            if (!enabled) return null
+            else enabled = false
+            window.removeEventListener("keyup", keyupHandler)
+            window.removeEventListener("keydown", keydownHandler)
+            document.querySelector("#mainCanvas").removeEventListener("mousedown", mainCanvasMouseDownHandler)
+            document.querySelector("#mainCanvas").removeEventListener("wheel", mainCanvasMouseWheelHandler)
+        }
+
         return {
-            init : init,
+            enable : enable,
+            disable : disable,
             apply : apply,
             setClickMode : n => clickMode = n
         }
@@ -249,10 +261,15 @@ const CLONE_Game = (function(){
             }
             game.pause = true
             container.classList.remove("occlude")
-            
+            Input.disable()
         }
-        const cancel = () => {}
-        const confirm = () => {}
+        const cancel = () => {
+            Input.enable()
+        }
+        const confirm = () => {
+            Input.enable()
+
+        }
         const init = () => {
             container = document.getElementById("store")
             details = {
@@ -321,13 +338,19 @@ const CLONE_Game = (function(){
             production *= Framerate.fps()
             stats.resources.innerHTML = game.resources.toFixed(3)
             stats.production.innerHTML = production.toFixed(3) + "/s"
-            stats.clones.innerHTML = cloneMap.size
-            stats.clonesCreated.innerHTML = game.clonesCreated
+            stats.clones.innerHTML = game.livingClones
+            stats.lifetimeClones.innerHTML = game.lifetimeClones
+            stats.mutantClones.innerHTML = game.livingMutantClones
+            stats.lifetimeMutantClones.innerHTML = game.lifetimeMutantClones
+            stats.foreignClones.innerHTML = game.livingForeignClones
+            stats.lifetimeForeignClones.innerHTML = game.lifetimeForeignClones
         }
         return {
             init : () => {
                 itemsContainer = document.querySelector("#menu-items")
-                new Array("resources","production","clones","clonesCreated").forEach( idPart => stats[idPart] = document.querySelector(`#menu-stats-${idPart}`) )
+                new Array(
+                    "resources","production","clones","lifetimeClones","mutantClones","lifetimeMutantClones","foreignClones","lifetimeForeignClones"
+                ).forEach( idPart => stats[idPart] = document.querySelector(`#menu-stats-${idPart}`) )
                 document.getElementById("menu-openShop").onclick = Store.open
             },
             refresh : refresh,
@@ -341,23 +364,23 @@ const CLONE_Game = (function(){
         var uiContainer, statisticsContainer, attributesContainer
         const resetElements = () => {
             uiContainer.appendChild(createHtmlElement("div",{
-                id:"cloneUI-statistics", className:"cloneUI-section",
-                innerHTML:`<div class="cloneUI-section-label">Statistics</div>`
+                id:"cloneUI-attributes", className:"cloneUI-section"
             }))
+            attributesContainer = uiContainer.children[0]
             uiContainer.appendChild(createHtmlElement("div",{
-                id:"cloneUI-attributes", className:"cloneUI-section",
-                innerHTML:`<div class="cloneUI-section-label">Attributes</div>`
+                id:"cloneUI-statistics", className:"cloneUI-section"
             }))
-            statisticsContainer = uiContainer.children[0]
-            attributesContainer = uiContainer.children[1]
+            statisticsContainer = uiContainer.children[1]
+        }
+        const attribute = (name,value) => {
+            let e = createHtmlElement("div",{className:"cloneUI-attribute",innerHTML:`<div>${name}</div><div>${value}</div>`})
+            attributesContainer.appendChild(e)
+            return e
         }
         const statistic = (name,value) => {
             let e = createHtmlElement("div",{className:"cloneUI-statistic",innerHTML:`<div>${name}</div><div>${value}</div>`})
             statisticsContainer.appendChild(e)
             return e
-        }
-        const attribute = (name,value) => {
-
         }
         const item = () => {}
         return {
@@ -370,15 +393,16 @@ const CLONE_Game = (function(){
                     game.pause = true
                     resetElements()
                     var clone = cloneMap.get(id)
-                    new Sprites.cloneHighlight(clone.worldPosition.x,clone.worldPosition.y,clone.radius)
+                    new Sprites.cloneHighlight(clone)
                     view.xPos = clone.worldPosition.x
                     view.yPos = clone.worldPosition.y
-                    statistic("Name",clone.name)
-                    statistic("Age",clone.age)
-                    statistic("Generation",clone.generation)
-                    statistic("Max age",clone.maxAge)
-                    statistic("Fertile age",clone.fertileAge)
-                    statistic("Cloning success rate", ((1 - clone.cloningFailureChance) * 100).toFixed(1) + "%")
+                    attribute("Name",clone.name)
+                    attribute("Age",clone.age)
+                    attribute("Generation",clone.generation)
+                    attribute("Max age",clone.maxAge)
+                    attribute("Fertile age",clone.fertileAge)
+                    attribute("Cloning success rate", ((1 - clone.cloningFailureChance) * 100).toFixed(1) + "%")
+                    attribute("Lifetime production", clone.lifetimeProduction.toFixed(3))
                 }
                 Artist.resize()
             }
@@ -397,10 +421,14 @@ const CLONE_Game = (function(){
         ].join(" ")
         this.age = 0
         this.generation = override.generation || 1
-        this.maxAge = override.maxAge || 100//40
+        this.maxAge = override.maxAge || 50
         this.fertileAge = override.fertileAge || 20
-        this.cloningFailureChance = override.cloningFailureChance || 0.975
-        this.production = override.production || 0.01
+        this.cloningFailureChance = override.cloningFailureChance || 0.96
+        // type
+        this.mutant = override.mutant ? true : (Math.random()>0.999 && this.generation > 1 ? true : false)
+        this.foreign = override.foreign || false
+        // production
+        this.production = (this.mutant||this.foreign) ? 0 : (override.production || 0.01)
         this.lifetimeProduction = 0
         this.radius = this.maxRadius*0.7
         this.xHash = xHash
@@ -409,15 +437,27 @@ const CLONE_Game = (function(){
         this.yOdd = Math.abs(this.yHash%2) === 1 ? 1 : 0
         this.worldPosition = this.getWorldPosition()
         this._drawn = false
-        this._color = `rgb(${Math.floor(Math.random()*100)},${Math.floor(Math.random()*100 + 100)},${Math.floor(Math.random()*200)})`
+        if (!this.mutant && !this.foreign) this._color = `rgb(${Math.floor(Math.random()*20)},${Math.floor(Math.random()*125 + 100)},${Math.floor(Math.random()*80)})`
+        else if (this.mutant) this._color = `rgb(${Math.floor(Math.random()*100+50)},${Math.floor(Math.random()*20)},${Math.floor(Math.random()*100+100)})`
+        else if (this.foreign) this._color = `rgb(${Math.floor(Math.random()*125+125)},${Math.floor(Math.random()*20)},${Math.floor(Math.random()*20)})`
         // make sure this is in world bounds
         if (Math.sqrt(this.worldPosition.x*this.worldPosition.x+this.worldPosition.y*this.worldPosition.y) > game.worldRadius) {
             delete this.id
             return null
         }
         else {
-            game.clonesCreated += 1
-            cloneMap.set(this.id,this)
+            if (this.mutant) {
+                game.livingMutantClones += 1
+                game.lifetimeMutantClones += 1
+            }
+            else if (this.foreign) {
+                game.livingForeignClones += 1
+                game.lifetimeForeignClones += 1
+            }
+            else {
+                game.livingClones += 1
+                game.lifetimeClones += 1
+            }            cloneMap.set(this.id,this)
             this.draw()
         }
     }
@@ -436,30 +476,12 @@ const CLONE_Game = (function(){
     Clone.prototype._getHashFromPosition = function(p) {
         var xHash,yHash
         switch(p) {
-            case 0:
-                xHash = this.xHash + 1
-                yHash = this.yHash
-                break
-            case 1:
-                xHash = this.xHash + this.yOdd
-                yHash = this.yHash + 1
-                break
-            case 2:
-                xHash = this.xHash - 1 + this.yOdd
-                yHash = this.yHash + 1
-                break
-            case 3:
-                xHash = this.xHash - 1
-                yHash = this.yHash
-                break
-            case 4:
-                xHash = this.xHash - 1 + this.yOdd
-                yHash = this.yHash - 1
-                break
-            case 5:
-                xHash = this.xHash + this.yOdd
-                yHash = this.yHash - 1
-                break
+            case 0: xHash = this.xHash + 1;             yHash = this.yHash;     break;
+            case 1: xHash = this.xHash + this.yOdd;     yHash = this.yHash + 1; break;
+            case 2: xHash = this.xHash - 1 + this.yOdd; yHash = this.yHash + 1; break;
+            case 3: xHash = this.xHash - 1;             yHash = this.yHash;     break;
+            case 4: xHash = this.xHash - 1 + this.yOdd; yHash = this.yHash - 1; break;
+            case 5: xHash = this.xHash + this.yOdd;     yHash = this.yHash - 1; break;
         }
         return {x:xHash,y:yHash}
     }
@@ -473,7 +495,11 @@ const CLONE_Game = (function(){
             else break
             if (!attempted.some(x=>x===0)) return null
         }
-        new Clone(hash.x, hash.y, { generation: this.generation+1 })
+        new Clone(hash.x, hash.y, {
+            generation: this.generation+1,
+            mutant: this.mutant,
+            foreign: this.foreign
+        })
     }
     Clone.prototype.draw = function(){
         if (
@@ -496,8 +522,10 @@ const CLONE_Game = (function(){
         this.lifetimeProduction += this.production
     }
     Clone.prototype.perish = function(){
-        // Artist.fillCircle(this.worldPosition.x,this.worldPosition.y,this.maxRadius,"rgba(0,0,0,0)")
         Artist.clipCircle(this.worldPosition.x,this.worldPosition.y,this.maxRadius)
+        if (this.mutant) game.livingMutantClones -= 1
+        else if (this.foreign) game.livingForeignClones -= 1
+        else game.livingClones -= 1
         cloneMap.delete(this.id)
     }
 
@@ -516,19 +544,26 @@ const CLONE_Game = (function(){
     Sprites.worldBoundary.prototype.step = function() {
         return null
     }
-    Sprites.cloneHighlight = function(x,y,r) {
+    Sprites.cloneHighlight = function(clone) {
         this.id = "cloneHighlight"
-        this.x = x
-        this.y = y
-        this.r = r
+        this.clone = clone
         this.draw()
         spriteMap.set(this.id,this)
     }
     Sprites.cloneHighlight.prototype.draw = function() {
-        Artist.outlineCircle(this.x,this.y,this.r+0.15,0.17,"#0F0")
+        Artist.outlineCircle(this.clone.worldPosition.x,this.clone.worldPosition.y,this.clone.radius+0.15,0.17,"#0F0")
     }
     Sprites.cloneHighlight.prototype.step = function() {
-        if (!game.pause) spriteMap.delete("cloneHighlight")
+        if (!game.pause) {
+            Artist.clipCircle(this.clone.worldPosition.x,this.clone.worldPosition.y,this.clone.maxRadius*2)
+            cloneMap.get(`${this.clone.xHash}_${this.clone.yHash}`).draw()
+            for (var p = 0; p < 6; p++) {
+                var hash = this.clone._getHashFromPosition(p)
+                var neighbor = cloneMap.get(`${hash.x}_${hash.y}`)
+                if (neighbor) neighbor.draw()
+            }
+            spriteMap.delete("cloneHighlight")
+        }
     }
 
 
@@ -599,6 +634,13 @@ const CLONE_Game = (function(){
             Framerate.register()
             game.steps += 1
             Input.apply()
+            if (Math.random() > 0.99) {
+                new Clone(
+                    Math.floor(Math.random()*2*game.worldRadius) - game.worldRadius,
+                    Math.floor(Math.random()*2*game.worldRadius) - game.worldRadius,
+                    {foreign:true}
+                )
+            }
             cloneMap.forEach( clone => clone.step() )
             spriteMap.forEach( sprite => sprite.step() )
             if (game.steps % 60 === 0) {
@@ -609,6 +651,7 @@ const CLONE_Game = (function(){
         window.requestAnimationFrame(gameplay)
     }
 
+    // SAVE AND LOAD
     const save = () => {
         var saveData = JSON.stringify({
             cloneMap: Array.from(cloneMap).map( clone => clone[1] ),
@@ -658,7 +701,12 @@ var openFile = function(event) {
         game = {
             steps:0,
             resources:0,
-            clonesCreated:0,
+            livingClones:0,
+            livingMutantClones:0,
+            livingForeignClones:0,
+            lifetimeClones:0,
+            lifetimeMutantClones:0,
+            lifetimeForeignClones:0,
             items:{
                 genesisPod: 15,
                 genesisRay: 1,
@@ -672,6 +720,7 @@ var openFile = function(event) {
         Artist.resize()
         Menu.refresh()
         Framerate.reset()
+        Input.enable()
         gameplay()
     }
 
@@ -680,7 +729,6 @@ var openFile = function(event) {
         CloneUI.init()
         Artist.init()
         Store.init()
-        Input.init()
         Menu.init()
         // start gameplay
         load()
@@ -691,4 +739,53 @@ var openFile = function(event) {
 
 window.onload = CLONE_Game
 
+
+
+/*
+
+        const init2 = function(){
+            // keyboard input
+            window.addEventListener("keyup", event => state[bindings[event.key]] = false)
+            window.addEventListener("keydown", event => {
+                let action = bindings[event.key]
+                state[action] = true
+                if (!game.pause) toggle(action)
+            })
+            // clicking on the world
+            document.querySelector("#mainCanvas").addEventListener("mousedown", event => {
+                let x = (event.offsetX - view.screenSize.x/2) / view.scale + view.xPos
+                let y = (view.screenSize.y/2 - event.offsetY) / view.scale + view.yPos
+                if (Math.sqrt(x*x+y*y) > game.worldRadius) return console.log("click out of world bounds")
+                let yHash = Math.round(y / Clone.prototype.yMultiplier)
+                let yOdd = yHash % 2 !== 0 ? Clone.prototype.xStagger : 0
+                let xHash = Math.round((x - yOdd) / Clone.prototype.xMultiplier)
+                // 0=inspect, 1=useItem
+                switch (clickMode) {
+                    case 0:
+                        let id = `${xHash}_${yHash}`
+                        if (cloneMap.has(id)) CloneUI.load(id)
+                        break
+                    case 1:
+                        let item = Menu.getSelectedItem()
+                        if (item && Items[item].use(xHash,yHash)) {
+                            game.items[item] -= 1
+                            if (game.items[item] === 0) {
+                                clickMode = 0
+                                Menu.refresh()
+                            }
+                            else Items[item].menuCountElement.innerHTML = game.items[item]
+                        }
+                        break
+                }
+            })
+            // zooming in on the world (changing `view.scale`) with mouse wheel
+            document.querySelector("#mainCanvas").addEventListener("wheel", event => {
+                if (event.deltaY) {
+                    view.scale *= (Math.sign(event.deltaY) < 0 ? 1.1 : 0.9)
+                    Artist.redraw()
+                }
+            })
+        }
+
+*/
 

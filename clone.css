@@ -149,10 +149,6 @@ html,body {
 .cloneUI-section {
     display:flex;
 }
-    .cloneUI-section-label {
-        font-weight:bold;
-        margin:0.5em;
-    }
 #cloneUI-statistics {}
     .cloneUI-statistic {}
 #cloneUI-attributes {}

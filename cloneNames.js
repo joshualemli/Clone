@@ -1,4 +1,38 @@
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+    CLONE - Automata html5+javascript game
+    Copyright (C) 2018  Joshua A. Lemli
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.    
+
+    
+
+        C O N T A C T    I N F O R M A T I O N
+
+            Joshua A. Lemli
+            joshualemli@gmail.com
+
+
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+    CLONE JavaScript file -- "Clone names"
+    v2
+
+
+*/
 
 const CLONE_NAMES = {
 
@@ -14,11 +48,13 @@ Daxia
 Dwik
 Dogen
 Elbert
+Ferble
 Fosley
 Glag
 Gorg
 Heinril
 Ibben
+Iidor
 Justice
 Kah'les
 Klahn
@@ -26,7 +62,9 @@ Lasly
 LoreMonson
 Nin
 Nurbert
-OzPeter
+Ogden
+Oz
+Peter
 Queequeg
 Ricker
 Sandsky
@@ -44,10 +82,12 @@ Zumley
 
 Ansibel
 Bartock
+Buddy
 Critin
 Dobek
 Drask
 Eribus
+Fiz
 Frip
 Gojir
 Hauser
@@ -58,6 +98,7 @@ Mohtel
 Naal
 Nash
 Ohm
+Pickles
 Prestoni
 Quinn
 Rho
@@ -72,10 +113,12 @@ Wexley
 Xim
 Yatha
 Zardak
+
 `,LAST:`
 
 Arden
 Barden
+Cage
 Cardon
 Dardon
 Egger
