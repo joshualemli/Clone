@@ -71,7 +71,46 @@ html,body {
 #menu {
     background:linear-gradient(#333,#555);
     color:white;
+    font-family: 'VT323', monospace;
 }
+#menu-mainOptions {
+    display:flex;
+    flex-direction:column;
+}
+    #menu-callsign {
+        display:flex;
+        flex:0 1 auto;
+    }
+        #menu-callsign-input {
+            text-align:center;
+            font-family: 'VT323', monospace;
+            font-size:1.1em;
+            padding:0;
+            height:1.1em;
+            background:rgb(18, 18, 19);
+            color:#7F0;
+            cursor:pointer;
+        }
+    #menu-saveAndLoad {
+        display:flex;
+        flex-direction:row;
+        flex:1 1 auto;
+        justify-content:space-around;
+        align-items:center;
+    }
+    .saveLoadButton {
+        display:flex;
+        flex:0 1 auto;
+        background:black;
+        color:rgb(207, 132, 11);
+        padding:0.05em 0.3em;
+        box-shadow:inset -0.1em -0.1em 0.2em #DDD;
+        cursor:pointer;
+    }
+    .saveLoadButton:hover {
+        color:rgb(255, 157, 0);
+    }
+
 #menu-stats {
     display:flex;
     flex-direction:row;
@@ -94,7 +133,7 @@ html,body {
     border-radius:0.35em;
 }
 .menu-items-selectedItem {
-    background:yellow;
+    background:rgb(133, 21, 21);
 }
 
 

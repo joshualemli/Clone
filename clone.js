@@ -690,8 +690,8 @@ var openFile = function(event) {
 })()
 
 const CLONE_NAMES = {
-    FIRST: ["Aziz","B'ki","Burdo","Ckally","Chamwin","Chuz","Dwik","Dogen","Elbert","Fosley","Glag","Gorg","Heinril","Ibben","Justice","Kah'les","Klahn","Lasly","Lore","Monson","Nin","Nurbert","Oz","Peter","Queequeg","Ricker","Sandsky","Simril","Trigger","Ured","Vio","Wo-xio","Xor","Yal","Y'po","Zumley"],
-    MIDDLE: ["Ansibel","Bartock","Critin","Dobek","Drask","Eribus","Frip","Gojir","Hauser","Iomi","Joruun","Llamama","Mohtel","Naal","Nash","Ohm","Prestoni","Quinn","Rho","Rhemmy","Sidar","Toonses","Trucker","Ulvinar","Vor","Wexley","Xim","Yatha","Zardak"],
+    FIRST: ["Aziz","B'ki","Burdo","Ckally","Chamwin","Chuz","Daxia","Dwik","Dogen","Elbert","Fosley","Glag","Gorg","Heinril","Ibben","Justice","Kah'les","Klahn","Lasly","Lore","Monson","Nin","Nurbert","Oz","Peter","Queequeg","Ricker","Sandsky","Simril","Trigger","Ured","Vio","Wo-xio","Xor","Yal","Y'po","Zumley"],
+    MIDDLE: ["Ansibel","Bartock","Critin","Dobek","Drask","Eribus","Frip","Gojir","Hauser","Iomi","Joruun","Llamama","Mohtel","Naal","Nash","Ohm","Prestoni","Quinn","Rho","Rhemmy","Sidar","Toonses","Trucker","Ulvinar","Von","Vor","Wexley","Xim","Yatha","Zardak"],
     LAST: ["Arden","Barden","Cardon","Dardon","Egger","Flohh","Gnoering","Hovenek","Immerman","Ipswich","Jazden","Koller","Krizler","Lobo","Mog","Murden","Narlson","Qi-xiao","Rhevkin","Ratjack","Sohbud","Szklyzky","Talax","Tugzak","Ulthu","Varrek","Vrakenthal","Weazlough","Xanaxar","Yalman","Z'kar"],
 }
 
