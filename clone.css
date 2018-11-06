@@ -68,7 +68,10 @@ html,body {
 
 
 
-
+#menu {
+    background:linear-gradient(#333,#555);
+    color:white;
+}
 #menu-stats {
     display:flex;
     flex-direction:row;
@@ -77,6 +80,9 @@ html,body {
 #menu-items {
     display:flex;
     flex-direction:row;
+}
+#menu-openShop {
+    margin:1em;
 }
 .menu-items-item {
     display:flex;

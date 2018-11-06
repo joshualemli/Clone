@@ -49,35 +49,7 @@ const CLONE_Game = (function(){
 
     // STATE DATA
 
-
-    var cloneMap = new Map(), spriteMap = new Map()
-
-    var view = {
-        scale:4,
-        xPos:0,
-        yPos:0,
-        bounds: {},
-        screenSize: {}
-    }
-
-    var game = {
-        steps:0,
-        resources:0,
-        clonesCreated:0,
-        items:{
-            genesisPod: 15,
-            genesisRay: 1,
-            smitingBolt: 1,
-        },
-        artifacts:[],
-        pause:false,
-        worldRadius:10
-    }
-
-
-
-    //DEBUG:
-    window.gg = () => console.log(game)
+    var view, game, cloneMap, spriteMap
 
 
     // MACROS
@@ -209,7 +181,8 @@ const CLONE_Game = (function(){
             context.clearRect(0,0,context.canvas.width,context.canvas.height)
             context.setTransform(view.scale,0,0,-view.scale, context.canvas.width/2 - view.xPos*view.scale, context.canvas.height/2 + view.yPos*view.scale)
             Artist.setBounds()
-            draw(false)
+            cloneMap.forEach( clone => clone.draw() )
+            spriteMap.forEach( sprite => sprite.draw() )
         }
         const resize = () => {
             canvas.width = canvas.parentElement.offsetWidth
@@ -547,6 +520,7 @@ const CLONE_Game = (function(){
         this.x = x
         this.y = y
         this.r = r
+        this.draw()
         spriteMap.set(this.id,this)
     }
     Sprites.cloneHighlight.prototype.draw = function() {
@@ -618,19 +592,6 @@ const CLONE_Game = (function(){
     // ARTIFACTS
 
 
-
-    // DRAW WORLD
-    const draw = (step) => {
-        if (step) {
-            cloneMap.forEach( clone => clone.step() )
-            spriteMap.forEach( sprite => sprite.step() )
-        }
-        else {
-            cloneMap.forEach( clone => clone.draw() )
-            spriteMap.forEach( sprite => sprite.draw() )
-        }
-    }
-
     // GAMEPLAY LOOP    
     const step = () => {
         // clones
@@ -638,7 +599,8 @@ const CLONE_Game = (function(){
             Framerate.register()
             game.steps += 1
             Input.apply()
-            draw(true)
+            cloneMap.forEach( clone => clone.step() )
+            spriteMap.forEach( sprite => sprite.step() )
             if (game.steps % 60 === 0) {
                 Menu.updateStats()
                 Framerate.reset()
@@ -648,6 +610,71 @@ const CLONE_Game = (function(){
         window.requestAnimationFrame(step)
     }
 
+    const save = () => {
+        var saveData = JSON.stringify({
+            cloneMap: Array.from(cloneMap).map( clone => clone[1] ),
+            spriteMap: Array.from(spriteMap).map( sprite => sprite[1] ),
+            view:view,
+            game:game
+        })
+        var anchor = createHtmlElement("a", { href: "data:text/html,"+btoa(saveData), download: "CLONE_saveGame.txt" })
+        document.body.appendChild(anchor)
+        anchor.click()
+        document.body.removeChild(anchor)
+        delete anchor
+    }
+    const load = saveData => {
+/*
+var openFile = function(event) {
+        var input = event.target;
+
+        var reader = new FileReader();
+        reader.onload = function(){
+          var text = reader.result;
+          var node = document.getElementById('output');
+          node.innerText = text;
+          console.log(reader.result.substring(0, 200));
+        };
+        reader.readAsText(input.files[0]);
+      };
+    </script>
+    </head>
+    <body>
+    <input type='file' accept='text/plain' onchange='openFile(event)'><br>
+*/
+
+
+
+
+        saveData = saveData || {}
+        cloneMap = new Map()
+        spriteMap = new Map()
+        view = {
+            scale:4,
+            xPos:0,
+            yPos:0,
+            bounds: {},
+            screenSize: {}
+        }
+        game = {
+            steps:0,
+            resources:0,
+            clonesCreated:0,
+            items:{
+                genesisPod: 15,
+                genesisRay: 1,
+                smitingBolt: 1,
+            },
+            artifacts:[],
+            pause:false,
+            worldRadius:10
+        }
+        new Sprites.worldBoundary()
+        Artist.resize()
+        Menu.refresh()
+        Framerate.reset()
+        step()
+    }
 
     return function() {
         // initialization
@@ -657,18 +684,15 @@ const CLONE_Game = (function(){
         Input.init()
         Menu.init()
         // start gameplay
-        Artist.resize()
-        Menu.refresh()
-        Framerate.reset()
-        step()
+        load()
     }
 
 })()
 
-CLONE_NAMES = {
-    FIRST: ["Aziz","B'ki","Burdo","Chuz","Dogen","Elbert","Fosley","Glag","Gorg","Heinril","Ibben","Justice","Kah'les","Klahn","Lasly","Lore","Monson","Nin","Nurbert","Oz","Peter","Queequeg","Ricker","Simril","Trigger","Xor"],
-    MIDDLE: ["Ansibel","Bartock","Critin","Dollinger","Eribus","Frip","Gojir","Hauser","Iomi","Joruun","Llamama","Mohtel","Nash","Ohm","Prestoni","Quinn","Rho","Rhemmy","Sidar"],
-    LAST: ["Arden","Barden","Cardon","Dardon","Egger","Flohh","Gnoering","Hovenek","Immerman","Ipswich","Jade","Koller","Krizler","Lobo","Mog","Murden","Narlson","Qi-xiao","Rhevkin","Ratjack","Sohbud","Szklyzky","Talax","Ulthu","Xanaxer"],
+const CLONE_NAMES = {
+    FIRST: ["Aziz","B'ki","Burdo","Ckally","Chamwin","Chuz","Dwik","Dogen","Elbert","Fosley","Glag","Gorg","Heinril","Ibben","Justice","Kah'les","Klahn","Lasly","Lore","Monson","Nin","Nurbert","Oz","Peter","Queequeg","Ricker","Sandsky","Simril","Trigger","Ured","Vio","Wo-xio","Xor","Yal","Y'po","Zumley"],
+    MIDDLE: ["Ansibel","Bartock","Critin","Dobek","Drask","Eribus","Frip","Gojir","Hauser","Iomi","Joruun","Llamama","Mohtel","Naal","Nash","Ohm","Prestoni","Quinn","Rho","Rhemmy","Sidar","Toonses","Trucker","Ulvinar","Vor","Wexley","Xim","Yatha","Zardak"],
+    LAST: ["Arden","Barden","Cardon","Dardon","Egger","Flohh","Gnoering","Hovenek","Immerman","Ipswich","Jazden","Koller","Krizler","Lobo","Mog","Murden","Narlson","Qi-xiao","Rhevkin","Ratjack","Sohbud","Szklyzky","Talax","Tugzak","Ulthu","Varrek","Vrakenthal","Weazlough","Xanaxar","Yalman","Z'kar"],
 }
 
 window.onload = CLONE_Game
