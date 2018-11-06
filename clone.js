@@ -31,9 +31,9 @@
     CLONE JavaScript file
     - - - - - - - - - - - - - - - - - - - */
         const
-        CLONE_VERSION = "0.1.3",
+        CLONE_VERSION = "0.2.0",
         CLONE_RELEASE = "dev",
-        CLONE_EDITION = "jailhouse rock";
+        CLONE_EDITION = "masumune calls";
     /* - - - - - - - - - - - - - - - - - - -
 
 
@@ -105,7 +105,7 @@ const CLONE_Game = (function(){
                     break
                 case "recenterView":
                     view.xPos = view.yPos = 0
-                    view.scale = 4
+                    view.scale = 7
                     Artist.redraw()
                     break
                 
@@ -116,10 +116,10 @@ const CLONE_Game = (function(){
             if (state.zoomIn) view.scale *= 1.02
             else if (state.zoomOut) view.scale *= 0.98
             // pan
-            if (state.panUp) view.yPos += 4 / view.scale
-            else if (state.panDown) view.yPos -= 4 / view.scale
-            if (state.panLeft) view.xPos -= 4 / view.scale
-            else if (state.panRight) view.xPos += 4 / view.scale
+            if (state.panUp) view.yPos += 5 / view.scale
+            else if (state.panDown) view.yPos -= 5 / view.scale
+            if (state.panLeft) view.xPos -= 5 / view.scale
+            else if (state.panRight) view.xPos += 5 / view.scale
             // redraw
             if (state.zoomIn||state.zoomOut||state.panUp||state.panDown||state.panLeft||state.panRight) Artist.redraw()
         }
@@ -129,7 +129,7 @@ const CLONE_Game = (function(){
             window.addEventListener("keydown", event => {
                 let action = bindings[event.key]
                 state[action] = true
-                toggle(action)
+                if (!game.pause) toggle(action)
             })
             // clicking on the world
             document.querySelector("#mainCanvas").addEventListener("mousedown", event => {
@@ -391,9 +391,9 @@ const CLONE_Game = (function(){
     function Clone(xHash,yHash,override) {
         override = override || {}
         this.name = [
-            CLONE_NAMES.FIRST[Math.floor(Math.random()*CLONE_NAMES.FIRST.length)],
-            CLONE_NAMES.MIDDLE[Math.floor(Math.random()*CLONE_NAMES.MIDDLE.length)],
-            CLONE_NAMES.LAST[Math.floor(Math.random()*CLONE_NAMES.LAST.length)]
+            this.nameLexicon.FIRST[Math.floor(Math.random()*this.nameLexicon.FIRST.length)],
+            this.nameLexicon.MIDDLE[Math.floor(Math.random()*this.nameLexicon.MIDDLE.length)],
+            this.nameLexicon.LAST[Math.floor(Math.random()*this.nameLexicon.LAST.length)]
         ].join(" ")
         this.age = 0
         this.generation = override.generation || 1
@@ -421,6 +421,7 @@ const CLONE_Game = (function(){
             this.draw()
         }
     }
+    Clone.prototype.nameLexicon = CLONE_NAMES
     Clone.prototype.maxRadius = 0.5
     Clone.prototype.xMultiplier = Clone.prototype.maxRadius * 2
     Clone.prototype.yMultiplier = Math.sin(60/180*Math.PI) * Clone.prototype.xMultiplier
@@ -592,9 +593,8 @@ const CLONE_Game = (function(){
     // ARTIFACTS
 
 
-    // GAMEPLAY LOOP    
-    const step = () => {
-        // clones
+    // GAMEPLAY LOOP
+    const gameplay = () => {
         if (!game.pause) {
             Framerate.register()
             game.steps += 1
@@ -606,8 +606,7 @@ const CLONE_Game = (function(){
                 Framerate.reset()
             }
         }
-        // loop
-        window.requestAnimationFrame(step)
+        window.requestAnimationFrame(gameplay)
     }
 
     const save = () => {
@@ -650,7 +649,7 @@ var openFile = function(event) {
         cloneMap = new Map()
         spriteMap = new Map()
         view = {
-            scale:4,
+            scale:7,
             xPos:0,
             yPos:0,
             bounds: {},
@@ -673,7 +672,7 @@ var openFile = function(event) {
         Artist.resize()
         Menu.refresh()
         Framerate.reset()
-        step()
+        gameplay()
     }
 
     return function() {
@@ -689,11 +688,6 @@ var openFile = function(event) {
 
 })()
 
-const CLONE_NAMES = {
-    FIRST: ["Aziz","B'ki","Burdo","Ckally","Chamwin","Chuz","Daxia","Dwik","Dogen","Elbert","Fosley","Glag","Gorg","Heinril","Ibben","Justice","Kah'les","Klahn","Lasly","Lore","Monson","Nin","Nurbert","Oz","Peter","Queequeg","Ricker","Sandsky","Simril","Trigger","Ured","Vio","Wo-xio","Xor","Yal","Y'po","Zumley"],
-    MIDDLE: ["Ansibel","Bartock","Critin","Dobek","Drask","Eribus","Frip","Gojir","Hauser","Iomi","Joruun","Llamama","Mohtel","Naal","Nash","Ohm","Prestoni","Quinn","Rho","Rhemmy","Sidar","Toonses","Trucker","Ulvinar","Von","Vor","Wexley","Xim","Yatha","Zardak"],
-    LAST: ["Arden","Barden","Cardon","Dardon","Egger","Flohh","Gnoering","Hovenek","Immerman","Ipswich","Jazden","Koller","Krizler","Lobo","Mog","Murden","Narlson","Qi-xiao","Rhevkin","Ratjack","Sohbud","Szklyzky","Talax","Tugzak","Ulthu","Varrek","Vrakenthal","Weazlough","Xanaxar","Yalman","Z'kar"],
-}
 
 window.onload = CLONE_Game
 
