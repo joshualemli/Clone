@@ -101,8 +101,7 @@ const CLONE_Game = (function(){
             switch(action) {
                 case "pause":
                     game.pause = !game.pause
-                    // if (!game.pause) CloneUI.load()
-                    Menu.updateStats()
+                    Menu.update()
                     break
                 case "recenterView":
                     view.xPos = view.yPos = 0
@@ -188,7 +187,7 @@ const CLONE_Game = (function(){
 
 
     var Artist = (function(){
-        var canvas, context
+        var canvas, context, lastResizeTime
         const redraw = () => {
             context.setTransform(1,0,0,1,0,0)
             context.clearRect(0,0,context.canvas.width,context.canvas.height)
@@ -198,6 +197,8 @@ const CLONE_Game = (function(){
             spriteMap.forEach( sprite => sprite.draw() )
         }
         const resize = () => {
+            lastResizeTime = new Date().getTime()
+            console.log("resize - ",lastResizeTime)
             canvas.width = canvas.parentElement.offsetWidth
             canvas.height = canvas.parentElement.offsetHeight
             context.canvas.width = view.screenSize.x = canvas.offsetWidth
@@ -207,7 +208,19 @@ const CLONE_Game = (function(){
         const init = () => {
             canvas = document.querySelector("#mainCanvas")
             context = canvas.getContext("2d")
-            window.addEventListener("resize",resize)
+            canvas.parentElement.addEventListener("resize",event=>console.log(event))
+            setInterval( () => {
+                if (
+                    new Date().getTime() - lastResizeTime > 500 &&
+                    (
+                        context.canvas.width !== canvas.parentElement.offsetWidth ||
+                        context.canvas.height !== canvas.parentElement.offsetHeight
+                    )
+                ) resize()
+            },600)
+            window.addEventListener("resize", () => {
+                if (new Date().getTime() - lastResizeTime > 500) resize()
+            })
         }
         return {
             init : init,
@@ -304,20 +317,18 @@ const CLONE_Game = (function(){
     const Menu = (function(){
         var dom, readoutOpen, toolsOpen
         const updateReadout = () => {
+            dom.readout.countBar.clones.innerHTML = game.extantClones || ""
+            dom.readout.countBar.clones.style.flex = Math.floor(100*game.extantClones/cloneMap.size).toString() + " 0 auto"
+            dom.readout.countBar.mutant.innerHTML = game.extantMutant || ""
+            dom.readout.countBar.mutant.style.flex = Math.floor(100*game.extantMutant/cloneMap.size).toString() + " 0 auto"
+            dom.readout.countBar.foreign.innerHTML = game.extantForeign || ""
+            dom.readout.countBar.foreign.style.flex = Math.floor(100*game.extantForeign/cloneMap.size).toString() + " 0 auto"
+            dom.readout.perished.clones.innerHTML = game.perishedClones
+            dom.readout.perished.mutant.innerHTML = game.perishedMutant
+            dom.readout.perished.foreign.innerHTML = game.perishedForeign
             // var production = 0
             // cloneMap.forEach( clone => production += clone.production )
             // production *= Framerate.fps()
-
-            
-
-            // stats.resources.innerHTML = game.resources.toFixed(3)
-            // stats.production.innerHTML = production.toFixed(3) + "/s"
-            // stats.clones.innerHTML = game.extantClones
-            // stats.perishedClones.innerHTML = game.perishedClones
-            // stats.mutantClones.innerHTML = game.extantMutant
-            // stats.perishedMutant.innerHTML = game.perishedMutant
-            // stats.foreignClones.innerHTML = game.extantForeign
-            // stats.perishedForeign.innerHTML = game.perishedForeign
         }
         const updateTools = () => {
 
@@ -341,29 +352,26 @@ const CLONE_Game = (function(){
                     readout: {
                         container: document.getElementById("menu-readout"),
                         countBar: {
-                            container: document.getElementById("menu-readout-countBar"),
                             clones: document.getElementById("menu-readout-countBar-clones"),
                             mutant: document.getElementById("menu-readout-countBar-mutant"),
                             foreign: document.getElementById("menu-readout-countBar-foreign"),
+                        },
+                        perished: {
+                            clones: document.getElementById("menu-readout-perishedClones"),
+                            mutant: document.getElementById("menu-readout-perishedMutant"),
+                            foreign: document.getElementById("menu-readout-perishedForeign"),
                         }
                     },
                     tools: {
                         container: document.getElementById("menu-tools")
                     }
                 }
-                new Array(
-                    "resources","estimated production/s","lifelongClones","lifelongMutant","lifelongForeign"
-                ).forEach( idPart => {})
-
                 dom.readout.cloneCount = {
                     bar: document.getElementById("menu-readout-countBar"),
                     clones: document.getElementById("menu-readout-countBar-clones"),
                     mutant: document.getElementById("menu-readout-countBar-mutant"),
                     foreign: document.getElementById("menu-readout-countBar-foreign")
                 }
-
-
-
                 // set behavior
                 dom.openShopButton.onclick = Store.open
                 dom.openReadoutButton.onclick = () => {
@@ -449,7 +457,7 @@ const CLONE_Game = (function(){
         this.maxAge = override.maxAge || 50
         this.generation = override.generation || 1
         // type
-        this.mutant = override.mutant ? true : (Math.random() > 1 - this.generation / 1e7/*1e+8*/ ? true : false)
+        this.mutant = override.mutant ? true : (Math.random() > 1 - this.generation / 1e6/*1e+8*/ ? true : false)
         this.foreign = override.foreign || false
         // cloning
         this.fertileAge = override.fertileAge || 20

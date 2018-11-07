@@ -49,6 +49,9 @@ html,body {
     display:flex;
     flex-direction:column;
 }
+.bg-clones {background-color:rgb(23, 100, 23);}
+.bg-foreign {background-color:rgb(107, 23, 23);}
+.bg-mutant {background-color:rgb(77, 30, 88);}
 
 #container {
     flex:0 0 0;
@@ -57,7 +60,7 @@ html,body {
     font-family: 'VT323', monospace;
 }
 #menu {
-    flex:0 1 content;
+    flex:0 1 auto;
 }
 #cloneUI {
     display:flex;
@@ -141,11 +144,36 @@ html,body {
     background:#5A5A5A;
 }
 
+.menu-readout-countArea {
+    text-align:center;
+    color:#FFF;
+    background-color:#333;
+    border:1px solid #999;
+}
 
 #menu-readout-countBar {
     flex:2 1 auto;
 }
+    .menu-readout-countBar-count {
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        border:1px solid #777;
+        font-family:monospace;
+        padding:0.2em 0;
+    }
 
+#menu-readout-perished {
+    flex:0 1 auto;
+    text-align:center;
+    background:#333;
+    color:#FFF;
+}
+.menu-readout-perishedValue {
+    border:1px solid #777;
+    padding:0.2em 0.4em;
+    font-family:monospace;
+}
 
 #store {
     position:fixed;

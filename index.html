@@ -58,15 +58,23 @@
                     <div id="menu-openButton-readout" class="menu-button">Readout</div>
                     <div id="menu-openButton-tools" class="menu-button">Tools</div>
                 </div>
-                <div id="menu-readout" class="flexRow" class="occlude">
-                    <div id="menu-readout-countBar" class="flexRow">
-                        <div id="menu-readout-countBar-clones"></div>
-                        <div id="menu-readout-countBar-foreign"></div>
-                        <div id="menu-readout-countBar-mutant"></div>
+                <div id="menu-readout" class="flexRow occlude">
+                    <div id="menu-readout-countBar" class="flexColumn menu-readout-countArea">
+                        <div>living</div>
+                        <div class="flexRow">
+                            <div id="menu-readout-countBar-clones" class="bg-clones menu-readout-countBar-count">0</div>
+                            <div id="menu-readout-countBar-foreign" class="bg-foreign menu-readout-countBar-count">0</div>
+                            <div id="menu-readout-countBar-mutant" class="bg-mutant menu-readout-countBar-count">0</div>
+                        </div>
                     </div>
-                    <div id="menu-readout-perishedClones"></div>
-                    <div id="menu-readout-perishedForeign"></div>
-                    <div id="menu-readout-perishedMutant"></div>
+                    <div id="menu-readout-perished" class="flexColumn menu-readout-countArea">
+                        <div>perished</div>
+                        <div class="flexRow">
+                            <div id="menu-readout-perishedClones" class="bg-clones menu-readout-perishedValue">0</div>
+                            <div id="menu-readout-perishedForeign" class="bg-foreign menu-readout-perishedValue">0</div>
+                            <div id="menu-readout-perishedMutant" class="bg-mutant menu-readout-perishedValue">0</div>
+                        </div>
+                    </div>
                     <div id="menu-readout-production"></div>
                 </div>
                 <div id="menu-tools" class="flexRow occlude"></div>
