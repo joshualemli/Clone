@@ -187,7 +187,7 @@ const CLONE_Game = (function(){
 
 
     var Artist = (function(){
-        var canvas, context, lastResizeTime
+        var canvas, context, lastResizeTime, windowResizeTimeout
         const redraw = () => {
             context.setTransform(1,0,0,1,0,0)
             context.clearRect(0,0,context.canvas.width,context.canvas.height)
@@ -219,7 +219,8 @@ const CLONE_Game = (function(){
             //     ) resize()
             // },500)
             window.addEventListener("resize", () => {
-                if (new Date().getTime() - lastResizeTime > 500) resize()
+                if (windowResizeTimeout) clearTimeout(windowResizeTimeout)
+                windowResizeTimeout = setTimeout(resize,100)
             })
         }
         return {
