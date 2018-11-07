@@ -161,6 +161,7 @@ html,body {
         border:1px solid #777;
         font-family:monospace;
         padding:0.2em 0;
+        transition:flex-grow 0.7s linear;
     }
 
 #menu-readout-perished {

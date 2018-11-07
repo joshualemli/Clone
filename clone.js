@@ -209,15 +209,15 @@ const CLONE_Game = (function(){
             canvas = document.querySelector("#mainCanvas")
             context = canvas.getContext("2d")
             canvas.parentElement.addEventListener("resize",event=>console.log(event))
-            setInterval( () => {
-                if (
-                    new Date().getTime() - lastResizeTime > 500 &&
-                    (
-                        context.canvas.width !== canvas.parentElement.offsetWidth ||
-                        context.canvas.height !== canvas.parentElement.offsetHeight
-                    )
-                ) resize()
-            },600)
+            // setInterval( () => {
+            //     if (
+            //         new Date().getTime() - lastResizeTime > 500 &&
+            //         (
+            //             context.canvas.width !== canvas.parentElement.offsetWidth ||
+            //             context.canvas.height !== canvas.parentElement.offsetHeight
+            //         )
+            //     ) resize()
+            // },500)
             window.addEventListener("resize", () => {
                 if (new Date().getTime() - lastResizeTime > 500) resize()
             })
@@ -317,12 +317,12 @@ const CLONE_Game = (function(){
     const Menu = (function(){
         var dom, readoutOpen, toolsOpen
         const updateReadout = () => {
-            dom.readout.countBar.clones.innerHTML = game.extantClones || ""
-            dom.readout.countBar.clones.style.flex = Math.floor(100*game.extantClones/cloneMap.size).toString() + " 0 auto"
-            dom.readout.countBar.mutant.innerHTML = game.extantMutant || ""
-            dom.readout.countBar.mutant.style.flex = Math.floor(100*game.extantMutant/cloneMap.size).toString() + " 0 auto"
-            dom.readout.countBar.foreign.innerHTML = game.extantForeign || ""
-            dom.readout.countBar.foreign.style.flex = Math.floor(100*game.extantForeign/cloneMap.size).toString() + " 0 auto"
+            dom.readout.countBar.clones.innerHTML = game.extantClones
+            dom.readout.countBar.clones.style.flex = (game.extantClones>0 ? Math.floor(100*game.extantClones/cloneMap.size).toString() : "1") + " 0 auto"
+            dom.readout.countBar.mutant.innerHTML = game.extantMutant
+            dom.readout.countBar.mutant.style.flex = (game.extantMutant>0 ? Math.floor(100*game.extantMutant/cloneMap.size).toString() : "1") + " 0 auto"
+            dom.readout.countBar.foreign.innerHTML = game.extantForeign
+            dom.readout.countBar.foreign.style.flex = (game.extantForeign>0 ? Math.floor(100*game.extantForeign/cloneMap.size).toString() : "1") + " 0 auto"
             dom.readout.perished.clones.innerHTML = game.perishedClones
             dom.readout.perished.mutant.innerHTML = game.perishedMutant
             dom.readout.perished.foreign.innerHTML = game.perishedForeign
@@ -377,10 +377,12 @@ const CLONE_Game = (function(){
                 dom.openReadoutButton.onclick = () => {
                     dom.openReadoutButton.classList.toggle("menu-openButton-opened")
                     readoutOpen = !dom.readout.container.classList.toggle("occlude")
+                    Artist.resize()
                 }
                 dom.openToolsButton.onclick = () => {
                     dom.openToolsButton.classList.toggle("menu-openButton-opened")
                     toolsOpen = !dom.tools.container.classList.toggle("occlude")
+                    Artist.resize()
                 }
             },
             update : update
@@ -424,7 +426,6 @@ const CLONE_Game = (function(){
                     attribute("Cloning success rate", ((1 - clone.cloningFailureChance) * 100).toFixed(1) + "%")
                     attribute("Lifetime production", clone.lifetimeProduction.toFixed(3))
                 }
-                Artist.resize()
             }
         }
     })()
@@ -684,16 +685,14 @@ const CLONE_Game = (function(){
             game.steps += 1
             if (Math.random() > 0.99) {
                 new Clone(
+                    Math.floor(Math.random()*2*game.worldRadius/Clone.prototype.xMultiplier) - game.worldRadius,
+                    Math.floor(Math.random()*2*game.worldRadius/Clone.prototype.yMultiplier) - game.worldRadius,
+                )
+                new Clone(
                     Math.floor(Math.random()*2*game.worldRadius) - game.worldRadius,
                     Math.floor(Math.random()*2*game.worldRadius) - game.worldRadius,
                     {foreign:true}
                 )
-
-                new Clone(
-                    Math.floor(Math.random()*2*game.worldRadius) - game.worldRadius,
-                    Math.floor(Math.random()*2*game.worldRadius) - game.worldRadius,
-                )
-
             }
             cloneMap.forEach( clone => clone.step() )
             spriteMap.forEach( sprite => sprite.step() )
