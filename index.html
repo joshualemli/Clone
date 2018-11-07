@@ -34,16 +34,57 @@
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>CLONE</title>
+        <!-- Google Fonts VT323 font -->
         <link href="https://fonts.googleapis.com/css?family=VT323" rel="stylesheet">
+        <!-- CLONE application files -->
         <link rel="stylesheet" href="clone.css">
         <script src="cloneNames.js"></script>
         <script src="clone.js"></script>
     </head>
     <body>
+        <!-- GAMEPLAY CONTAINER -->
+        <div id="container" class="flexColumn">
+            <!-- GAMEPLAY MENU -->
+            <div id="menu" class="flexColumn">
+                <div id="menu-persistent" class="flexRow">
+                    <div id="menu-about">?</div>
+                    <input id="menu-callsign" value="Captain Clone">
+                    <div id="menu-saveButton" class="menu-button">SAVE</div>
+                    <div id="menu-loadButton" class="menu-button">LOAD</div>
+                    <div id="menu-openButton-shop" class="menu-button">The Money Pit</div>
+                    <div id="menu-openButton-readout" class="menu-button">Readout</div>
+                    <div id="menu-openButton-tools" class="menu-button">Tools</div>
+                </div>
+                <div id="menu-readout" class="flexRow" class="occlude">
+                    <div id="menu-readout-countBar" class="flexRow">
+                        <div id="menu-readout-countBar-clones"></div>
+                        <div id="menu-readout-countBar-foreign"></div>
+                        <div id="menu-readout-countBar-mutant"></div>
+                    </div>
+                    <div id="menu-readout-perishedClones"></div>
+                    <div id="menu-readout-perishedForeign"></div>
+                    <div id="menu-readout-perishedMutant"></div>
+                    <div id="menu-readout-production"></div>
+                </div>
+                <div id="menu-tools" class="flexRow occlude"></div>
+            </div>
+            <!-- INSPECT CLONE UI -->
+            <div id="cloneUI">
+                <div id="cloneUI-availableAugmentations"></div>
+                <div id="cloneUI-info"></div>
+            </div>
+            <!-- MAIN CANVAS -->
+            <div id="mainCanvasContainer">
+                <canvas id="mainCanvas"></canvas>
+            </div>
+        </div>
+        <!-- STORE DIALOG -->
         <div id="store" class="occlude">
             <div id="store-banner">The Money Pit</div>
-            <div id="store-itemDetails" class="store-section occlude">
+            <div id="store-itemDetails" class="store-section">
                 <div>
                     <div id="store-itemDetails-icon"></div>
                     <div id="store-itemDetails-name"></div>
@@ -59,8 +100,8 @@
                 </div>
             </div>
             <div class="store-section">
-                <div class="store-section-label">Clone "Management" Items</div>
-                <div id="store-section-items" class="store-section-merchandise"></div>
+                <div class="store-section-label">Clone "Management" Tools</div>
+                <div id="store-section-tools" class="store-section-merchandise"></div>
             </div>
             <div class="store-section">
                 <div class="store-section-label">Clone Augmentations</div>
@@ -71,70 +112,12 @@
                 <div id="store-section-artifacts" class="store-section-merchandise"></div>
             </div>
             <div id="store-checkout" class="store-section">
-                <div id="store-checkout-items"></div>
+                <div id="store-checkout-basket"></div>
                 <div id="store-checkout-total"></div>
                 <div id="store-checkout-cancel">nevermind</div>
                 <div id="store-checkout-confirm">PAY YER BLOODMONEY</div>
             </div>
         </div>
-        <div id="container">
-            <div id="menu">
-                <div id="menu-mainOptions">
-                    <div id="menu-callsign"><input id="menu-callsign-input" value="Captain Clone"></div>
-                    <div id="menu-saveAndLoad">
-                        <div id="menu-saveButton" class="menu-button">SAVE</div>
-                        <div id="menu-loadButton" class="menu-button">LOAD</div>
-                    </div>
-                </div>
-                <div id="menu-openShop" class="menu-button">$$$HOP</div>
-                <div id="menu-stats">
-                    <div id="menu-stats-column">
-                        <div class="menu-stats-stat">
-                            Resources
-                            <div id="menu-stats-resources"></div>
-                        </div>
-                        <div class="menu-stats-stat">
-                            Production
-                            <div id="menu-stats-production"></div>
-                        </div>
-                    </div>
-                    <div id="menu-stats-column">
-                        <div class="menu-stats-stat">
-                            Clones
-                            <div id="menu-stats-clones"></div>
-                        </div>
-                        <div class="menu-stats-stat">
-                            lifetime total
-                            <div id="menu-stats-lifetimeClones"></div>
-                        </div>
-                    </div>
-                    <div id="menu-stats-column">
-                        <div class="menu-stats-stat">
-                            Mutant
-                            <div id="menu-stats-mutantClones"></div>
-                        </div>
-                        <div class="menu-stats-stat">
-                            lifetime total
-                            <div id="menu-stats-lifetimeMutantClones"></div>
-                        </div>
-                    </div>
-                    <div id="menu-stats-column">
-                        <div class="menu-stats-stat">
-                            Foreign
-                            <div id="menu-stats-foreignClones"></div>
-                        </div>
-                        <div class="menu-stats-stat">
-                            lifetime total
-                            <div id="menu-stats-lifetimeForeignClones"></div>
-                        </div>
-                    </div>
-                </div>
-                <div id="menu-items"></div>
-            </div>
-            <div id="cloneUI"></div>
-            <div id="mainCanvasContainer">
-                <canvas id="mainCanvas"></canvas>
-            </div>
-        </div>
     </body>
+    <!--fuck the world!-->
 </html>
