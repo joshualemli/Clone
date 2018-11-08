@@ -179,7 +179,14 @@ const CLONE_Game = (function(){
             disable : disable,
             apply : apply,
             setClickMode : n => clickMode = n,
-            setSelectedTool : t => selectedTool = t
+            setSelectedTool : t => {
+                if (selectedTool === t) {
+                    selectedTool = null
+                    return false
+                }
+                selectedTool = t
+                return true
+            }
         }
     })()
 
@@ -355,16 +362,23 @@ const CLONE_Game = (function(){
                     }
                 }
                 for (let key in Tools) {
-                    dom.tools[key] = createHtmlElement("div",{
+                    let toolElement = createHtmlElement("div",{
                         className: "menu-tools-tool flexRow",
-                        innerHTML: `<div>${Tools[key].name}</div><div>0</div>`
+                        innerHTML: `<div class="menu-tools-tool-label">${Tools[key].name}</div><div class="menu-tools-tool-quantity">0</div>`
                     })
-                    dom.tools.container.appendChild(dom.tools[key])
-                    dom.tools[key].onclick = event => {
-                        Input.setSelectedTool(key)
-                        Input.setClickMode(game.tools[key] ? 1 : 0)
+                    dom.tools.container.appendChild(toolElement)
+                    toolElement.onclick = event => {
+                        dom.tools.container.querySelectorAll(".menu-tools-selectedTool").forEach( e => e.classList.remove("menu-tools-selectedTool") )
+                        document.getElementsByClassName("menu-tools-selectedTool")
+                        if (!Input.setSelectedTool(key) || game.tools[key] === 0) {
+                            Input.setClickMode(0)
+                        }
+                        else {
+                            Input.setClickMode(game.tools[key] ? 1 : 0)
+                            toolElement.children[0].classList.add("menu-tools-selectedTool")
+                        }
                     }
-                    dom.tools[key] = dom.tools[key].children[1]
+                    dom.tools[key] = toolElement.children[1]
                 }
                 // set behavior
                 dom.openShopButton.onclick = Store.open
@@ -376,6 +390,7 @@ const CLONE_Game = (function(){
                 dom.openToolsButton.onclick = () => {
                     dom.openToolsButton.classList.toggle("menu-openButton-opened")
                     toolsOpen = !dom.tools.container.classList.toggle("occlude")
+                    Menu.updateTools()
                     Artist.resize()
                 }
             },
@@ -437,9 +452,9 @@ const CLONE_Game = (function(){
                 // always update:
                 dom.info.age.innerHTML = clone.age
                 dom.info.maxAge.innerHTML = clone.maxAge
-                dom.info.production.innerHTML = clone.production
-                dom.info.lifetimeProduction.innerHTML = clone.lifetimeProduction
-                dom.info.cloningRate.innerHTML = 1 - clone.cloningFailureChance
+                dom.info.production.innerHTML = clone.production.toFixed(2)
+                dom.info.lifetimeProduction.innerHTML = clone.lifetimeProduction.toFixed(2)
+                dom.info.cloningRate.innerHTML = ((1 - clone.cloningFailureChance)*100).toFixed(2)+ "%"
                 dom.info.descendants.innerHTML = clone.descendants
             }
         }
@@ -473,11 +488,11 @@ const CLONE_Game = (function(){
         this.maxAge = override.maxAge || 50
         this.generation = override.generation || 1
         // type
-        this.mutant = override.mutant ? true : (Math.random() > 1 - this.generation / 5e7 ? true : false)
+        this.mutant = override.mutant ? true : (Math.random() > 1 - this.generation / 1e8 ? true : false)
         this.foreign = override.foreign || false
         // cloning
         this.fertileAge = override.fertileAge || 20
-        this.cloningFailureChance = override.cloningFailureChance || 0.96
+        this.cloningFailureChance = override.cloningFailureChance || 0.965
         if (this.mutant) this.cloningFailureChance *= 0.98
         // production
         this.production = (this.mutant||this.foreign) ? 0 : (override.production || 0.01)

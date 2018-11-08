@@ -185,7 +185,22 @@ html,body {
     background:linear-gradient(#444,#111);
 }
 .menu-tools-tool {
+    margin:0.5em;
+    border:1px solid #AAA;
     color:#CCC;
+    background-color:#222;
+    padding:0.2em;
+}
+.menu-tools-tool-label {
+    padding:0.1em;
+}
+.menu-tools-tool-quantity {
+    padding:0.2em;
+    font-family:monospace;
+    background:#000;
+}
+.menu-tools-selectedTool {
+    color:#55F;
 }
 
 
