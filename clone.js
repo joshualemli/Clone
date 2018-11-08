@@ -84,7 +84,7 @@ const CLONE_Game = (function(){
 
     var Input = (function(){
         
-        var enabled = false, clickMode = 0
+        var enabled = false, clickMode = 0, selectedTool = null
 
         var bindings = {
             "=" : "zoomIn",
@@ -108,7 +108,6 @@ const CLONE_Game = (function(){
                     view.scale = 7
                     Artist.redraw()
                     break
-                
             }
         }
         const apply = () => {
@@ -142,14 +141,12 @@ const CLONE_Game = (function(){
                     if (cloneMap.has(id)) CloneUI.load(id)
                     break
                 case 1: // Use Tool
-                    let tool = Menu.getSelectedTool()
-                    if (tool && Tools[tool].use(xHash,yHash)) {
-                        game.tools[tool] -= 1
-                        if (game.tools[tool] === 0) {
+                    if (selectedTool && Tools[selectedTool].use(xHash,yHash)) {
+                        game.tools[selectedTool] -= 1
+                        if (game.tools[selectedTool] === 0) {
                             clickMode = 0
-                            Menu.refresh()
                         }
-                        else Tools[tool].menuCountElement.innerHTML = game.tools[tool]
+                        Menu.updateTools()
                     }
                     break
             }
@@ -181,13 +178,14 @@ const CLONE_Game = (function(){
             enable : enable,
             disable : disable,
             apply : apply,
-            setClickMode : n => clickMode = n
+            setClickMode : n => clickMode = n,
+            setSelectedTool : t => selectedTool = t
         }
     })()
 
 
     var Artist = (function(){
-        var canvas, context, lastResizeTime, windowResizeTimeout
+        var canvas, context, windowResizeTimeout
         const redraw = () => {
             context.setTransform(1,0,0,1,0,0)
             context.clearRect(0,0,context.canvas.width,context.canvas.height)
@@ -197,8 +195,6 @@ const CLONE_Game = (function(){
             spriteMap.forEach( sprite => sprite.draw() )
         }
         const resize = () => {
-            lastResizeTime = new Date().getTime()
-            console.log("resize - ",lastResizeTime)
             canvas.width = canvas.parentElement.offsetWidth
             canvas.height = canvas.parentElement.offsetHeight
             context.canvas.width = view.screenSize.x = canvas.offsetWidth
@@ -209,15 +205,6 @@ const CLONE_Game = (function(){
             canvas = document.querySelector("#mainCanvas")
             context = canvas.getContext("2d")
             canvas.parentElement.addEventListener("resize",event=>console.log(event))
-            // setInterval( () => {
-            //     if (
-            //         new Date().getTime() - lastResizeTime > 500 &&
-            //         (
-            //             context.canvas.width !== canvas.parentElement.offsetWidth ||
-            //             context.canvas.height !== canvas.parentElement.offsetHeight
-            //         )
-            //     ) resize()
-            // },500)
             window.addEventListener("resize", () => {
                 if (windowResizeTimeout) clearTimeout(windowResizeTimeout)
                 windowResizeTimeout = setTimeout(resize,100)
@@ -332,7 +319,7 @@ const CLONE_Game = (function(){
             // production *= Framerate.fps()
         }
         const updateTools = () => {
-
+            for (var key in game.tools) dom.tools[key].innerHTML = game.tools[key]
         }
         const update = () => {
             if (toolsOpen) updateTools()
@@ -367,11 +354,17 @@ const CLONE_Game = (function(){
                         container: document.getElementById("menu-tools")
                     }
                 }
-                dom.readout.cloneCount = {
-                    bar: document.getElementById("menu-readout-countBar"),
-                    clones: document.getElementById("menu-readout-countBar-clones"),
-                    mutant: document.getElementById("menu-readout-countBar-mutant"),
-                    foreign: document.getElementById("menu-readout-countBar-foreign")
+                for (let key in Tools) {
+                    dom.tools[key] = createHtmlElement("div",{
+                        className: "menu-tools-tool flexRow",
+                        innerHTML: `<div>${Tools[key].name}</div><div>0</div>`
+                    })
+                    dom.tools.container.appendChild(dom.tools[key])
+                    dom.tools[key].onclick = event => {
+                        Input.setSelectedTool(key)
+                        Input.setClickMode(game.tools[key] ? 1 : 0)
+                    }
+                    dom.tools[key] = dom.tools[key].children[1]
                 }
                 // set behavior
                 dom.openShopButton.onclick = Store.open
@@ -386,47 +379,27 @@ const CLONE_Game = (function(){
                     Artist.resize()
                 }
             },
-            update : update
+            update : update,
+            updateTools : updateTools
         }
     })()
 
 
     const CloneUI = (function() {
-        var uiContainer, statisticsContainer, attributesContainer
-        const resetElements = () => {
-            uiContainer.appendChild(createHtmlElement("div",{
-                id:"cloneUI-attributes", className:"cloneUI-section"
-            }))
-            attributesContainer = uiContainer.children[0]
-            uiContainer.appendChild(createHtmlElement("div",{
-                id:"cloneUI-statistics", className:"cloneUI-section"
-            }))
-            statisticsContainer = uiContainer.children[1]
-        }
-        const attribute = (name,value) => {
-            let e = createHtmlElement("div",{className:"cloneUI-attribute",innerHTML:`<div>${name}</div><div>${value}</div>`})
-            attributesContainer.appendChild(e)
-            return e
-        }
+        var dom, id
         return {
             init : () => {
-                uiContainer = document.querySelector("#cloneUI")
+                dom = document.getElementById("cloneUI")                
             },
-            load : (id) => {
-                while (uiContainer.firstElementChild) uiContainer.removeChild(uiContainer.firstElementChild)
-                if (id) {
-                    game.pause = true
-                    resetElements()
-                    var clone = cloneMap.get(id)
-                    new Sprites.cloneHighlight(clone)
-                    attribute("Name",clone.name)
-                    attribute("Age",clone.age)
-                    attribute("Generation",clone.generation)
-                    attribute("Max age",clone.maxAge)
-                    attribute("Fertile age",clone.fertileAge)
-                    attribute("Cloning success rate", ((1 - clone.cloningFailureChance) * 100).toFixed(1) + "%")
-                    attribute("Lifetime production", clone.lifetimeProduction.toFixed(3))
+            update : (_id) => {
+                if (_id) id = _id
+                if (!id) return null
+                let clone = cloneMap.get(id)
+                if (!clone) {
+                    id = null
+                    return null
                 }
+                
             }
         }
     })()
@@ -459,27 +432,27 @@ const CLONE_Game = (function(){
         this.maxAge = override.maxAge || 50
         this.generation = override.generation || 1
         // type
-        this.mutant = override.mutant ? true : (Math.random() > 1 - this.generation / 1e6/*1e+8*/ ? true : false)
+        this.mutant = override.mutant ? true : (Math.random() > 1 - this.generation / 5e7 ? true : false)
         this.foreign = override.foreign || false
         // cloning
         this.fertileAge = override.fertileAge || 20
         this.cloningFailureChance = override.cloningFailureChance || 0.96
-        if (this.mutant) this.cloningFailureChance *= 1//0.98
+        if (this.mutant) this.cloningFailureChance *= 0.98
         // production
         this.production = (this.mutant||this.foreign) ? 0 : (override.production || 0.01)
         this.lifetimeProduction = 0
         this.radius = this.maxRadius*0.7
         this._drawn = false
         if (this.mutant) {
-            this._color = `rgb(${Math.floor(Math.random()*100+50)},${Math.floor(Math.random()*20)},${Math.floor(Math.random()*100+100)})`
+            this._color = `rgb(${Math.floor(Math.random()*70+85)},${Math.floor(Math.random()*20)},${Math.floor(Math.random()*70+85)})`
             game.extantMutant += 1
         }
         else if (this.foreign) {
-            this._color = `rgb(${Math.floor(Math.random()*125+125)},${Math.floor(Math.random()*20)},${Math.floor(Math.random()*20)})`
+            this._color = `rgb(${Math.floor(Math.random()*90+100)},${Math.floor(Math.random()*20)},${Math.floor(Math.random()*20)})`
             game.extantForeign += 1
         }
         else {
-            this._color = `rgb(${Math.floor(Math.random()*20)},${Math.floor(Math.random()*125 + 100)},${Math.floor(Math.random()*80)})`
+            this._color = `rgb(${Math.floor(Math.random()*20)},${Math.floor(Math.random()*100 + 110)},${Math.floor(Math.random()*80)})`
             game.extantClones += 1
             game.perishedClones += 1
         }
@@ -559,7 +532,6 @@ const CLONE_Game = (function(){
         else {
             game.extantClones -= 1
             game.perishedClones += 1
-
         }
         cloneMap.delete(this.id)
     }
@@ -649,6 +621,27 @@ const CLONE_Game = (function(){
             name: "Smiting Bolt",
             description: "Painlessly (yes, that should sell these matter-dissolving hell engi... am I saying this out loud?) eliminates a single clone."
         },
+        deionizer: {
+            use: (xHash,yHash) => {
+                py = yHash * Clone.prototype.yMultiplier
+                px = xHash * Clone.prototype.xMultiplier + (yHash%2!==0?Clone.prototype.xStagger:0)
+                var x,y,dx,dy,yOdd,target
+                for (var i = 0; i < 50; i++) {
+                    dx = Math.random()*8 - 4
+                    dy = Math.random()*8 - 4
+                    if (Math.sqrt(dx*dx+dy*dy) > 4) continue
+                    x = px+dx
+                    y = py+dy
+                    yHash = Math.round(y / Clone.prototype.yMultiplier)
+                    yOdd = yHash % 2 !== 0 ? Clone.prototype.xStagger : 0
+                    xHash = Math.round((x - yOdd) / Clone.prototype.xMultiplier)
+                    target = cloneMap.get(`${xHash.toString()}_${yHash.toString()}`)
+                    if (target) target.perish()
+                }
+                return true
+            },
+            name: "Deionizer"
+        }
     }
 
     // AUGMENTATIONS
@@ -690,8 +683,8 @@ const CLONE_Game = (function(){
                     Math.floor(Math.random()*2*game.worldRadius/Clone.prototype.yMultiplier) - game.worldRadius,
                 )
                 new Clone(
-                    Math.floor(Math.random()*2*game.worldRadius) - game.worldRadius,
-                    Math.floor(Math.random()*2*game.worldRadius) - game.worldRadius,
+                    Math.floor(Math.random()*2*game.worldRadius/Clone.prototype.xMultiplier) - game.worldRadius,
+                    Math.floor(Math.random()*2*game.worldRadius/Clone.prototype.yMultiplier) - game.worldRadius,
                     {foreign:true}
                 )
             }
@@ -739,15 +732,18 @@ var openFile = function(event) {
 */
         saveData = saveData || {}
         cloneMap = new Map()
+        if (saveData.cloneMap) saveData.cloneMap.forEach( cloneInfo => {
+            new Clone(cloneInfo.xHash,cloneInfo.yHash,cloneInfo)
+        })
         spriteMap = new Map()
-        view = {
+        view = saveData.view || {
             scale:7,
             xPos:0,
             yPos:0,
             bounds: {},
             screenSize: {}
         }
-        game = {
+        game = saveData.game || {
             steps:0,
             resources:0,
             extantClones:0,
@@ -757,13 +753,14 @@ var openFile = function(event) {
             perishedMutant:0,
             perishedForeign:0,
             tools:{
-                genesisPod: 15,
-                genesisRay: 1,
-                smitingBolt: 1,
+                genesisPod: 100,
+                genesisRay: 100,
+                smitingBolt: 100,
+                deionizer: 100,
             },
             artifacts:[],
             pause:false,
-            worldRadius:10
+            worldRadius:20
         }
         new Sprites.worldBoundary()
         Artist.resize()

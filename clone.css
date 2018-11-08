@@ -51,7 +51,7 @@ html,body {
 }
 .bg-clones {background-color:rgb(23, 100, 23);}
 .bg-foreign {background-color:rgb(107, 23, 23);}
-.bg-mutant {background-color:rgb(77, 30, 88);}
+.bg-mutant {background-color:rgb(81, 10, 90);}
 
 #container {
     flex:0 0 0;
@@ -80,6 +80,7 @@ html,body {
 
 #menu-persistent {
     flex-wrap:wrap;
+    background:linear-gradient(#222,#555);
 }
 
 #menu-about {
@@ -105,7 +106,7 @@ html,body {
     text-align:center;
     font-family: 'VT323', monospace;
     font-size:calc(1rem + 0.5vw);
-    background-color:rgb(24, 22, 22);
+    background-color:transparent;
     color:#7F0;
     cursor:pointer;
 }
@@ -117,7 +118,7 @@ html,body {
     border:1px solid #555;
     color:rgb(185, 125, 27);
     font-size:calc(1rem + 0.5vw);
-    background-color:#222;
+    background-color:transparent;
     cursor:pointer;
     transition:color 0.12s,background-color 0.12s,border-color 0.12s;
 }
@@ -133,7 +134,7 @@ html,body {
 #menu-saveButton:hover {color:#FFF;}
 #menu-loadButton {color:#CCC;}
 #menu-loadButton:hover {color:#FFF;}
-#menu-openButton-shop {color:rgb(57, 84, 170);}
+#menu-openButton-shop {color:rgb(39, 71, 175);}
 #menu-openButton-shop:hover {color:rgb(0, 60, 255);}
 #menu-openButton-tools.menu-openButton-opened, #menu-openButton-readout.menu-openButton-opened {
     color:rgb(153, 206, 8);
@@ -144,6 +145,10 @@ html,body {
     background:#5A5A5A;
 }
 
+#menu-readout {
+    background-color:#AAA;
+    padding:0.3em;
+}
 .menu-readout-countArea {
     text-align:center;
     color:#FFF;
@@ -175,6 +180,15 @@ html,body {
     padding:0.2em 0.4em;
     font-family:monospace;
 }
+
+#menu-tools {
+    background:linear-gradient(#444,#111);
+}
+.menu-tools-tool {
+    color:#CCC;
+}
+
+
 
 #store {
     position:fixed;
