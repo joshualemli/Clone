@@ -138,7 +138,7 @@ const CLONE_Game = (function(){
             switch (clickMode) {
                 case 0: // Inspect
                     let id = `${xHash}_${yHash}`
-                    if (cloneMap.has(id)) CloneUI.load(id)
+                    if (cloneMap.has(id)) CloneUI.update(id)
                     break
                 case 1: // Use Tool
                     if (selectedTool && Tools[selectedTool].use(xHash,yHash)) {
@@ -387,19 +387,60 @@ const CLONE_Game = (function(){
 
     const CloneUI = (function() {
         var dom, id
+        const show = () => {
+            dom.container.classList.remove("occlude")
+            Artist.resize()
+        }
+        const hide = () => {
+            dom.container.classList.add("occlude")
+            Artist.resize()
+        }
         return {
             init : () => {
-                dom = document.getElementById("cloneUI")                
+                dom = {
+                    container: document.getElementById("cloneUI"),
+                    augmentations: {
+                        available: document.getElementById("cloneUI-augmentations-available"),
+                        pending: document.getElementById("cloneUI-augmentations-pending"),
+                        applyButton: document.getElementById("cloneUI-augmentations-applyButton"),
+                        applied: document.getElementById("cloneUI-augmentations-applied")
+                    },
+                    info: {
+                        name: document.getElementById("cloneUI-info-name"),
+                        age: document.getElementById("cloneUI-info-age"),
+                        maxAge: document.getElementById("cloneUI-info-maxAge"),
+                        generation: document.getElementById("cloneUI-info-generation"),
+                        production :document.getElementById("cloneUI-info-production"),
+                        lifetimeProduction: document.getElementById("cloneUI-info-lifetimeProduction"),
+                        cloningRate: document.getElementById("cloneUI-info-cloningRate"),
+                        descendants: document.getElementById("cloneUI-info-descendants")
+                    }
+                }
             },
             update : (_id) => {
-                if (_id) id = _id
-                if (!id) return null
+                if (_id) {
+                    id = _id
+                    show()
+                }
+                else if (!id) return null
                 let clone = cloneMap.get(id)
                 if (!clone) {
                     id = null
+                    hide()
                     return null
                 }
-                
+                // update once:
+                if (_id) {
+                    dom.info.name.innerHTML = clone.name
+                    dom.info.generation.innerHTML = clone.generation
+                }
+                // always update:
+                dom.info.age.innerHTML = clone.age
+                dom.info.maxAge.innerHTML = clone.maxAge
+                dom.info.production.innerHTML = clone.production
+                dom.info.lifetimeProduction.innerHTML = clone.lifetimeProduction
+                dom.info.cloningRate.innerHTML = 1 - clone.cloningFailureChance
+                dom.info.descendants.innerHTML = clone.descendants
             }
         }
     })()
@@ -441,6 +482,7 @@ const CLONE_Game = (function(){
         // production
         this.production = (this.mutant||this.foreign) ? 0 : (override.production || 0.01)
         this.lifetimeProduction = 0
+        this.descendants = 0
         this.radius = this.maxRadius*0.7
         this._drawn = false
         if (this.mutant) {
@@ -498,6 +540,7 @@ const CLONE_Game = (function(){
             mutant: this.mutant,
             foreign: this.foreign
         })
+        this.descendants += 1
     }
     Clone.prototype.draw = function(){
         if (
@@ -692,6 +735,7 @@ const CLONE_Game = (function(){
             spriteMap.forEach( sprite => sprite.step() )
             if (game.steps % 30 === 0) {
                 Menu.update()
+                CloneUI.update()
                 Framerate.reset()
             } 
         }
