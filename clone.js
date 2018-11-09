@@ -306,14 +306,14 @@ const CLONE_Game = (function(){
                 selectedItemGameCategory = gameSection
                 selectedItemGameId = key
             }
-            selectedQuantity = 0
+            selectedQuantity = 1
             dom.itemDetails.name.innerHTML = selectedItem.name || ""
             dom.itemDetails.description.innerHTML = selectedItem.description || ""
             let costString = selectedItem.cost ? ("$" + selectedItem.cost.toFixed(2)) : ""
             dom.itemDetails.cost.innerHTML = costString
             dom.itemDetails.costMultiplier.innerHTML = costString ? (" x " + costString + " = ") : ""
             dom.itemDetails.quantity.innerHTML = selectedItem.cost ? selectedQuantity : ""
-            dom.itemDetails.subtotal.innerHTML = selectedItem.cost ? ("$"+((selectedItem.cost || 0) * selectedQuantity).toString()) : ""
+            dom.itemDetails.subtotal.innerHTML = selectedItem.cost ? ("$"+((selectedItem.cost || 0) * selectedQuantity).toFixed(2)) : ""
         }
         const init = () => {
             // html pointers
@@ -488,6 +488,38 @@ const CLONE_Game = (function(){
             dom.container.classList.add("occlude")
             Artist.resize()
         }
+        const applyAugmentation = () => {}
+        const _augElem = (key,quantity) => {
+            let augElem = createHtmlElement("div",{
+                className: "cloneUI-augmentations-item flexRow",
+                innerHTML: `<div class="cloneUI-augmentations-item-name">${Augmentations[key].name}</div><div class="cloneUI-augmentations-item-count">${quantity}</div>`
+            })
+            augElem.dataset.key = key
+            return augElem
+        }
+        const updateAugmentations = () => {
+            while (dom.augmentations.available.firstElementChild) dom.augmentations.available.removeChild(dom.augmentations.available.firstElementChild)
+            for (let key in game.unusedAugmentations) {
+                let elem = _augElem(key,game.unusedAugmentations[key])
+                dom.augmentations.available.appendChild(elem)
+                elem.onclick = event => {
+                    if (!game.unusedAugmentations[key]) throw new Error("should not happen")
+                    if (parseInt(elem.children[1].innerHTML) === 0) return null
+                    elem.children[1].innerHTML = parseInt(elem.children[1].innerHTML) - 1
+                    let extantPending = Array.from(dom.augmentations.pending.children).find(e=>e.dataset.key==key)
+                    let pending = extantPending || _augElem(key,1)
+                    if (!extantPending) {
+                        dom.augmentations.pending.appendChild(pending)
+                        pending.onclick = () => {
+                            elem.children[1].innerHTML = parseInt(elem.children[1].innerHTML) + 1
+                            pending.children[1].innerHTML = parseInt(pending.children[1].innerHTML) - 1
+                            if (parseInt(pending.children[1].innerHTML) === 0) dom.augmentations.pending.removeChild(pending)
+                        }
+                    }
+                    else pending.children[1].innerHTML = parseInt(pending.children[1].innerHTML) + 1
+                }
+            }
+        }
         return {
             init : () => {
                 dom = {
@@ -499,6 +531,7 @@ const CLONE_Game = (function(){
                         applied: document.getElementById("cloneUI-augmentations-applied")
                     },
                     info: {
+                        container: document.getElementById("cloneUI-info"),
                         name: document.getElementById("cloneUI-info-name"),
                         age: document.getElementById("cloneUI-info-age"),
                         maxAge: document.getElementById("cloneUI-info-maxAge"),
@@ -513,28 +546,27 @@ const CLONE_Game = (function(){
             update : (setId) => {
                 var clone = null
                 if (setId) {
-
-                }
-                else {}
-
-                /*
-                if (setId) {
+                    clone = cloneMap.get(setId)
                     id = setId
+                    uid = clone.uid
+                    new Array("clones","mutant","foreign").forEach( classPart => dom.container.classList.remove(`border-${classPart}`) )
+                    // update once:
+                    if (clone.mutant) dom.container.classList.add("border-mutant")
+                    else if (clone.foreign) dom.container.classList.add("border-foreign")
+                    else dom.container.classList.add("border-clones")
+                    dom.info.name.innerHTML = clone.name
+                    dom.info.generation.innerHTML = clone.generation
+                    updateAugmentations()
                     show()
                 }
                 else if (!id) return null
-                let clone = cloneMap.get(id)
-                if (!clone || ) {
-                    id = null
-                    hide()
-                    return null
-                }
-                */
-                // update once:
-                if (setId) {
-
-                    dom.info.name.innerHTML = clone.name
-                    dom.info.generation.innerHTML = clone.generation
+                else {
+                    clone = cloneMap.get(id)
+                    if (!clone || clone.uid !== uid) {
+                        hide()
+                        id = uid = null
+                        return null
+                    }
                 }
                 // always update:
                 dom.info.age.innerHTML = clone.age
@@ -948,7 +980,9 @@ var openFile = function(event) {
                 smitingBolt: 100,
                 deionizer: 100,
             },
-            unusedAugmentations:{},
+            unusedAugmentations:{
+                immortality:10
+            },
             artifacts:[],
             pause:false,
             worldRadius:20

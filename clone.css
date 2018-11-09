@@ -53,21 +53,27 @@ html,body {
     flex-wrap:wrap;
 }
 
-.bg-clones {background-color:rgb(23, 100, 23);}
-.bg-foreign {background-color:rgb(107, 23, 23);}
-.bg-mutant {background-color:rgb(81, 10, 90);}
+.bg-clones  { background-color:rgb(28, 124, 19); }
+.bg-foreign { background-color:rgb(148, 33, 33); }
+.bg-mutant  { background-color:rgb(102, 35, 110); }
+.border-clones  { border:2px solid rgb(49, 160, 39); }
+.border-foreign { border:2px solid rgb(158, 25, 25); }
+.border-mutant  { border:2px solid rgb(129, 25, 143); }
 
 #container {
     flex:0 0 0;
     width:100vw;
     height:100vh;
     font-family: 'VT323', monospace;
+    background:#333;
 }
 #menu {
     flex:0 1 auto;
 }
 #cloneUI {
-    display:flex;
+    background:linear-gradient(#222,#070707);
+    border-width:4px;
+    margin:1em;
 }
 #mainCanvasContainer {
     display:flex;
@@ -92,9 +98,9 @@ html,body {
     align-items:center;
     padding:0 0.5em;
     border:1px solid #777;
-    font-size:calc(1rem + 0.5vw);
+    font-size:calc(1.2rem + 0.8vw);
     background-color:#000;
-    color:#AA0;
+    color:#BB0;
     cursor:pointer;
     transition:color 0.3s, font-size 0.5s;
 }
@@ -108,7 +114,7 @@ html,body {
     border:1px solid #999;
     text-align:center;
     font-family: 'VT323', monospace;
-    font-size:calc(1rem + 0.5vw);
+    font-size:calc(1.2rem + 0.6vw);
     background-color:transparent;
     color:#7F0;
     cursor:pointer;
@@ -120,7 +126,7 @@ html,body {
     padding:0.05em 0.3em;
     border:1px solid #555;
     color:rgb(185, 125, 27);
-    font-size:calc(1rem + 0.5vw);
+    font-size:calc(1.3rem + 0.7vw);
     background-color:transparent;
     cursor:pointer;
     transition:color 0.12s,background-color 0.12s,border-color 0.12s;
@@ -149,18 +155,17 @@ html,body {
 }
 
 #menu-readout {
-    background-color:#AAA;
+    background-color:#333;
     padding:0.3em;
 }
 .menu-readout-countArea {
     text-align:center;
     color:#FFF;
     background-color:#333;
-    border:1px solid #999;
 }
 
 #menu-readout-countBar {
-    flex:2 1 auto;
+    flex:10 1 auto;
 }
     .menu-readout-countBar-count {
         display:flex;
@@ -173,12 +178,16 @@ html,body {
     }
 
 #menu-readout-perished {
-    flex:0 1 auto;
-    text-align:center;
+    padding-left:2vw;
+    flex:1 1 auto;
     background:#333;
     color:#FFF;
 }
 .menu-readout-perishedValue {
+    display:flex;
+    flex:1 1 auto;
+    align-items:center;
+    justify-content:center;
     border:1px solid #777;
     padding:0.2em 0.4em;
     font-family:monospace;
@@ -208,11 +217,66 @@ html,body {
 
 
 
-.cloneUI-info-item {
-    margin:1em;
-    background:#0002;
-}
 
+#cloneUI-augmentations {
+}
+.cloneUI-augmentations-section {
+    margin:0.25em;
+}
+#cloneUI-augmentations-available {
+    background-color:#111;
+}
+#cloneUI-augmentations-pending {
+    background-color:#444;
+}
+#cloneUI-augmentations-applyButton {
+    color:#D33;
+    font-size:2em;
+    border:2px solid #A77;
+    border-radius:0.5rem;
+    padding:0 0.2em;
+}
+#cloneUI-augmentations-applyButton:hover {
+    color:#F00;
+    border-color:#C33;
+}
+#cloneUI-augmentations-applied {}
+.cloneUI-augmentations-section-label {
+    color:#C7C;
+}
+.cloneUI-augmentations-item {
+    background:#000;
+    border:1px solid #777;
+    color:#FFF;
+}
+.cloneUI-augmentations-item-name {
+    display:flex;
+    flex:2 1 auto;
+    padding:0 0.2em;
+}
+.cloneUI-augmentations-item-count {
+    display:flex;
+    flex:1 1 auto;
+    padding:0 0.2em;
+}
+#cloneUI-info {
+    flex:1 1 auto;
+}
+.cloneUI-info-item {
+    display:flex;
+    flex-direction:column;
+    flex:1 1 auto;
+    margin:0.2em 0.4em;
+    padding:0.1em 0.4em;
+    border-radius:0.4em;
+    font-size:1.2rem;
+    background:#FFFFFF15;
+    color:#FFF;
+}
+.cloneUI-info-item-label {
+    font-size:0.8em;
+    color:#AAA;
+}
 
 
 
@@ -238,11 +302,28 @@ html,body {
     display:flex;
     align-self:center;
     font-size:calc(1.5em + 3vmin);
-    font-style:ita1lic;
-    color:#CCC;
-    text-shadow:0.02em -0.05em 0.2em #F70;
+    font-style:italic;
+    color:#EEE;
+    text-shadow:0.02em -0.05em 0.2em rgb(135, 92, 255);
     text-decoration:underline;
 }
+#store-exit {
+    display:flex;
+    margin:1.5rem 0;
+    padding:0.5em 2em;
+    align-self:center;
+    font-size:calc(1.1em + 0.4vmin);
+    background:linear-gradient(#222,#444);
+    color:rgb(245, 187, 187);
+    border-radius:0.1rem;
+    justify-content:center;
+    cursor:pointer;
+}
+#store-exit:hover {
+    box-shadow:none;
+    color:rgb(255, 81, 81);
+}
+
 #store-yourResources {
     margin:0.5rem 0;
     font-size:1.5rem;
@@ -337,9 +418,8 @@ html,body {
     border-color:#FFF;
 }
 
+
 .store-section-merchandise {
-    display:flex;
-    flex-direction:row;
     align-items: flex-start;
     position:relative;
 }
