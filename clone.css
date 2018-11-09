@@ -214,6 +214,7 @@ html,body {
     border:1em solid #000;
     background:linear-gradient(325deg,rgba(55,12,0,0.95),rgba(0,12,55,0.95));
     font-family: 'VT323', monospace;
+    color:#AAA;
 }
 #store-banner {
     font-stretch:200%;
@@ -231,11 +232,16 @@ html,body {
     font-size:1.2em;
 }
 
+#store-itemDetails {
+}
 .store-itemDetails-quantityArrow {
     text-align:center;
     padding:0.2em;
     margin:0.2em;
-    color:#6F2;
+    color:rgb(177, 202, 96);
+}
+.store-itemDetails-quantityArrow:active {
+    color:rgb(81, 209, 26);
 }
 
 .store-section-merchandise {

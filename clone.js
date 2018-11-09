@@ -261,44 +261,91 @@ const CLONE_Game = (function(){
 
     
     const Store = (function(){
-        var details, container
+        var dom, resumeGameplayOnClose, basket, selectedItem
         const open = () => {
-            showing = true
-            game.pause = true
-            container.classList.remove("occlude")
+            if (!game.pause) resumeGameplayOnClose = game.pause = true
+            else resumeGameplayOnClose = false
+            dom.container.classList.remove("occlude")
             Input.disable()
+            basket = {}
         }
         const cancel = () => {
-            showing = false
             Input.enable()
+            dom.container.classList.add("occlude")
+            if (resumeGameplayOnClose) game.pause = false
         }
         const confirm = () => {
-            showing = false
             Input.enable()
+            dom.container.classList.add("occlude")
+            if (resumeGameplayOnClose) game.pause = false
+        }
+        const _setDetails = (_Section,key) => {
+            selectedItem = key
+            dom.itemDetails.name.innerHTML = _Section[key].name
+            dom.itemDetails.description.innerHTML = _Section[key].description
+            dom.itemDetails.cost.innerHTML = _Section[key].cost
+            dom.itemDetails.quantity.innerHTML = basket[key] || 0
+            dom.itemDetails.subtotal = (basket[key] || 0) * _Section[key].cost
         }
         const init = () => {
-            showing = false
-            container = document.getElementById("store")
-            details = {
-                container: document.getElementById("store-itemDetails"),
-                toolsContainer: document.getElementById("store-section-tools"),
-                augmentationsContainer: document.getElementById("store-section-augmentations"),
-                artifactsContainer: document.getElementById("store-section-artifacts"),
+            // html pointers
+            dom = {
+                container: document.getElementById("store"),
+                itemDetails: {
+                    icon: document.getElementById("store-itemDetails-icon"),
+                    name: document.getElementById("store-itemDetails-name"),
+                    description: document.getElementById("store-itemDetails-description"),
+                    minusTen: document.getElementById("store-itemDetails-minusTen"),
+                    minusOne: document.getElementById("store-itemDetails-minusOne"),
+                    plusTen: document.getElementById("store-itemDetails-plusTen"),
+                    plusOne: document.getElementById("store-itemDetails-plusOne"),
+                    cost: document.getElementById("store-itemDetails-cost"),
+                    quantity: document.getElementById("store-itemDetails-quantity"),
+                    subtotal: document.getElementById("store-itemDetails-subtotal")
+                },
+                tools: {
+                    container: document.getElementById("store-section-tools"),
+                },
+                augmentations: {
+                    container: document.getElementById("store-section-augmentations"),
+                },
+                artifacts: {
+                    container: document.getElementById("store-section-artifacts"),
+                },
+                checkout: {
+                    basket: document.getElementById("store-checkout-basket"),
+                    total: document.getElementById("store-checkout-total"),
+                    cancel: document.getElementById("store-checkout-cancel"),
+                    confirm: document.getElementById("store-checkout-confirm")
+                }
             }
-            new Array("icon","name","details","quanity","cost").forEach( idPart => details[idPart] = document.getElementById(`store-itemDetails-${idPart}`) )
-            document.getElementById("store-itemDetails-minusTen").onclick = event => {}
-            document.querySelectorAll(".store-merchandiseItem").forEach( e => e.onclick = event => {
-                let type = event.target.dataset.type
-                let key = event.target.dataset.key
-            })
-            var key,elem
-            for (key in Tools) {
-                elem = createHtmlElement("div",{className:"store-merchandiseItem"})
-                elem.dataset.key = key
-                elem.dataset.type = "tool"
-                elem.appendChild(createHtmlElement("div",{className:"store-merchandiseItem-icon"}))
-                elem.appendChild(createHtmlElement("div",{className:"store-merchandiseItem-name",innerHTML:Tools[key].name}))
+            for (let key in Tools) {
+                dom.tools[key] = createHtmlElement("div",{
+                    innerHTML: `<div>${Tools[key].name}</div>`
+                })
+                dom.tools.container.appendChild(dom.tools[key])
+                dom.tools[key].onclick = event => _setDetails(Tools,key)
             }
+            for (let key in Augmentations) {
+                if (key[0] === "_") continue // ignore "private" functions
+                dom.augmentations[key] = createHtmlElement("div",{
+                    innerHTML: `<div>${Augmentations[key].name}</div>`
+                })
+                dom.augmentations.container.appendChild(dom.augmentations[key])
+                dom.augmentations[key].onclick = event => _setDetails(Augmentations,key)
+            }
+            // for (key in Artifacts) {}
+            // behavior
+            let adjustQuantity = (key,quantity) => {
+                if (!basket[key]) basket[key] = 0
+                basket[key] += quantity
+                if (basket[key] < 0) basket[key] = 0
+            }
+            dom.itemDetails.plusOne.onclick = event => adjustQuantity(selectedItem,1)
+            dom.itemDetails.plusTen.onclick = event => adjustQuantity(selectedItem,10)
+            dom.itemDetails.minusOne.onclick = event => adjustQuantity(selectedItem,-10)
+            dom.itemDetails.minusTen.onclick = event => adjustQuantity(selectedItem,-1)
+            dom.checkout.cancel.onclick = cancel
         }
         return {
             init : init,
@@ -490,6 +537,8 @@ const CLONE_Game = (function(){
         // type
         this.mutant = override.mutant ? true : (Math.random() > 1 - this.generation / 1e8 ? true : false)
         this.foreign = override.foreign || false
+        // augmentations
+        this.augmentations = {}
         // cloning
         this.fertileAge = override.fertileAge || 20
         this.cloningFailureChance = override.cloningFailureChance || 0.965
@@ -646,7 +695,8 @@ const CLONE_Game = (function(){
                 return false
             },
             name: "Genesis Pod",
-            description: "Used to spit out... I mean gently bring a new clone into existence.",
+            description: "Used to spit out... we mean gently bring a new clone into existence.",
+            cost: 0.9,
             icon: "1_20"
         },
         genesisRay: {
@@ -665,6 +715,7 @@ const CLONE_Game = (function(){
             },
             name: "Genesis Ray",
             description: "By jetisoning organic tissue suspended in a high-energy control ray, an entire group of unfortunate clones can be grotesquely reanimated... I mean beautifully, er, coalesced back to their, uh, intended forms.",
+            cost: 7.2,
             icon: "1_20"
         },
         smitingBolt: {
@@ -677,7 +728,8 @@ const CLONE_Game = (function(){
                 return false
             },
             name: "Smiting Bolt",
-            description: "Painlessly (yes, that should sell these matter-dissolving hell engi... am I saying this out loud?) eliminates a single clone."
+            description: "Painlessly (yes, that sounds good, that should sell these matter-dissolving hell engi... is this thing on?) eliminates a single clone.",
+            cost: 3.35
         },
         deionizer: {
             use: (xHash,yHash) => {
@@ -698,17 +750,55 @@ const CLONE_Game = (function(){
                 }
                 return true
             },
-            name: "Deionizer"
+            name: "Deionizer",
+            description: "Renders all clones' essential biochemical processes, um... inert. Works over a sizeable radius.",
+            cost: 17.99
         }
     }
 
     // AUGMENTATIONS
     var Augmentations = {
-        longevityX2: {
-            use: null,
-            name: "Longevity (x2)",
-            description: "Prolong... I mean, uh, extend the happy, very happy, life of a clone!"
-        }
+        _increment: (clone,key) => {
+            if (!clone.augmentations[key]) clone.augmentations[key] = 1
+            else clone.augmentations[key] += 1
+        },
+        longevityX3: {
+            use: clone => {
+                Augmentations._increment(clone,"longevityX3")
+                clone.maxAge *= 3
+            },
+            name: "Longevity (x3)",
+            description: "Prolong -- wait, sorry, our mistake -- <i>extend</i> the happy, very happy, life of a clone!",
+            cost: 0.95
+        },
+        longevityX25: {
+            use: clone => {
+                Augmentations._increment(clone,"longevityX25")
+                clone.maxAge *= 25
+            },
+            name: "Longevity (x25)",
+            description: "This is really a totally natural process, trust us.  Clones love it.  Don't ask them about it though, they would probably just want the next level up in our product line and seriously, who can afford that?  Oh but if you could, oh man.  That's the stuff.",
+            cost: 22.45
+        },
+        longevityX500: {
+            use: clone => {
+                Augmentations._increment(clone,"longevityX100")
+                clone.maxAge *= 500
+            },
+            name: "Longevity (x100)",
+            description: `While this modification is, well, "difficult" on the clone, the potential rewards are fantastic.  For you.`,
+            cost: 211
+        },
+        immortality: {
+            use: clone => {
+                Augmentations._increment(clone,"immortality")
+                clone.maxAge = Infinity
+                clone._color = "rgb(255,215,0)";
+            },
+            name: "Immortality",
+            description: "Literally, no shit, your clone will be immortal.  Will do nothing for their temperment, however.",
+            cost: 1
+        },
     }
     // ARTIFACTS (in value/order?)
     // 
@@ -817,6 +907,7 @@ var openFile = function(event) {
                 smitingBolt: 100,
                 deionizer: 100,
             },
+            unusedAugmentations:{},
             artifacts:[],
             pause:false,
             worldRadius:20
