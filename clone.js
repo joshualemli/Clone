@@ -31,9 +31,9 @@
     CLONE JavaScript file
     - - - - - - - - - - - - - - - - - - - */
         const
-        CLONE_VERSION = "0.2.0",
+        CLONE_VERSION = "0.2.1",
         CLONE_RELEASE = "dev",
-        CLONE_EDITION = "masumune calls";
+        CLONE_EDITION = "undreamer";
     /* - - - - - - - - - - - - - - - - - - -
 
 
@@ -261,36 +261,65 @@ const CLONE_Game = (function(){
 
     
     const Store = (function(){
-        var dom, resumeGameplayOnClose, basket, selectedItem
+        var dom, resumeGameplayOnClose, selectedQuantity, selectedItem, selectedItemGameCategory, selectedItemGameId
+        const _setResourcesHtml = () => dom.resources.innerHTML = "$" + game.resources.toFixed(2)
         const open = () => {
             if (!game.pause) resumeGameplayOnClose = game.pause = true
             else resumeGameplayOnClose = false
+            _setDetails()
+            _setResourcesHtml()
             dom.container.classList.remove("occlude")
             Input.disable()
-            basket = {}
         }
-        const cancel = () => {
+        const close = () => {
             Input.enable()
             dom.container.classList.add("occlude")
             if (resumeGameplayOnClose) game.pause = false
         }
-        const confirm = () => {
-            Input.enable()
-            dom.container.classList.add("occlude")
-            if (resumeGameplayOnClose) game.pause = false
+        const purchase = () => {
+            let subtotal = selectedQuantity * selectedItem.cost
+            if (game.resources >= subtotal) {
+                dom.itemDetails.purchase.style.transition = ""
+                dom.itemDetails.purchase.style.backgroundColor = "#F75"
+                setTimeout(()=>{
+                    dom.itemDetails.purchase.style.transition = "background-color 0.5s"
+                    dom.itemDetails.purchase.style.backgroundColor = "#CCC"
+                },100)
+                game.resources -= subtotal
+                _setResourcesHtml()
+                if (selectedItemGameCategory === "artifacts") {
+
+                }
+                else if (game[selectedItemGameCategory][selectedItemGameId]) game[selectedItemGameCategory][selectedItemGameId] += selectedQuantity
+                else game[selectedItemGameCategory][selectedItemGameId] = selectedQuantity
+            }
+            else console.log("not enough dough")
         }
-        const _setDetails = (_Section,key) => {
-            selectedItem = key
-            dom.itemDetails.name.innerHTML = _Section[key].name
-            dom.itemDetails.description.innerHTML = _Section[key].description
-            dom.itemDetails.cost.innerHTML = _Section[key].cost
-            dom.itemDetails.quantity.innerHTML = basket[key] || 0
-            dom.itemDetails.subtotal = (basket[key] || 0) * _Section[key].cost
+        const _setDetails = (_Section,gameSection,key) => {
+            if (!_Section) {
+                selectedItem = {}
+                selectedItemGameCategory = null
+                selectedItemGameId = null
+            }
+            else {
+                selectedItem = _Section[key]
+                selectedItemGameCategory = gameSection
+                selectedItemGameId = key
+            }
+            selectedQuantity = 0
+            dom.itemDetails.name.innerHTML = selectedItem.name || ""
+            dom.itemDetails.description.innerHTML = selectedItem.description || ""
+            let costString = selectedItem.cost ? ("$" + selectedItem.cost.toFixed(2)) : ""
+            dom.itemDetails.cost.innerHTML = costString
+            dom.itemDetails.costMultiplier.innerHTML = costString ? (" x " + costString + " = ") : ""
+            dom.itemDetails.quantity.innerHTML = selectedItem.cost ? selectedQuantity : ""
+            dom.itemDetails.subtotal.innerHTML = selectedItem.cost ? ("$"+((selectedItem.cost || 0) * selectedQuantity).toString()) : ""
         }
         const init = () => {
             // html pointers
             dom = {
                 container: document.getElementById("store"),
+                resources: document.getElementById("store-yourResources-value"),
                 itemDetails: {
                     icon: document.getElementById("store-itemDetails-icon"),
                     name: document.getElementById("store-itemDetails-name"),
@@ -301,7 +330,9 @@ const CLONE_Game = (function(){
                     plusOne: document.getElementById("store-itemDetails-plusOne"),
                     cost: document.getElementById("store-itemDetails-cost"),
                     quantity: document.getElementById("store-itemDetails-quantity"),
-                    subtotal: document.getElementById("store-itemDetails-subtotal")
+                    costMultiplier: document.getElementById("store-itemDetails-costMultiplier"),
+                    subtotal: document.getElementById("store-itemDetails-subtotal"),
+                    purchase: document.getElementById("store-itemDetails-purchase")
                 },
                 tools: {
                     container: document.getElementById("store-section-tools"),
@@ -312,45 +343,45 @@ const CLONE_Game = (function(){
                 artifacts: {
                     container: document.getElementById("store-section-artifacts"),
                 },
-                checkout: {
-                    basket: document.getElementById("store-checkout-basket"),
-                    total: document.getElementById("store-checkout-total"),
-                    cancel: document.getElementById("store-checkout-cancel"),
-                    confirm: document.getElementById("store-checkout-confirm")
-                }
+                exit: document.getElementById("store-exit"),
             }
+            let _itemHtml = item => `<div class="store-section-merchandise-item">${item.name}</div>`
             for (let key in Tools) {
                 dom.tools[key] = createHtmlElement("div",{
-                    innerHTML: `<div>${Tools[key].name}</div>`
+                    innerHTML: _itemHtml(Tools[key])
                 })
                 dom.tools.container.appendChild(dom.tools[key])
-                dom.tools[key].onclick = event => _setDetails(Tools,key)
+                dom.tools[key].onclick = event => _setDetails(Tools,"tools",key)
             }
             for (let key in Augmentations) {
                 if (key[0] === "_") continue // ignore "private" functions
                 dom.augmentations[key] = createHtmlElement("div",{
-                    innerHTML: `<div>${Augmentations[key].name}</div>`
+                    innerHTML: _itemHtml(Augmentations[key])
                 })
                 dom.augmentations.container.appendChild(dom.augmentations[key])
-                dom.augmentations[key].onclick = event => _setDetails(Augmentations,key)
+                dom.augmentations[key].onclick = event => _setDetails(Augmentations,"unusedAugmentations",key)
             }
             // for (key in Artifacts) {}
             // behavior
             let adjustQuantity = (key,quantity) => {
-                if (!basket[key]) basket[key] = 0
-                basket[key] += quantity
-                if (basket[key] < 0) basket[key] = 0
+                if (!selectedItem.cost) return null
+                if (!selectedQuantity) selectedQuantity = 0
+                selectedQuantity += quantity
+                if (selectedQuantity < 0) selectedQuantity = 0
+                dom.itemDetails.quantity.innerHTML = selectedQuantity
+                dom.itemDetails.subtotal.innerHTML = "$" + (selectedItem.cost * selectedQuantity).toFixed(2)
             }
-            dom.itemDetails.plusOne.onclick = event => adjustQuantity(selectedItem,1)
             dom.itemDetails.plusTen.onclick = event => adjustQuantity(selectedItem,10)
-            dom.itemDetails.minusOne.onclick = event => adjustQuantity(selectedItem,-10)
-            dom.itemDetails.minusTen.onclick = event => adjustQuantity(selectedItem,-1)
-            dom.checkout.cancel.onclick = cancel
+            dom.itemDetails.plusOne.onclick = event => adjustQuantity(selectedItem,1)
+            dom.itemDetails.minusOne.onclick = event => adjustQuantity(selectedItem,-1)
+            dom.itemDetails.minusTen.onclick = event => adjustQuantity(selectedItem,-10)
+            dom.itemDetails.purchase.onclick = purchase
+            dom.exit.onclick = close
         }
         return {
             init : init,
             open : open,
-            cancel : cancel,
+            close : close,
             confirm : confirm
         }
     })()
@@ -448,7 +479,7 @@ const CLONE_Game = (function(){
 
 
     const CloneUI = (function() {
-        var dom, id
+        var dom, id, uid
         const show = () => {
             dom.container.classList.remove("occlude")
             Artist.resize()
@@ -479,20 +510,29 @@ const CLONE_Game = (function(){
                     }
                 }
             },
-            update : (_id) => {
-                if (_id) {
-                    id = _id
+            update : (setId) => {
+                var clone = null
+                if (setId) {
+
+                }
+                else {}
+
+                /*
+                if (setId) {
+                    id = setId
                     show()
                 }
                 else if (!id) return null
                 let clone = cloneMap.get(id)
-                if (!clone) {
+                if (!clone || ) {
                     id = null
                     hide()
                     return null
                 }
+                */
                 // update once:
-                if (_id) {
+                if (setId) {
+
                     dom.info.name.innerHTML = clone.name
                     dom.info.generation.innerHTML = clone.generation
                 }
@@ -515,6 +555,7 @@ const CLONE_Game = (function(){
         this.xHash = xHash
         this.yHash = yHash
         this.id = `${this.xHash.toString()}_${this.yHash.toString()}`
+        this.uid = `${this.id}_${game.steps.toString()}`
         this.yOdd = Math.abs(this.yHash%2) === 1 ? 1 : 0
         this.worldPosition = this.getWorldPosition()
         // out of bounds or exists

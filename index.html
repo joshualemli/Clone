@@ -87,7 +87,7 @@
                     <div id="cloneUI-augmentations-applyButton">APPLY<br>AUGMENTATIONS</div>
                     <div id="cloneUI-augmentations-applied"></div>
                 </div>
-                <div id="cloneUI-info" class="flexRow">
+                <div id="cloneUI-info" class="flexRow flexWrap">
                     <div class="cloneUI-info-item">
                         <div class="cloneUI-info-itemLabel">Name</div>
                         <div id="cloneUI-info-name">-</div>
@@ -128,43 +128,48 @@
             </div>
         </div>
         <!-- STORE DIALOG -->
-        <div id="store" class="occlude">
+        <div id="store" class="flexColumn occlude">
             <div id="store-banner">The Money Pit</div>
-            <div id="store-itemDetails" class="store-section">
+            <div class="flexRow flexWrap">
+                <div class="store-section">
+                    <div class="store-section-label">"Management" Tools</div>
+                    <div id="store-section-tools" class="store-section-merchandise"></div>
+                </div>
+                <div class="store-section">
+                    <div class="store-section-label">Clone Augmentations</div>
+                    <div id="store-section-augmentations" class="store-section-merchandise"></div>
+                </div>
+                <div class="store-section">
+                    <div class="store-section-label">Artifacts</div>
+                    <div id="store-section-artifacts" class="store-section-merchandise"></div>
+                </div>
+            </div>
+            <div id="store-exit">LEAVE</div>
+            <div id="store-itemDetails" class="flexColumn store-section">
                 <div>
                     <div id="store-itemDetails-icon"></div>
                     <div id="store-itemDetails-name"></div>
                 </div>
+                <div id="store-itemDetails-cost"></div>
                 <div id="store-itemDetails-description"></div>
-                <div style="display:flex;flex-direction:row;">
-                    <div id="store-itemDetails-minusTen" class="store-itemDetails-quantityArrow">-10<br><b style="font-size:1.5em;">&ll;</b></div>
-                    <div id="store-itemDetails-minusOne" class="store-itemDetails-quantityArrow">-1<br><b style="font-size:1.5em;">&vltri;</b></div>
-                    <div id="store-itemDetails-plusOne" class="store-itemDetails-quantityArrow">+1<br><b style="font-size:1.5em;">&vrtri;</b></div>
-                    <div id="store-itemDetails-plusTen" class="store-itemDetails-quantityArrow">+10<br><b style="font-size:1.5em;">&gg;</b></div>
-                    <div id="store-itemDetails-cost"></div>
-                    <div id="store-itemDetails-quantity"></div>
-                    <div id="store-itemDetails-subtotal"></div>
+                <div id="store-itemDetails-purchaseArea" class="flexColumn">
+                    <div id="store-itemDetails-arrowsContainer" class="flexRow">
+                        <div id="store-itemDetails-minusTen" class="store-itemDetails-quantityArrow">-10<br><b style="font-size:1.5em;">&ll;</b></div>
+                        <div id="store-itemDetails-minusOne" class="store-itemDetails-quantityArrow">-1<br><b style="font-size:1.5em;">&vltri;</b></div>
+                        <div id="store-itemDetails-plusOne" class="store-itemDetails-quantityArrow">+1<br><b style="font-size:1.5em;">&vrtri;</b></div>
+                        <div id="store-itemDetails-plusTen" class="store-itemDetails-quantityArrow">+10<br><b style="font-size:1.5em;">&gg;</b></div>
+                    </div>
+                    <div class="flexRow">
+                        <div id="store-itemDetails-quantity"></div>
+                        <div id="store-itemDetails-costMultiplier"></div>
+                        <div id="store-itemDetails-subtotal"></div>
+                    </div>
                 </div>
-            </div>
-            <div class="store-section">
-                <div class="store-section-label">"Management" Tools</div>
-                <div id="store-section-tools" class="store-section-merchandise"></div>
-            </div>
-            <div class="store-section">
-                <div class="store-section-label">Clone Augmentations</div>
-                <div id="store-section-augmentations" class="store-section-merchandise"></div>
-            </div>
-            <div class="store-section">
-                <div class="store-section-label">Artifacts</div>
-                <div id="store-section-artifacts" class="store-section-merchandise"></div>
-            </div>
-            <div id="store-checkout" class="store-section">
-                <div id="store-checkout-basket"></div>
-                <div id="store-checkout-total"></div>
-                <div id="store-checkout-cancel">nevermind</div>
-                <div id="store-checkout-confirm">PAY YER BLOODMONEY</div>
+                <div id="store-yourResources">
+                    your resources: <span id="store-yourResources-value"></span>
+                </div>
+                <div id="store-itemDetails-purchase">PAY YER BLOODMONEY</div>
             </div>
         </div>
     </body>
-    <!--fuck the world!-->
 </html>
