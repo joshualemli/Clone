@@ -225,8 +225,13 @@ html,body {
 
 #cloneUI-augmentations {
 }
+#cloneUI-augmentationsAreaLabel {
+    color:#FFF;
+    margin:0.5em 0 0 0.5em;
+}
 .cloneUI-augmentations-section {
-    margin:0.25em;
+    margin:0 0.5em 0.5em 0.5em;
+    flex:1 1 auto;
 }
 #cloneUI-augmentations-available {
     background-color:#111;
@@ -236,7 +241,6 @@ html,body {
 }
 #cloneUI-augmentations-applyButton {
     display:flex;
-    flex: 1 0 auto;
     justify-content:center;
     align-items:center;
     font-size:2em;
@@ -268,11 +272,12 @@ html,body {
 }
 .cloneUI-augmentations-item-count {
     display:flex;
-    flex:1 1 auto;
+    flex:0 1 auto;
     padding:0 0.2em;
 }
 #cloneUI-info {
     flex:1 1 auto;
+    align-items:start;
 }
 .cloneUI-info-item {
     display:flex;
@@ -356,12 +361,12 @@ html,body {
     flex:0 1 auto;
     margin:0.5em;
     padding:1em;
-    background:#000;
+    background:rgba(0,0,0,0.5);
     border:3px solid #333;
     color:#FFF;
 }
 #store-itemDetails-name {
-    font-size:2rem;
+    font-size:1.7rem;
     color:rgb(47, 218, 61);
 }
 #store-itemDetails-cost {
@@ -369,8 +374,15 @@ html,body {
     color:rgb(66, 164, 255);
 }
 #store-itemDetails-description {
-    font-size:1.3rem;
+    font-size:1.2rem;
+    color:#CBB;
 }
+    .augEffect {
+        font-family:monospace;
+        font-size:0.9em;
+        margin:0.25em 0;
+        font-style:italic;
+    }
 #store-itemDetails-purchaseArea {
     margin-top:0.75em;
     padding:0.25em;

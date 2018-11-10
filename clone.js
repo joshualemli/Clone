@@ -102,6 +102,7 @@ const CLONE_Game = (function(){
                 case "pause":
                     game.pause = !game.pause
                     Menu.update()
+                    CloneUI.update()
                     break
                 case "recenterView":
                     view.xPos = view.yPos = 0
@@ -276,6 +277,8 @@ const CLONE_Game = (function(){
         const close = () => {
             Input.enable()
             dom.container.classList.add("occlude")
+            Menu.update()
+            CloneUI.updateAugmentations()
             if (resumeGameplayOnClose) game.pause = false
         }
         const purchase = () => {
@@ -517,6 +520,7 @@ const CLONE_Game = (function(){
                 }
             })
             updateAugmentations()
+            update()
         }
         const _augElem = (key,quantity) => {
             let augElem = createHtmlElement("div",{
@@ -527,9 +531,11 @@ const CLONE_Game = (function(){
             return augElem
         }
         const updateAugmentations = () => {
+            if (!id) return null
             while (dom.augmentations.available.firstElementChild) dom.augmentations.available.removeChild(dom.augmentations.available.firstElementChild)
             while (dom.augmentations.pending.firstElementChild) dom.augmentations.pending.removeChild(dom.augmentations.pending.firstElementChild)
-            for (let key in game.unusedAugmentations) {
+            while (dom.augmentations.applied.firstElementChild) dom.augmentations.applied.removeChild(dom.augmentations.applied.firstElementChild)
+            for (let key in game.unusedAugmentations) if (game.unusedAugmentations[key]) {
                 let elem = _augElem(key,game.unusedAugmentations[key])
                 dom.augmentations.available.appendChild(elem)
                 elem.onclick = event => {
@@ -549,6 +555,8 @@ const CLONE_Game = (function(){
                     else pending.children[1].innerHTML = parseInt(pending.children[1].innerHTML) + 1
                 }
             }
+            let clone = cloneMap.get(id)
+            for (var k in clone.augmentations) dom.augmentations.applied.appendChild(_augElem(k,clone.augmentations[k]))
         }
         const update = (setId) => {
             var clone = null
@@ -607,6 +615,7 @@ const CLONE_Game = (function(){
         return {
             init : init,
             update : update,
+            updateAugmentations : updateAugmentations,
             clear : () => hide(true),
         }
     })()
@@ -870,32 +879,32 @@ const CLONE_Game = (function(){
             if (!clone.augmentations[key]) clone.augmentations[key] = 1
             else clone.augmentations[key] += 1
         },
-        longevityX3: {
+        ribonucleicInjection: {
             use: clone => {
-                Augmentations._increment(clone,"longevityX3")
-                clone.maxAge *= 3
+                Augmentations._increment(clone,"ribonucleicInjection")
+                clone.maxAge += 250
             },
-            name: "Longevity (x3)",
-            description: "Prolong -- wait, sorry, our mistake -- <i>extend</i> the happy, very happy, life of a clone!",
-            cost: 0.95
+            name: "Ribonucleic Injection",
+            description: "<div class='augEffect'>Max Age +250</div>Prolong -- wait, sorry, our mistake -- <i>extend</i> the happy, very happy, life of a clone!",
+            cost: 1000
         },
-        longevityX25: {
+        longevityPump: {
             use: clone => {
-                Augmentations._increment(clone,"longevityX25")
-                clone.maxAge *= 25
+                Augmentations._increment(clone,"longevityPump")
+                clone.maxAge *= 5
             },
-            name: "Longevity (x25)",
-            description: "This is really a totally natural process, trust us.  Clones love it.  Don't ask them about it though, they would probably just want the next level up in our product line and seriously, who can afford that?  Oh but if you could, oh man.  That's the stuff.",
-            cost: 22.45
+            name: "Longevity Pump",
+            description: "<div class='augEffect'>Max Age x5</div>Works great!  And trust us, they barely notice the pump.  In fact, uh, clones love it.  Don't ask them about it though, they're selfish and would probably just want the next step up in our product line and seriously, who can afford that?  Oh but if you could, oh man.  That's the stuff.",
+            cost: 3000
         },
-        longevityX500: {
+        organicMaterialResequencer: {
             use: clone => {
-                Augmentations._increment(clone,"longevityX100")
-                clone.maxAge *= 500
+                Augmentations._increment(clone,"organicMaterialResequencer")
+                clone.maxAge *= 200
             },
-            name: "Longevity (x100)",
-            description: `While this modification is, well, "difficult" on the clone, the potential rewards are fantastic.  For you.`,
-            cost: 211
+            name: "Organic Material Resequencer",
+            description: `<div class='augEffect'>Max Age x200</div>A totally natural process.  While this modification is, well, "difficult" on the clone, the potential rewards are fantastic.  For you.`,
+            cost: 11000
         },
         immortality: {
             use: clone => {
@@ -906,11 +915,16 @@ const CLONE_Game = (function(){
             },
             name: "Immortality",
             description: "Literally, no shit, your clone will be immortal.  Will do nothing for their temperment, however.",
-            cost: 1
+            cost: 200000
         },
     }
     // ARTIFACTS (in value/order?)
-    // 
+    //
+    // purchase, discover, engineer
+    //
+    // shogoth's helix
+    // architect's code
+    // django's pick - toggle soundtrack
     // opalescent ward - 99/100 foreign spawn rate
     // fluorescent ward - 49/50 foreign spawn rate
     // viridescent ward - 9/10 foreign spawn rate
@@ -923,10 +937,10 @@ const CLONE_Game = (function(){
     // bioschismatic extraction engine - world radius +5
     // dark energy transmutation engine - world radius +10
     // hawking-cipolla expansion limit engine - world radius +20
-    // zelda stone - random clone spawns
-    // metroid stone - smiting bolt infinite ammo ???
-    // halflife stone - double production and reproduction rate, half lifespan !!! ultimate
-
+    // link stone - random clone spawns
+    // aran stone - smiting bolt infinite ammo ???
+    // freeman stone - double production and reproduction rate, half lifespan !!! ultimate
+    // stellar fragment
 
     // GAMEPLAY LOOP
     const gameplay = () => {
@@ -1011,12 +1025,15 @@ var openFile = function(event) {
             perishedMutant:0,
             perishedForeign:0,
             tools:{
-                genesisPod: 100,
-                genesisRay: 100,
-                smitingBolt: 100,
-                deionizer: 100,
+                genesisPod: 10,
+                genesisRay: 1,
+                smitingBolt: 10,
+                deionizer: 0,
             },
             unusedAugmentations:{
+                ribonucleicInjection:10,
+                longevityPump:10,
+                organicMaterialResequencer:10,
                 immortality:10
             },
             artifacts:[],
