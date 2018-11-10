@@ -441,6 +441,19 @@ const CLONE_Game = (function(){
                         container: document.getElementById("menu-tools")
                     }
                 }
+                // tools: "inspect"
+                let inspectElement = createHtmlElement("div",{
+                    className: "menu-tools-tool flexRow menu-tools-selectedTool",
+                    innerHTML: "<div class='menu-tools-tool-label'>INSPECT</div>"
+                })
+                dom.tools.container.appendChild(inspectElement)
+                inspectElement.onclick = event => {
+                    dom.tools.container.querySelectorAll(".menu-tools-selectedTool").forEach( e => e.classList.remove("menu-tools-selectedTool") )
+                    inspectElement.children[0].classList.add("menu-tools-selectedTool")
+                    Input.setSelectedTool(null)
+                    Input.setClickMode(0)
+                }
+                // inventoried tools
                 for (let key in Tools) {
                     let toolElement = createHtmlElement("div",{
                         className: "menu-tools-tool flexRow",
@@ -449,9 +462,9 @@ const CLONE_Game = (function(){
                     dom.tools.container.appendChild(toolElement)
                     toolElement.onclick = event => {
                         dom.tools.container.querySelectorAll(".menu-tools-selectedTool").forEach( e => e.classList.remove("menu-tools-selectedTool") )
-                        document.getElementsByClassName("menu-tools-selectedTool")
                         if (!Input.setSelectedTool(key) || game.tools[key] === 0) {
                             Input.setClickMode(0)
+                            inspectElement.children[0].classList.add("menu-tools-selectedTool")
                         }
                         else {
                             Input.setClickMode(game.tools[key] ? 1 : 0)
@@ -489,6 +502,8 @@ const CLONE_Game = (function(){
         const hide = (clear) => {
             dom.container.classList.add("occlude")
             if (clear) id = null
+            let highlight = spriteMap.get("cloneHighlight")
+            if (highlight) highlight.destroy()
             Artist.resize()
         }
         const applyAugmentations = () => {
@@ -543,6 +558,7 @@ const CLONE_Game = (function(){
                 uid = clone.uid
                 new Array("clones","mutant","foreign").forEach( classPart => dom.container.classList.remove(`border-${classPart}`) )
                 // update once:
+                new Sprites.cloneHighlight(clone)
                 if (clone.mutant) dom.container.classList.add("border-mutant")
                 else if (clone.foreign) dom.container.classList.add("border-foreign")
                 else dom.container.classList.add("border-clones")
@@ -554,11 +570,7 @@ const CLONE_Game = (function(){
             else if (!id) return null
             else {
                 clone = cloneMap.get(id)
-                if (!clone || clone.uid !== uid) {
-                    hide()
-                    id = uid = null
-                    return null
-                }
+                if (!clone || clone.uid !== uid) return hide(true)
             }
             // always update:
             dom.info.age.innerHTML = clone.age
@@ -758,9 +770,9 @@ const CLONE_Game = (function(){
         spriteMap.set(this.id,this)
     }
     Sprites.cloneHighlight.prototype.draw = function() {
-        Artist.outlineCircle(this.clone.worldPosition.x,this.clone.worldPosition.y,this.clone.radius+0.15,0.17,"#0F0")
+        Artist.outlineCircle(this.clone.worldPosition.x,this.clone.worldPosition.y,this.clone.radius+0.07,0.1,"#07F")
     }
-    Sprites.cloneHighlight.prototype.step = function() {
+    Sprites.cloneHighlight.prototype.destroy = function() {
         Artist.clipCircle(this.clone.worldPosition.x,this.clone.worldPosition.y,this.clone.maxRadius*2)
         for (var p = 0; p < 6; p++) {
             var hash = this.clone._getHashFromPosition(p)
@@ -770,6 +782,9 @@ const CLONE_Game = (function(){
         spriteMap.delete("cloneHighlight")
         let clone = cloneMap.get(`${this.clone.xHash}_${this.clone.yHash}`)
         if (clone) clone.draw()
+    }
+    Sprites.cloneHighlight.prototype.step = function() {
+        return null
     }
 
 

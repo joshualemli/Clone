@@ -202,6 +202,11 @@ html,body {
     color:#CCC;
     background-color:#222;
     padding:0.2em;
+    cursor:pointer;
+}
+.menu-tools-tool:hover {
+    border-color:#FFF;
+    color:#FFF;
 }
 .menu-tools-tool-label {
     padding:0.1em;
