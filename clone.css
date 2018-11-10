@@ -230,19 +230,26 @@ html,body {
     background-color:#444;
 }
 #cloneUI-augmentations-applyButton {
-    color:#D33;
+    display:flex;
+    flex: 1 0 auto;
+    justify-content:center;
+    align-items:center;
     font-size:2em;
-    border:2px solid #A77;
     border-radius:0.5rem;
     padding:0 0.2em;
+    color:rgb(174, 0, 255);
+    border:2px solid rgb(101, 49, 185);
+    background:linear-gradient(210deg,rgb(0, 5, 15),rgb(41, 0, 21));
+    cursor:pointer;
 }
 #cloneUI-augmentations-applyButton:hover {
-    color:#F00;
-    border-color:#C33;
+    color:rgb(204, 95, 255);
+    border-color:rgb(155, 93, 255);
+    background:linear-gradient(170deg,rgb(0, 5, 15),rgb(41, 0, 21));
 }
 #cloneUI-augmentations-applied {}
 .cloneUI-augmentations-section-label {
-    color:#C7C;
+    color:rgb(157, 91, 195);
 }
 .cloneUI-augmentations-item {
     background:#000;

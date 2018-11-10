@@ -31,7 +31,7 @@
     CLONE JavaScript file
     - - - - - - - - - - - - - - - - - - - */
         const
-        CLONE_VERSION = "0.2.1",
+        CLONE_VERSION = "0.2.2",
         CLONE_RELEASE = "dev",
         CLONE_EDITION = "undreamer";
     /* - - - - - - - - - - - - - - - - - - -
@@ -138,7 +138,9 @@ const CLONE_Game = (function(){
             switch (clickMode) {
                 case 0: // Inspect
                     let id = `${xHash}_${yHash}`
+                    console.log(id)
                     if (cloneMap.has(id)) CloneUI.update(id)
+                    else CloneUI.clear()
                     break
                 case 1: // Use Tool
                     if (selectedTool && Tools[selectedTool].use(xHash,yHash)) {
@@ -297,7 +299,7 @@ const CLONE_Game = (function(){
         }
         const _setDetails = (_Section,gameSection,key) => {
             if (!_Section) {
-                selectedItem = {}
+                selectedItem = {description:"[awaiting selection]"}
                 selectedItemGameCategory = null
                 selectedItemGameId = null
             }
@@ -484,11 +486,23 @@ const CLONE_Game = (function(){
             dom.container.classList.remove("occlude")
             Artist.resize()
         }
-        const hide = () => {
+        const hide = (clear) => {
             dom.container.classList.add("occlude")
+            if (clear) id = null
             Artist.resize()
         }
-        const applyAugmentation = () => {}
+        const applyAugmentations = () => {
+            Array.from(dom.augmentations.pending.children).map( e => new Object({
+                key: e.dataset.key,
+                quantity: parseInt(e.children[1].innerHTML)
+            })).forEach( aug => {
+                game.unusedAugmentations[aug.key] -= aug.quantity
+                for (aug.quantity; aug.quantity--;) {
+                    Augmentations[aug.key].use(cloneMap.get(id))
+                }
+            })
+            updateAugmentations()
+        }
         const _augElem = (key,quantity) => {
             let augElem = createHtmlElement("div",{
                 className: "cloneUI-augmentations-item flexRow",
@@ -499,6 +513,7 @@ const CLONE_Game = (function(){
         }
         const updateAugmentations = () => {
             while (dom.augmentations.available.firstElementChild) dom.augmentations.available.removeChild(dom.augmentations.available.firstElementChild)
+            while (dom.augmentations.pending.firstElementChild) dom.augmentations.pending.removeChild(dom.augmentations.pending.firstElementChild)
             for (let key in game.unusedAugmentations) {
                 let elem = _augElem(key,game.unusedAugmentations[key])
                 dom.augmentations.available.appendChild(elem)
@@ -520,62 +535,67 @@ const CLONE_Game = (function(){
                 }
             }
         }
-        return {
-            init : () => {
-                dom = {
-                    container: document.getElementById("cloneUI"),
-                    augmentations: {
-                        available: document.getElementById("cloneUI-augmentations-available"),
-                        pending: document.getElementById("cloneUI-augmentations-pending"),
-                        applyButton: document.getElementById("cloneUI-augmentations-applyButton"),
-                        applied: document.getElementById("cloneUI-augmentations-applied")
-                    },
-                    info: {
-                        container: document.getElementById("cloneUI-info"),
-                        name: document.getElementById("cloneUI-info-name"),
-                        age: document.getElementById("cloneUI-info-age"),
-                        maxAge: document.getElementById("cloneUI-info-maxAge"),
-                        generation: document.getElementById("cloneUI-info-generation"),
-                        production :document.getElementById("cloneUI-info-production"),
-                        lifetimeProduction: document.getElementById("cloneUI-info-lifetimeProduction"),
-                        cloningRate: document.getElementById("cloneUI-info-cloningRate"),
-                        descendants: document.getElementById("cloneUI-info-descendants")
-                    }
-                }
-            },
-            update : (setId) => {
-                var clone = null
-                if (setId) {
-                    clone = cloneMap.get(setId)
-                    id = setId
-                    uid = clone.uid
-                    new Array("clones","mutant","foreign").forEach( classPart => dom.container.classList.remove(`border-${classPart}`) )
-                    // update once:
-                    if (clone.mutant) dom.container.classList.add("border-mutant")
-                    else if (clone.foreign) dom.container.classList.add("border-foreign")
-                    else dom.container.classList.add("border-clones")
-                    dom.info.name.innerHTML = clone.name
-                    dom.info.generation.innerHTML = clone.generation
-                    updateAugmentations()
-                    show()
-                }
-                else if (!id) return null
-                else {
-                    clone = cloneMap.get(id)
-                    if (!clone || clone.uid !== uid) {
-                        hide()
-                        id = uid = null
-                        return null
-                    }
-                }
-                // always update:
-                dom.info.age.innerHTML = clone.age
-                dom.info.maxAge.innerHTML = clone.maxAge
-                dom.info.production.innerHTML = clone.production.toFixed(2)
-                dom.info.lifetimeProduction.innerHTML = clone.lifetimeProduction.toFixed(2)
-                dom.info.cloningRate.innerHTML = ((1 - clone.cloningFailureChance)*100).toFixed(2)+ "%"
-                dom.info.descendants.innerHTML = clone.descendants
+        const update = (setId) => {
+            var clone = null
+            if (setId) {
+                clone = cloneMap.get(setId)
+                id = setId
+                uid = clone.uid
+                new Array("clones","mutant","foreign").forEach( classPart => dom.container.classList.remove(`border-${classPart}`) )
+                // update once:
+                if (clone.mutant) dom.container.classList.add("border-mutant")
+                else if (clone.foreign) dom.container.classList.add("border-foreign")
+                else dom.container.classList.add("border-clones")
+                dom.info.name.innerHTML = clone.name
+                dom.info.generation.innerHTML = clone.generation
+                updateAugmentations()
+                show()
             }
+            else if (!id) return null
+            else {
+                clone = cloneMap.get(id)
+                if (!clone || clone.uid !== uid) {
+                    hide()
+                    id = uid = null
+                    return null
+                }
+            }
+            // always update:
+            dom.info.age.innerHTML = clone.age
+            dom.info.maxAge.innerHTML = clone.maxAge
+            dom.info.production.innerHTML = clone.production.toFixed(2)
+            dom.info.lifetimeProduction.innerHTML = clone.lifetimeProduction.toFixed(2)
+            dom.info.cloningRate.innerHTML = ((1 - clone.cloningFailureChance)*100).toFixed(2)+ "%"
+            dom.info.descendants.innerHTML = clone.descendants
+        }
+        const init = () => {
+            dom = {
+                container: document.getElementById("cloneUI"),
+                augmentations: {
+                    available: document.getElementById("cloneUI-augmentations-available"),
+                    pending: document.getElementById("cloneUI-augmentations-pending"),
+                    applyButton: document.getElementById("cloneUI-augmentations-applyButton"),
+                    applied: document.getElementById("cloneUI-augmentations-applied")
+                },
+                info: {
+                    container: document.getElementById("cloneUI-info"),
+                    name: document.getElementById("cloneUI-info-name"),
+                    age: document.getElementById("cloneUI-info-age"),
+                    maxAge: document.getElementById("cloneUI-info-maxAge"),
+                    generation: document.getElementById("cloneUI-info-generation"),
+                    production :document.getElementById("cloneUI-info-production"),
+                    lifetimeProduction: document.getElementById("cloneUI-info-lifetimeProduction"),
+                    cloningRate: document.getElementById("cloneUI-info-cloningRate"),
+                    descendants: document.getElementById("cloneUI-info-descendants")
+                }
+            }
+            // behavior
+            dom.augmentations.applyButton.onclick = applyAugmentations
+        }
+        return {
+            init : init,
+            update : update,
+            clear : () => hide(true),
         }
     })()
 
@@ -867,6 +887,7 @@ const CLONE_Game = (function(){
                 Augmentations._increment(clone,"immortality")
                 clone.maxAge = Infinity
                 clone._color = "rgb(255,215,0)";
+                clone.draw()
             },
             name: "Immortality",
             description: "Literally, no shit, your clone will be immortal.  Will do nothing for their temperment, however.",
