@@ -408,10 +408,14 @@ const CLONE_Game = (function(){
             // cloneMap.forEach( clone => production += clone.production )
             // production *= Framerate.fps()
         }
-        const updateTools = () => {
+        const updateTools = (useInspect) => {
             for (var key in game.tools) dom.tools[key].innerHTML = game.tools[key]
+            if (useInspect) {
+
+            }
         }
         const update = () => {
+            dom.pauseWarningBar.classList[game.pause ? "remove" : "add"]("occlude")
             if (toolsOpen) updateTools()
             if (readoutOpen) updateReadout()
         }
@@ -421,6 +425,7 @@ const CLONE_Game = (function(){
                 readoutOpen = toolsOpen = false
                 // element pointers
                 dom = {
+                    pauseWarningBar: document.getElementById("pauseWarningBar"),
                     callsign: document.getElementById("menu-callsign"),
                     saveButton: document.getElementById(""),
                     loadButton: document.getElementById(""),
@@ -491,7 +496,8 @@ const CLONE_Game = (function(){
                 }
             },
             update : update,
-            updateTools : updateTools
+            updateTools : updateTools,
+            // pauseWarningBar : () => dom.pauseWarningBar.classList[game.pause ? "remove" : "add"]("occlude")
         }
     })()
 
@@ -882,41 +888,68 @@ const CLONE_Game = (function(){
         ribonucleicInjection: {
             use: clone => {
                 Augmentations._increment(clone,"ribonucleicInjection")
-                clone.maxAge += 250
+                clone.maxAge += 600
             },
             name: "Ribonucleic Injection",
             description: "<div class='augEffect'>Max Age +250</div>Prolong -- wait, sorry, our mistake -- <i>extend</i> the happy, very happy, life of a clone!",
-            cost: 1000
+            cost: 910
         },
         longevityPump: {
             use: clone => {
                 Augmentations._increment(clone,"longevityPump")
-                clone.maxAge *= 5
+                clone.maxAge *= 2
             },
             name: "Longevity Pump",
             description: "<div class='augEffect'>Max Age x5</div>Works great!  And trust us, they barely notice the pump.  In fact, uh, clones love it.  Don't ask them about it though, they're selfish and would probably just want the next step up in our product line and seriously, who can afford that?  Oh but if you could, oh man.  That's the stuff.",
-            cost: 3000
+            cost: 1225
         },
-        organicMaterialResequencer: {
+        organicTransmutation: {
             use: clone => {
-                Augmentations._increment(clone,"organicMaterialResequencer")
-                clone.maxAge *= 200
+                Augmentations._increment(clone,"organicTransmutation")
+                clone.maxAge *= 2000
             },
-            name: "Organic Material Resequencer",
-            description: `<div class='augEffect'>Max Age x200</div>A totally natural process.  While this modification is, well, "difficult" on the clone, the potential rewards are fantastic.  For you.`,
-            cost: 11000
+            name: "Organic Transmutation",
+            description: `<div class='augEffect'>Max Age x2000</div>A totally natural process.  While this modification is, well, "difficult" on the clone, the potential rewards are fantastic.  For you.`,
+            cost: 7000
         },
-        immortality: {
+        immortalitySerum: {
             use: clone => {
-                Augmentations._increment(clone,"immortality")
+                Augmentations._increment(clone,"immortalitySerum")
                 clone.maxAge = Infinity
                 clone._color = "rgb(255,215,0)";
                 clone.draw()
             },
-            name: "Immortality",
+            name: "Immortality Serum",
             description: "Literally, no shit, your clone will be immortal.  Will do nothing for their temperment, however.",
             cost: 200000
         },
+        geneticResequencingNodules: {
+            use: clone => {
+                Augmentations._increment(clone,"geneticResequencingNodules")
+            },
+            name: "Genetic Resequencing Nodules",
+            description: "Only the finest implanted nodules crafted from 100% reprocessed... material.  Allows clone's organic sequences to stay intact, preventing mutant offspring (is that a paradox? hahahaha....).",
+            cost: 250000
+        },
+        exophagicAfterbirth: {
+            use: clone => {
+                Augmentations._increment(clone,"exophagicAfterbirth")
+            },
+            name: "Exophagic Afterbirth",
+            description: "How to put it?  Ahhh... Part of the, er, cloning process, umm, allows dissimilar clones to be *ahem* consumed. You may opt to not watch this miracle of science. Actually, nobody should see this.  In fact, this augmentation automagically blinds the clone.  It was the only humane thing to do.",
+            cost: 300000
+        },
+        // YESSSS!
+        // exophagicOffspring: {},
+        // allelopathicOffspring: {},
+        allelopathicDeathTendrils: {
+            use: clone => {
+                Augmentations._increment(clone,"allelopathicDeathTendrils")
+            },
+            name: "Allelopathic Death Tendrils",
+            description: "Gives your clone an automatic defense net that will strike out at dissimilar clones.",
+            cost: 500000
+        }
     }
     // ARTIFACTS (in value/order?)
     //
@@ -949,13 +982,13 @@ const CLONE_Game = (function(){
             Framerate.register()
             game.steps += 1
             if (Math.random() > 0.99) {
+                // new Clone(
+                //     Math.floor( (Math.random() * 2 - 1) * game.worldRadius/Clone.prototype.xMultiplier),
+                //     Math.floor( (Math.random() * 2 - 1) * game.worldRadius/Clone.prototype.yMultiplier),
+                // )
                 new Clone(
-                    Math.floor(Math.random()*2*game.worldRadius/Clone.prototype.xMultiplier) - game.worldRadius,
-                    Math.floor(Math.random()*2*game.worldRadius/Clone.prototype.yMultiplier) - game.worldRadius,
-                )
-                new Clone(
-                    Math.floor(Math.random()*2*game.worldRadius/Clone.prototype.xMultiplier) - game.worldRadius,
-                    Math.floor(Math.random()*2*game.worldRadius/Clone.prototype.yMultiplier) - game.worldRadius,
+                    Math.floor( (Math.random() * 2 - 1) * game.worldRadius/Clone.prototype.xMultiplier),
+                    Math.floor( (Math.random() * 2 - 1) * game.worldRadius/Clone.prototype.yMultiplier),
                     {foreign:true}
                 )
             }
@@ -1034,7 +1067,8 @@ var openFile = function(event) {
                 ribonucleicInjection:10,
                 longevityPump:10,
                 organicMaterialResequencer:10,
-                immortality:10
+                immortality:10,
+                deathTendrils:10
             },
             artifacts:[],
             pause:false,
