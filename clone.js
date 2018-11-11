@@ -131,11 +131,10 @@ const CLONE_Game = (function(){
             state[action] = true
             toggle(action)
         }
-        console.log("y seems too high on zoom out")
         const mainCanvasMouseDownHandler = event => {
             let x = (event.offsetX - view.screenSize.x/2) / view.scale + view.xPos
             let y = (view.screenSize.y/2 - event.offsetY) / view.scale + view.yPos
-            console.log(x,y)
+            //Artist.fillCircle(x,y,0.2,"rgb(0,0,255)")
             if (Math.sqrt(x*x+y*y) > game.worldRadius + 0.5) {
                 CloneUI.clear()
                 return console.log("click out of world bounds")
@@ -537,12 +536,13 @@ const CLONE_Game = (function(){
                 dom.openReadoutButton.onclick = () => {
                     dom.openReadoutButton.classList.toggle("menu-openButton-opened")
                     readoutOpen = !dom.readout.container.classList.toggle("occlude")
+                    updateReadout()
                     Artist.resize()
                 }
                 dom.openToolsButton.onclick = () => {
                     dom.openToolsButton.classList.toggle("menu-openButton-opened")
                     toolsOpen = !dom.tools.container.classList.toggle("occlude")
-                    Menu.updateTools()
+                    updateTools()
                     Artist.resize()
                 }
             },
@@ -560,11 +560,13 @@ const CLONE_Game = (function(){
             Artist.resize()
         }
         const hide = (clear) => {
-            dom.container.classList.add("occlude")
-            if (clear) id = null
+            if (!dom.container.classList.contains("occlude")) {
+                dom.container.classList.add("occlude")
+                Artist.resize()                
+            }
             let highlight = spriteMap.get("cloneHighlight")
             if (highlight) highlight.destroy()
-            Artist.resize()
+            if (clear) id = null
         }
         const applyAugmentations = () => {
             Array.from(dom.augmentations.pending.children).map( e => e.dataset.key ).forEach( augKey => {
@@ -928,12 +930,12 @@ const CLONE_Game = (function(){
             description: "Renders all clones' essential biochemical processes, um... inert. Works over a sizeable radius.",
             cost: 795.99
         },
-        csrd: {
+        cascadeResonanceQuantumWarhead: {
             use: () => {
                 cloneMap.forEach( clone => clone.perish() )
                 return true
             },
-            name: "CRQW",
+            name: "Cascade Resonance Quantum Warhead",
             description: "The Cascade Resonance Quantum Warhead (CRQW) is the finest world-refreshing armament on the market.  Nothing survives, guaranteed.",
             cost: 6669.99
         },
