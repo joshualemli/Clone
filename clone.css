@@ -198,13 +198,13 @@ html,body {
     padding:0.3em;
 }
 
-#menu-readout-topBar {
-    color:#CCC;
-}
+
     .menu-readout-topBar-item {
+        align-items:center;
         margin:0.25em;
         padding:0.25em;
         border:1px solid #555;
+        color:#FFF;
     }
         .menu-readout-topBar-value {
             font-family:monospace;

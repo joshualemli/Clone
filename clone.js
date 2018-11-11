@@ -826,7 +826,7 @@ const CLONE_Game = (function(){
         spriteMap.set(this.id,this)
     }
     Sprites.worldBoundary.prototype.draw = function() {
-        Artist.outlineCircle(0,0,game.worldRadius+1,0.4,"#AA7777")
+        Artist.outlineCircle(0,0,game.worldRadius+1,0.25,"rgb(117, 120, 138)")
     }
     Sprites.worldBoundary.prototype.step = function() {
         return null
@@ -984,7 +984,14 @@ const CLONE_Game = (function(){
             description: `<div class='storeDescEffect'>Max Age x3</div><div class='storeDescEffect'>Production x3</div>While this modification is, well, "difficult" on the clone, the potential rewards are fantastic.  For you.`,
             cost: 1999.99
         },
-
+        syntheticHormoneGland: {
+            use: clone => {
+                clone.cloningFailureChance -= 0.01
+            },
+            name: "Synthetic Hormone Gland",
+            description: "<div class='storeDescEffect'>Cloning Rate +1%</div>Encourages friskiness.",
+            cost: 34e3
+        },
         immortalitySerum: {
             use: clone => {
                 clone.maxAge = Infinity
@@ -998,7 +1005,7 @@ const CLONE_Game = (function(){
         geneticResequencingNodules: {
             use: clone => {},
             name: "Genetic Resequencing Nodules",
-            description: "Only the finest implanted nodules crafted from 100% reprocessed... material.  Allows clone's organic sequences to stay intact, preventing mutant offspring (is that a paradox? hahahaha....).",
+            description: "Only the finest implanted nodules crafted from 100% reprocessed... material.  Allows clone's organic sequences to stay intact, preventing mutant offspring (is that a paradox? hahahaha....).  Descendents do not inherit this augmentation.",
             cost: 2e5
         },
         allelopathicDeathTendrils: {
@@ -1013,7 +1020,7 @@ const CLONE_Game = (function(){
             description: "How to put it?  Ahhh... Part of the, er, cloning process, umm, allows dissimilar clones to be *ahem* consumed. You may opt to not watch this miracle of science. Actually, nobody should see this.  In fact, this augmentation automagically blinds the clone.  It was the only humane thing to do.",
             cost: 12e6
         },
-        progenicServitudeEngrams: {
+        hereditaryServitudeEngrams: {
             use: clone => {},
             name: "Progenic Servitude Engrams",
             description: "<div class='storeDescEffect'>Max Age +110 (descendants only)</div><div class='storeDescEffect'>Production +0.005 (descendants only)</div>Descendants will posses genotypes that increases longevity and productivity (they just won't know it).",
@@ -1031,6 +1038,12 @@ const CLONE_Game = (function(){
             description: "",
             cost: 20e9
         },
+        progenicResequencing: {
+            use: clone => {},
+            name: "Progenic Resequencing",
+            description: "Descendants will inherit the ability to resequence flaws in their own organic sequences.  All future generations descended from clones with this augmentation will carry this augmentation.",
+            cost: 950e9
+        }
     }
 
     var Artifices = {
@@ -1135,7 +1148,7 @@ const CLONE_Game = (function(){
             view:view,
             game:game
         })
-        var anchor = createHtmlElement("a", { href: "data:text/html,"+btoa(saveData), download: "CLONE_saveGame.txt" })
+        var anchor = createHtmlElement("a", { href: "data:text/html,"+btoa(saveData), download: `CLONE_save_${new Date().getTime()}.txt` })
         document.body.appendChild(anchor)
         anchor.click()
         document.body.removeChild(anchor)
@@ -1191,7 +1204,6 @@ const CLONE_Game = (function(){
         Menu.updateArtifices(true)
         Framerate.reset()
         Input.enable()
-        gameplay()
     }
 
     return function() {
@@ -1202,28 +1214,16 @@ const CLONE_Game = (function(){
         Menu.init()
         // start gameplay
         load()
+        gameplay()
     }
 
 })()
 
 window.onload = CLONE_Game
 
-        
-/*
-var openFile = function(event) {
-        var input = event.target;
-        var reader = new FileReader();
-        reader.onload = function(){
-          var text = reader.result;
-          var node = document.getElementById('output');
-          node.innerText = text;
-          console.log(reader.result.substring(0, 200));
-        };
-        reader.readAsText(input.files[0]);
-      };
-    </script>
-    </head>
-    <body>
-    <input type='file' accept='text/plain' onchange='openFile(event)'><br>
-*/
 
+
+
+/* word dungeon
+progenic
+*/
