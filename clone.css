@@ -172,7 +172,7 @@ html,body {
 
 
 #menu-readout {
-    background-color:#333;
+    background:linear-gradient(0deg,#335,#112);
     padding:0.3em;
 }
 
@@ -198,7 +198,6 @@ html,body {
 .menu-readout-countArea {
     text-align:center;
     color:#FFF;
-    background-color:#333;
 }
 
 #menu-readout-countBar {
@@ -217,7 +216,6 @@ html,body {
 #menu-readout-perished {
     padding-left:2vw;
     flex:1 1 auto;
-    background:#333;
     color:#FFF;
 }
 .menu-readout-perishedValue {
@@ -231,27 +229,30 @@ html,body {
 }
 
 #menu-tools {
-    background:linear-gradient(#444,#111);
+    background:linear-gradient(#533,#211);
 }
 .menu-tools-tool {
     margin:0.5em;
-    border:1px solid #AAA;
+    border:1px solid #777;
     color:#CCC;
-    background-color:#222;
+    background-color:#411;
     padding:0.2em;
     cursor:pointer;
 }
 .menu-tools-tool:hover {
-    border-color:#FFF;
+
     color:#FFF;
 }
 .menu-tools-tool-label {
     padding:0.1em;
 }
 .menu-tools-tool-quantity {
-    padding:0.2em;
+    margin-left:0.25em;
+    padding:0.2em 0.4em;
     font-family:monospace;
     background:#000;
+    color:#DDD;
+    border-radius:0.2em;
 }
 .menu-tools-selectedTool {
     color:#55F;
@@ -392,7 +393,8 @@ html,body {
     color:#CFC;
 }
 .store-section {
-    margin:1em;
+    margin:0.3em 1em;
+    width:100%;
 }
 .store-section-label {
     color:#EEE;
@@ -408,9 +410,16 @@ html,body {
     border:3px solid #333;
     color:#FFF;
 }
+#store-itemDetails-topBar {
+    justify-content:space-between;
+}
+#store-itemDetails-icon {}
 #store-itemDetails-name {
     font-size:1.7rem;
     color:rgb(47, 218, 61);
+}
+#store-itemDetails-owned {
+    margin-left:1em;
 }
 #store-itemDetails-cost {
     font-size:1.5rem;
@@ -487,12 +496,14 @@ html,body {
 
 
 .store-section-merchandise {
-    align-items: flex-start;
-    position:relative;
+    width:100%;
 }
     .store-section-merchandise-item {
-        padding:0.5em;
-        margin:0.5em;
+        display:flex;
+        flex:1 1 auto;
+        justify-content:center;
+        padding:0.1em 0.5em;
+        margin:0.12em 0.2em;
         border:1px solid #666;
         border-radius:0.25em;
         transition:border-color 0.13s,color 0.13s;

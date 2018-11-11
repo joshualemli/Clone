@@ -31,7 +31,7 @@
     CLONE JavaScript file
     - - - - - - - - - - - - - - - - - - - */
         const
-        CLONE_VERSION = "0.3.3",
+        CLONE_VERSION = "0.3.4",
         CLONE_RELEASE = "alpha",
         CLONE_EDITION = "lawnmower";
     /* - - - - - - - - - - - - - - - - - - -
@@ -271,6 +271,7 @@ const CLONE_Game = (function(){
     const Store = (function(){
         var dom, resumeGameplayOnClose, selectedQuantity, selectedItem, selectedItemGameCategory, selectedItemGameId
         const _setResourcesHtml = () => dom.resources.innerHTML = numberToCurrency(game.resources)
+        const _setOwnedQuantity = () => dom.itemDetails.owned.innerHTML = (selectedItemGameCategory&&selectedItemGameId&&game[selectedItemGameCategory][selectedItemGameId]) ? game[selectedItemGameCategory][selectedItemGameId] : "0"
         const open = () => {
             if (!game.pause) resumeGameplayOnClose = game.pause = true
             else resumeGameplayOnClose = false
@@ -305,16 +306,19 @@ const CLONE_Game = (function(){
                 },100)
                 game.resources -= subtotal
                 _setResourcesHtml()
+                _setOwnedQuantity()
             }
             else console.log("not enough dough")
         }
         const _setDetails = (_Section,gameSection,key) => {
             if (!_Section) {
+                dom.itemDetails.topBar.classList.add("occlude")
                 selectedItem = {description:"[awaiting selection]"}
                 selectedItemGameCategory = null
                 selectedItemGameId = null
             }
             else {
+                dom.itemDetails.topBar.classList.remove("occlude")
                 selectedItem = _Section[key]
                 selectedItemGameCategory = gameSection
                 selectedItemGameId = key
@@ -327,6 +331,7 @@ const CLONE_Game = (function(){
             dom.itemDetails.costMultiplier.innerHTML = costString ? (" x " + costString + " = ") : ""
             dom.itemDetails.quantity.innerHTML = selectedItem.cost ? selectedQuantity : ""
             dom.itemDetails.subtotal.innerHTML = selectedItem.cost ? numberToCurrency((selectedItem.cost || 0) * selectedQuantity) : ""
+            _setOwnedQuantity()
         }
         const init = () => {
             // html pointers
@@ -334,8 +339,10 @@ const CLONE_Game = (function(){
                 container: document.getElementById("store"),
                 resources: document.getElementById("store-yourResources-value"),
                 itemDetails: {
+                    topBar: document.getElementById("store-itemDetails-topBar"),
                     icon: document.getElementById("store-itemDetails-icon"),
                     name: document.getElementById("store-itemDetails-name"),
+                    owned: document.getElementById("store-itemDetails-owned"),
                     description: document.getElementById("store-itemDetails-description"),
                     minusTen: document.getElementById("store-itemDetails-minusTen"),
                     minusOne: document.getElementById("store-itemDetails-minusOne"),
@@ -358,25 +365,22 @@ const CLONE_Game = (function(){
                 },
                 exit: document.getElementById("store-exit"),
             }
-            let _itemHtml = item => `<div class="store-section-merchandise-item">${item.name}</div>`
+            let _itemHtml = item => createHtmlElement("div",{
+                className: "store-section-merchandise-item",
+                innerHTML: item.name
+            })
             for (let key in Tools) {
-                dom.tools[key] = createHtmlElement("div",{
-                    innerHTML: _itemHtml(Tools[key])
-                })
+                dom.tools[key] = _itemHtml(Tools[key])
                 dom.tools.container.appendChild(dom.tools[key])
                 dom.tools[key].onclick = event => _setDetails(Tools,"tools",key)
             }
             for (let key in Augmentations) {
-                dom.augmentations[key] = createHtmlElement("div",{
-                    innerHTML: _itemHtml(Augmentations[key])
-                })
+                dom.augmentations[key] = _itemHtml(Augmentations[key])
                 dom.augmentations.container.appendChild(dom.augmentations[key])
                 dom.augmentations[key].onclick = event => _setDetails(Augmentations,"unusedAugmentations",key)
             }
             for (let key in Artifices) {
-                dom.artifices[key] = createHtmlElement("div",{
-                    innerHTML: _itemHtml(Artifices[key])
-                })
+                dom.artifices[key] = _itemHtml(Artifices[key])
                 dom.artifices.container.appendChild(dom.artifices[key])
                 dom.artifices[key].onclick = event => _setDetails(Artifices,"artifices",key)
             }
@@ -485,7 +489,7 @@ const CLONE_Game = (function(){
                 // tools: "inspect"
                 dom.tools.inspect = createHtmlElement("div",{
                     className: "menu-tools-tool flexRow menu-tools-selectedTool",
-                    innerHTML: "<div class='menu-tools-tool-label'>INSPECT</div>"
+                    innerHTML: "<div class='menu-tools-tool-label'>INSPECT &ofcir;</div>"
                 })
                 dom.tools.container.appendChild(dom.tools.inspect)
                 dom.tools.inspect.onclick = event => {
@@ -966,33 +970,45 @@ const CLONE_Game = (function(){
                 clone.draw()
             },
             name: "Immortality Serum",
-            description: "Literally, no shit, your clone will be immortal.  Will do nothing for their temperment, however.",
-            cost: 200000
+            description: "<div class='storeDescEffect'>Max Age &rarr; <b>&infin;</b></div>Literally, no shit, your clone will be immortal.  Will do nothing for their temperment, however.",
+            cost: 1e5
         },
         geneticResequencingNodules: {
-            use: clone => {
-            },
+            use: clone => {},
             name: "Genetic Resequencing Nodules",
             description: "Only the finest implanted nodules crafted from 100% reprocessed... material.  Allows clone's organic sequences to stay intact, preventing mutant offspring (is that a paradox? hahahaha....).",
-            cost: 250000
+            cost: 2e5
         },
-        exophagicAfterbirth: {
-            use: clone => {
-            },
-            name: "Exophagic Afterbirth",
-            description: "How to put it?  Ahhh... Part of the, er, cloning process, umm, allows dissimilar clones to be *ahem* consumed. You may opt to not watch this miracle of science. Actually, nobody should see this.  In fact, this augmentation automagically blinds the clone.  It was the only humane thing to do.",
-            cost: 300000
-        },
-        // YESSSS!
-        // exophagicOffspring: {},
-        // allelopathicOffspring: {},
         allelopathicDeathTendrils: {
-            use: clone => {
-            },
+            use: clone => {},
             name: "Allelopathic Death Tendrils",
             description: "Gives your clone an automatic defense net that will strike out at dissimilar clones. What could go wrong?",
-            cost: 500000
-        }
+            cost: 7e5
+        },
+        exophagicAfterbirth: {
+            use: clone => {},
+            name: "Exophagic Afterbirth",
+            description: "How to put it?  Ahhh... Part of the, er, cloning process, umm, allows dissimilar clones to be *ahem* consumed. You may opt to not watch this miracle of science. Actually, nobody should see this.  In fact, this augmentation automagically blinds the clone.  It was the only humane thing to do.",
+            cost: 12e6
+        },
+        progenicServitudeEngrams: {
+            use: clone => {},
+            name: "Progenic Servitude Engrams",
+            description: "<div class='storeDescEffect'>Max Age +110 (descendants only)</div><div class='storeDescEffect'>Production +0.005 (descendants only)</div>Descendants will posses genotypes that increases longevity and productivity (they just won't know it).",
+            cost: 390e6
+        },
+        allelopathicOffspring: {
+            use: clone => {},
+            name: "Allelopathic Offspring",
+            description: "",
+            cost: 5.5e9
+        },
+        exophagicOffspring: {
+            use: clone => {},
+            name: "Exophagic Offspring",
+            description: "",
+            cost: 20e9
+        },
     }
 
     var Artifices = {
