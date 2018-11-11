@@ -156,7 +156,10 @@ html,body {
 #menu-saveButton:hover {color:#FFF;}
 #menu-loadButton {color:#CCC;}
 #menu-loadButton:hover {color:#FFF;}
-#menu-openButton-shop {color:rgb(39, 71, 175);}
+#menu-openButton-shop {
+    color:rgb(39, 71, 175);
+    font-style:italic;
+}
 #menu-openButton-shop:hover {color:rgb(0, 60, 255);}
 #menu-openButton-tools.menu-openButton-opened, #menu-openButton-readout.menu-openButton-opened {
     color:rgb(153, 206, 8);
@@ -329,30 +332,35 @@ html,body {
     font-family: 'VT323', monospace;
     color:#AAA;
 }
-#store-banner {
-    display:flex;
-    align-self:center;
-    font-size:calc(1.5em + 3vmin);
-    font-style:italic;
-    color:#EEE;
-    text-shadow:0.02em -0.05em 0.2em rgb(135, 92, 255);
-    text-decoration:underline;
-}
-#store-exit {
-    display:flex;
-    margin:1.5rem 0;
-    padding:0.5em 2em;
-    align-self:center;
-    font-size:calc(1.1em + 0.4vmin);
-    background:linear-gradient(#222,#444);
-    color:rgb(245, 187, 187);
-    border-radius:0.1rem;
+#store-header {
+    width:100%;
     justify-content:center;
-    cursor:pointer;
+    align-items:center;
 }
-#store-exit:hover {
-    box-shadow:none;
-    color:rgb(255, 81, 81);
+    #store-banner {
+        display:flex;
+        font-size:calc(1.5em + 2vmin);
+        font-style:italic;
+        color:#FFF;
+        text-shadow:0.02em -0.05em 0.2em rgb(135, 92, 255);
+        text-decoration:underline;
+    }
+    #store-exit {
+        text-shadow:0.02em -0.05em 0.2em rgb(135, 92, 255);
+        display:flex;
+        margin:1em 1em 1em 2em;
+        padding:0.2em 1em;
+        justify-content:center;
+        align-self:center;
+        font-size:calc(1em + 0.3vmin);
+        color:#CCC;
+        border-radius:0.4rem;
+        border:1px solid #AAA;
+        cursor:pointer;
+    }
+    #store-exit:hover {
+        box-shadow:none;
+        color:#FFF;
 }
 
 #store-yourResources {

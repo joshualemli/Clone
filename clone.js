@@ -148,8 +148,10 @@ const CLONE_Game = (function(){
                         game.tools[selectedTool] -= 1
                         if (game.tools[selectedTool] === 0) {
                             clickMode = 0
+                            selectedTool = null
+                            Menu.updateTools(true)
                         }
-                        Menu.updateTools()
+                        else Menu.updateTools()
                     }
                     break
             }
@@ -411,7 +413,8 @@ const CLONE_Game = (function(){
         const updateTools = (useInspect) => {
             for (var key in game.tools) dom.tools[key].innerHTML = game.tools[key]
             if (useInspect) {
-
+                dom.tools.container.querySelectorAll(".menu-tools-selectedTool").forEach( e => e.classList.remove("menu-tools-selectedTool") )
+                    dom.tools.inspect.children[0].classList.add("menu-tools-selectedTool")
             }
         }
         const update = () => {
@@ -450,14 +453,14 @@ const CLONE_Game = (function(){
                     }
                 }
                 // tools: "inspect"
-                let inspectElement = createHtmlElement("div",{
+                dom.tools.inspect = createHtmlElement("div",{
                     className: "menu-tools-tool flexRow menu-tools-selectedTool",
                     innerHTML: "<div class='menu-tools-tool-label'>INSPECT</div>"
                 })
-                dom.tools.container.appendChild(inspectElement)
-                inspectElement.onclick = event => {
+                dom.tools.container.appendChild(dom.tools.inspect)
+                dom.tools.inspect.onclick = event => {
                     dom.tools.container.querySelectorAll(".menu-tools-selectedTool").forEach( e => e.classList.remove("menu-tools-selectedTool") )
-                    inspectElement.children[0].classList.add("menu-tools-selectedTool")
+                    dom.tools.inspect.children[0].classList.add("menu-tools-selectedTool")
                     Input.setSelectedTool(null)
                     Input.setClickMode(0)
                 }
@@ -472,7 +475,7 @@ const CLONE_Game = (function(){
                         dom.tools.container.querySelectorAll(".menu-tools-selectedTool").forEach( e => e.classList.remove("menu-tools-selectedTool") )
                         if (!Input.setSelectedTool(key) || game.tools[key] === 0) {
                             Input.setClickMode(0)
-                            inspectElement.children[0].classList.add("menu-tools-selectedTool")
+                            dom.tools.inspect.children[0].classList.add("menu-tools-selectedTool")
                         }
                         else {
                             Input.setClickMode(game.tools[key] ? 1 : 0)
@@ -496,8 +499,7 @@ const CLONE_Game = (function(){
                 }
             },
             update : update,
-            updateTools : updateTools,
-            // pauseWarningBar : () => dom.pauseWarningBar.classList[game.pause ? "remove" : "add"]("occlude")
+            updateTools : updateTools
         }
     })()
 
@@ -538,6 +540,7 @@ const CLONE_Game = (function(){
         }
         const updateAugmentations = () => {
             if (!id) return null
+            let clone = cloneMap.get(id)
             while (dom.augmentations.available.firstElementChild) dom.augmentations.available.removeChild(dom.augmentations.available.firstElementChild)
             while (dom.augmentations.pending.firstElementChild) dom.augmentations.pending.removeChild(dom.augmentations.pending.firstElementChild)
             while (dom.augmentations.applied.firstElementChild) dom.augmentations.applied.removeChild(dom.augmentations.applied.firstElementChild)
@@ -546,7 +549,7 @@ const CLONE_Game = (function(){
                 dom.augmentations.available.appendChild(elem)
                 elem.onclick = event => {
                     if (!game.unusedAugmentations[key]) throw new Error("should not happen")
-                    if (parseInt(elem.children[1].innerHTML) === 0) return null
+                    if (clone.augmentations[key] || parseInt(elem.children[1].innerHTML) === 0) return null
                     elem.children[1].innerHTML = parseInt(elem.children[1].innerHTML) - 1
                     let extantPending = Array.from(dom.augmentations.pending.children).find(e=>e.dataset.key==key)
                     let pending = extantPending || _augElem(key,1)
@@ -561,8 +564,7 @@ const CLONE_Game = (function(){
                     else pending.children[1].innerHTML = parseInt(pending.children[1].innerHTML) + 1
                 }
             }
-            let clone = cloneMap.get(id)
-            for (var k in clone.augmentations) dom.augmentations.applied.appendChild(_augElem(k,clone.augmentations[k]))
+            for (var k in clone.augmentations) dom.augmentations.applied.appendChild(_augElem(k,""))
         }
         const update = (setId) => {
             var clone = null
@@ -819,7 +821,7 @@ const CLONE_Game = (function(){
             },
             name: "Genesis Pod",
             description: "Used to spit out... we mean gently bring a new clone into existence.",
-            cost: 0.9,
+            cost: 2.50,
             icon: "1_20"
         },
         genesisRay: {
@@ -838,7 +840,7 @@ const CLONE_Game = (function(){
             },
             name: "Genesis Ray",
             description: "By jetisoning organic tissue suspended in a high-energy control ray, an entire group of unfortunate clones can be grotesquely reanimated... I mean beautifully, er, coalesced back to their, uh, intended forms.",
-            cost: 7.2,
+            cost: 105,
             icon: "1_20"
         },
         smitingBolt: {
@@ -888,7 +890,7 @@ const CLONE_Game = (function(){
         ribonucleicInjection: {
             use: clone => {
                 Augmentations._increment(clone,"ribonucleicInjection")
-                clone.maxAge += 600
+                clone.maxAge += 250
             },
             name: "Ribonucleic Injection",
             description: "<div class='augEffect'>Max Age +250</div>Prolong -- wait, sorry, our mistake -- <i>extend</i> the happy, very happy, life of a clone!",
@@ -900,7 +902,7 @@ const CLONE_Game = (function(){
                 clone.maxAge *= 2
             },
             name: "Longevity Pump",
-            description: "<div class='augEffect'>Max Age x5</div>Works great!  And trust us, they barely notice the pump.  In fact, uh, clones love it.  Don't ask them about it though, they're selfish and would probably just want the next step up in our product line and seriously, who can afford that?  Oh but if you could, oh man.  That's the stuff.",
+            description: "<div class='augEffect'>Max Age x2</div>Works great!  And trust us, they barely notice the pump.  In fact, uh, clones love it.  Don't ask them about it though, they're selfish and would probably just want the next step up in our product line and seriously, who can afford that?  Oh but if you could, oh man.  That's the stuff.",
             cost: 1225
         },
         organicTransmutation: {
@@ -1058,17 +1060,13 @@ var openFile = function(event) {
             perishedMutant:0,
             perishedForeign:0,
             tools:{
-                genesisPod: 10,
-                genesisRay: 1,
-                smitingBolt: 10,
+                genesisPod: 3,
+                genesisRay: 0,
+                smitingBolt: 1,
                 deionizer: 0,
             },
             unusedAugmentations:{
                 ribonucleicInjection:10,
-                longevityPump:10,
-                organicMaterialResequencer:10,
-                immortality:10,
-                deathTendrils:10
             },
             artifacts:[],
             pause:false,
