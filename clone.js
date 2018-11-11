@@ -31,9 +31,9 @@
     CLONE JavaScript file
     - - - - - - - - - - - - - - - - - - - */
         const
-        CLONE_VERSION = "0.2.2",
-        CLONE_RELEASE = "dev",
-        CLONE_EDITION = "undreamer";
+        CLONE_VERSION = "0.3.0",
+        CLONE_RELEASE = "alpha",
+        CLONE_EDITION = "lawnmower";
     /* - - - - - - - - - - - - - - - - - - -
 
 
@@ -286,6 +286,13 @@ const CLONE_Game = (function(){
         const purchase = () => {
             let subtotal = selectedQuantity * selectedItem.cost
             if (game.resources >= subtotal) {
+                if (selectedItemGameCategory === "artifacts") {
+                    if (game.artifacts[selectedItemGameId]) return null
+                    else game.artifacts[selectedItemGameId] = 1
+                    Artifacts[selectedItemGameId].use()
+                }
+                else if (game[selectedItemGameCategory][selectedItemGameId]) game[selectedItemGameCategory][selectedItemGameId] += selectedQuantity
+                else game[selectedItemGameCategory][selectedItemGameId] = selectedQuantity
                 dom.itemDetails.purchase.style.transition = ""
                 dom.itemDetails.purchase.style.backgroundColor = "#F75"
                 setTimeout(()=>{
@@ -294,11 +301,6 @@ const CLONE_Game = (function(){
                 },100)
                 game.resources -= subtotal
                 _setResourcesHtml()
-                if (selectedItemGameCategory === "artifacts") {
-
-                }
-                else if (game[selectedItemGameCategory][selectedItemGameId]) game[selectedItemGameCategory][selectedItemGameId] += selectedQuantity
-                else game[selectedItemGameCategory][selectedItemGameId] = selectedQuantity
             }
             else console.log("not enough dough")
         }
@@ -368,6 +370,13 @@ const CLONE_Game = (function(){
                 dom.augmentations.container.appendChild(dom.augmentations[key])
                 dom.augmentations[key].onclick = event => _setDetails(Augmentations,"unusedAugmentations",key)
             }
+            for (let key in Artifacts) {
+                dom.artifacts[key] = createHtmlElement("div",{
+                    innerHTML: _itemHtml(Artifacts[key])
+                })
+                dom.artifacts.container.appendChild(dom.artifacts[key])
+                dom.artifacts[key].onclick = event => _setDetails(Artifacts,"artifacts",key)
+            }
             // for (key in Artifacts) {}
             // behavior
             let adjustQuantity = (key,quantity) => {
@@ -414,7 +423,7 @@ const CLONE_Game = (function(){
             for (var key in game.tools) dom.tools[key].innerHTML = game.tools[key]
             if (useInspect) {
                 dom.tools.container.querySelectorAll(".menu-tools-selectedTool").forEach( e => e.classList.remove("menu-tools-selectedTool") )
-                    dom.tools.inspect.children[0].classList.add("menu-tools-selectedTool")
+                dom.tools.inspect.children[0].classList.add("menu-tools-selectedTool")
             }
         }
         const update = () => {
@@ -664,9 +673,9 @@ const CLONE_Game = (function(){
         // cloning
         this.fertileAge = override.fertileAge || 20
         this.cloningFailureChance = override.cloningFailureChance || 0.965
-        if (this.mutant) this.cloningFailureChance *= 0.98
+        if (this.mutant) this.cloningFailureChance *= 0.99
         // production
-        this.production = (this.mutant||this.foreign) ? 0 : (override.production || 0.01)
+        this.production = (this.mutant||this.foreign) ? 0 : (override.production || 0.005)
         this.lifetimeProduction = 0
         this.descendants = 0
         this.radius = this.maxRadius*0.7
@@ -821,7 +830,7 @@ const CLONE_Game = (function(){
             },
             name: "Genesis Pod",
             description: "Used to spit out... we mean gently bring a new clone into existence.",
-            cost: 2.50,
+            cost: 3.75,
             icon: "1_20"
         },
         genesisRay: {
@@ -839,8 +848,8 @@ const CLONE_Game = (function(){
                 return true
             },
             name: "Genesis Ray",
-            description: "By jetisoning organic tissue suspended in a high-energy control ray, an entire group of unfortunate clones can be grotesquely reanimated... I mean beautifully, er, coalesced back to their, uh, intended forms.",
-            cost: 105,
+            description: "By jetisoning organic tissue into a high-energy control ray, an entire group of clones can be grotesquely reanimated... I mean beautifully, er, coalesced back to their, uh, intended forms.",
+            cost: 125.95,
             icon: "1_20"
         },
         smitingBolt: {
@@ -854,7 +863,7 @@ const CLONE_Game = (function(){
             },
             name: "Smiting Bolt",
             description: "Painlessly (yes, that sounds good, that should sell these matter-dissolving hell engi... is this thing on?) eliminates a single clone.",
-            cost: 3.35
+            cost: 400
         },
         deionizer: {
             use: (xHash,yHash) => {
@@ -877,7 +886,7 @@ const CLONE_Game = (function(){
             },
             name: "Deionizer",
             description: "Renders all clones' essential biochemical processes, um... inert. Works over a sizeable radius.",
-            cost: 17.99
+            cost: 795.99
         }
     }
 
@@ -893,7 +902,7 @@ const CLONE_Game = (function(){
                 clone.maxAge += 250
             },
             name: "Ribonucleic Injection",
-            description: "<div class='augEffect'>Max Age +250</div>Prolong -- wait, sorry, our mistake -- <i>extend</i> the happy, very happy, life of a clone!",
+            description: "<div class='storeDescEffect'>Max Age +250</div>Prolong -- wait, sorry, our mistake -- <i>extend</i> the happy, very happy, life of a clone!",
             cost: 910
         },
         longevityPump: {
@@ -902,7 +911,7 @@ const CLONE_Game = (function(){
                 clone.maxAge *= 2
             },
             name: "Longevity Pump",
-            description: "<div class='augEffect'>Max Age x2</div>Works great!  And trust us, they barely notice the pump.  In fact, uh, clones love it.  Don't ask them about it though, they're selfish and would probably just want the next step up in our product line and seriously, who can afford that?  Oh but if you could, oh man.  That's the stuff.",
+            description: "<div class='storeDescEffect'>Max Age x2</div>Works great!  And trust us, they barely notice the pump.  In fact, uh, clones love it.  Don't ask them about it though, they're selfish and would probably just want the next step up in our product line and seriously, who can afford that?  Oh but if you could, oh man.  That's the stuff.",
             cost: 1225
         },
         organicTransmutation: {
@@ -911,7 +920,7 @@ const CLONE_Game = (function(){
                 clone.maxAge *= 2000
             },
             name: "Organic Transmutation",
-            description: `<div class='augEffect'>Max Age x2000</div>A totally natural process.  While this modification is, well, "difficult" on the clone, the potential rewards are fantastic.  For you.`,
+            description: `<div class='storeDescEffect'>Max Age x2000</div>A totally natural process.  While this modification is, well, "difficult" on the clone, the potential rewards are fantastic.  For you.`,
             cost: 7000
         },
         immortalitySerum: {
@@ -953,6 +962,20 @@ const CLONE_Game = (function(){
             cost: 500000
         }
     }
+
+    var Artifacts = {
+        // cobaltFusionEngine
+        darkEnergyTransmutationEngine: {
+            use: () => {
+                game.worldRadius += 20
+                Artist.redraw()
+            },
+            name: "Dark Energy Transmutation Engine",
+            description: "<div class='storeDescEffect'>World Radius +20</div>Dirty whore of a cocksucker works great!",
+            cost: 1000
+        }
+    }
+
     // ARTIFACTS (in value/order?)
     //
     // purchase, discover, engineer
@@ -1060,15 +1083,13 @@ var openFile = function(event) {
             perishedMutant:0,
             perishedForeign:0,
             tools:{
-                genesisPod: 3,
+                genesisPod: 7,
                 genesisRay: 0,
-                smitingBolt: 1,
+                smitingBolt: 0,
                 deionizer: 0,
             },
-            unusedAugmentations:{
-                ribonucleicInjection:10,
-            },
-            artifacts:[],
+            unusedAugmentations:{},
+            artifacts:{},
             pause:false,
             worldRadius:20
         }
