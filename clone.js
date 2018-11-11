@@ -62,6 +62,8 @@ const CLONE_Game = (function(){
         return e
     }
 
+    const numberToCurrency = n => n.toLocaleString("en-US",{style:"currency",currency:"USD"})
+
 
     // MODULES
 
@@ -267,7 +269,7 @@ const CLONE_Game = (function(){
     
     const Store = (function(){
         var dom, resumeGameplayOnClose, selectedQuantity, selectedItem, selectedItemGameCategory, selectedItemGameId
-        const _setResourcesHtml = () => dom.resources.innerHTML = "$" + game.resources.toFixed(2)
+        const _setResourcesHtml = () => dom.resources.innerHTML = numberToCurrency(game.resources)
         const open = () => {
             if (!game.pause) resumeGameplayOnClose = game.pause = true
             else resumeGameplayOnClose = false
@@ -286,10 +288,10 @@ const CLONE_Game = (function(){
         const purchase = () => {
             let subtotal = selectedQuantity * selectedItem.cost
             if (game.resources >= subtotal) {
-                if (selectedItemGameCategory === "artifacts") {
-                    if (game.artifacts[selectedItemGameId]) return null
-                    else game.artifacts[selectedItemGameId] = 1
-                    Artifacts[selectedItemGameId].use()
+                if (selectedItemGameCategory === "artifices") {
+                    if (game.artifices[selectedItemGameId]) return null
+                    else game.artifices[selectedItemGameId] = 1
+                    Artifices[selectedItemGameId].use()
                 }
                 else if (game[selectedItemGameCategory][selectedItemGameId]) game[selectedItemGameCategory][selectedItemGameId] += selectedQuantity
                 else game[selectedItemGameCategory][selectedItemGameId] = selectedQuantity
@@ -318,11 +320,11 @@ const CLONE_Game = (function(){
             selectedQuantity = 1
             dom.itemDetails.name.innerHTML = selectedItem.name || ""
             dom.itemDetails.description.innerHTML = selectedItem.description || ""
-            let costString = selectedItem.cost ? ("$" + selectedItem.cost.toFixed(2)) : ""
+            let costString = selectedItem.cost ? (numberToCurrency(selectedItem.cost)) : ""
             dom.itemDetails.cost.innerHTML = costString
             dom.itemDetails.costMultiplier.innerHTML = costString ? (" x " + costString + " = ") : ""
             dom.itemDetails.quantity.innerHTML = selectedItem.cost ? selectedQuantity : ""
-            dom.itemDetails.subtotal.innerHTML = selectedItem.cost ? ("$"+((selectedItem.cost || 0) * selectedQuantity).toFixed(2)) : ""
+            dom.itemDetails.subtotal.innerHTML = selectedItem.cost ? numberToCurrency((selectedItem.cost || 0) * selectedQuantity) : ""
         }
         const init = () => {
             // html pointers
@@ -349,8 +351,8 @@ const CLONE_Game = (function(){
                 augmentations: {
                     container: document.getElementById("store-section-augmentations"),
                 },
-                artifacts: {
-                    container: document.getElementById("store-section-artifacts"),
+                artifices: {
+                    container: document.getElementById("store-section-artifices"),
                 },
                 exit: document.getElementById("store-exit"),
             }
@@ -370,22 +372,23 @@ const CLONE_Game = (function(){
                 dom.augmentations.container.appendChild(dom.augmentations[key])
                 dom.augmentations[key].onclick = event => _setDetails(Augmentations,"unusedAugmentations",key)
             }
-            for (let key in Artifacts) {
-                dom.artifacts[key] = createHtmlElement("div",{
-                    innerHTML: _itemHtml(Artifacts[key])
+            for (let key in Artifices) {
+                dom.artifices[key] = createHtmlElement("div",{
+                    innerHTML: _itemHtml(Artifices[key])
                 })
-                dom.artifacts.container.appendChild(dom.artifacts[key])
-                dom.artifacts[key].onclick = event => _setDetails(Artifacts,"artifacts",key)
+                dom.artifices.container.appendChild(dom.artifices[key])
+                dom.artifices[key].onclick = event => _setDetails(Artifices,"artifices",key)
             }
-            // for (key in Artifacts) {}
+            // for (key in Artifices) {}
             // behavior
             let adjustQuantity = (key,quantity) => {
                 if (!selectedItem.cost) return null
                 if (!selectedQuantity) selectedQuantity = 0
                 selectedQuantity += quantity
                 if (selectedQuantity < 0) selectedQuantity = 0
+                if (selectedItemGameCategory === "artifices" && selectedQuantity > 1) selectedQuantity = 1
                 dom.itemDetails.quantity.innerHTML = selectedQuantity
-                dom.itemDetails.subtotal.innerHTML = "$" + (selectedItem.cost * selectedQuantity).toFixed(2)
+                dom.itemDetails.subtotal.innerHTML = numberToCurrency(selectedItem.cost * selectedQuantity)
             }
             dom.itemDetails.plusTen.onclick = event => adjustQuantity(selectedItem,10)
             dom.itemDetails.plusOne.onclick = event => adjustQuantity(selectedItem,1)
@@ -887,7 +890,15 @@ const CLONE_Game = (function(){
             name: "Deionizer",
             description: "Renders all clones' essential biochemical processes, um... inert. Works over a sizeable radius.",
             cost: 795.99
-        }
+        },
+        csrd: {
+            use: () => {
+                cloneMap.forEach( clone => clone.perish() )
+            },
+            name: "CRQW",
+            description: "The Cascade Resonance Quantum Warhead (CRQW) is the finest world-refreshing armament on the market.  Nothing survives, guaranteed.",
+            cost: 6669.99
+        },
     }
 
     // AUGMENTATIONS
@@ -920,7 +931,7 @@ const CLONE_Game = (function(){
                 clone.maxAge *= 2000
             },
             name: "Organic Transmutation",
-            description: `<div class='storeDescEffect'>Max Age x2000</div>A totally natural process.  While this modification is, well, "difficult" on the clone, the potential rewards are fantastic.  For you.`,
+            description: `<div class='storeDescEffect'>Max Age x2000</div>While this modification is, well, "difficult" on the clone, the potential rewards are fantastic.  For you.`,
             cost: 7000
         },
         immortalitySerum: {
@@ -963,16 +974,50 @@ const CLONE_Game = (function(){
         }
     }
 
-    var Artifacts = {
-        // cobaltFusionEngine
+    var Artifices = {
+        cobaltFusionEngine: {
+            use: () => {
+                game.worldRadius += 2
+                Artist.redraw()
+            },
+            name: "Cobalt Fusion Engine",
+            description: "<div class='storeDescEffect'>World Radius +2</div>Powered by cobalt fusion, the modern standard in energy delivery systems. The fusion chain produces only high-grade Terbium as a byproduct (and some high-intesity beta radiation, but the clones will soak most of that up).",
+            cost: 53000
+        },
+        hyperstaticInductionEngine: {
+            use: () => {
+                game.worldRadius += 3
+                Artist.redraw()
+            },
+            name: "Hyper-static Induction Engine",
+            description: "<div class='storeDescEffect'>World Radius +3</div>",
+        },
+        bioschismaticExtractionEngine: {
+            use: () => {
+                game.worldRadius += 5
+                Artist.redraw()
+            },
+            name: "Bioschismatic Extraction Engine",
+            description: "<div class='storeDescEffect'>World Radius +5</div>Directly harnesses the clones bioenergy.  Just give 'em an extra half scoop of feed at night, they'll be fine.",
+            cost: 9e5,
+        },
         darkEnergyTransmutationEngine: {
             use: () => {
-                game.worldRadius += 20
+                game.worldRadius += 10
                 Artist.redraw()
             },
             name: "Dark Energy Transmutation Engine",
             description: "<div class='storeDescEffect'>World Radius +20</div>Dirty whore of a cocksucker works great!",
-            cost: 1000
+            cost: 23e6
+        },
+        hawkingCipollaExpansionLimitEngine: {
+            use: () => {
+                game.worldRadius += 30
+                Artist.redraw()
+            },
+            name: "Hawking-Cipolla Expansion Limit Engine",
+            description: "<div class='storeDescEffect'>World Radius +20</div>Do NOT let the clones near the glow-zone (and trust us, they're gunna want to wander in there).  They come back... changed.",
+            cost: 75e9
         }
     }
 
@@ -1089,7 +1134,7 @@ var openFile = function(event) {
                 deionizer: 0,
             },
             unusedAugmentations:{},
-            artifacts:{},
+            artifices:{},
             pause:false,
             worldRadius:20
         }
