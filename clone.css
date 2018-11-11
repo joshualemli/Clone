@@ -175,6 +175,26 @@ html,body {
     background-color:#333;
     padding:0.3em;
 }
+
+#menu-readout-topBar {
+    color:#CCC;
+}
+    .menu-readout-topBar-item {
+        margin:0.25em;
+        padding:0.25em;
+        border:1px solid #555;
+    }
+        .menu-readout-topBar-value {
+            font-family:monospace;
+        }
+    #menu-resources {
+    }
+    #menu-production {
+    }
+    #menu-artifices {
+        color:#4C8;
+    }
+
 .menu-readout-countArea {
     text-align:center;
     color:#FFF;

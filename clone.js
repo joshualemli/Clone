@@ -31,7 +31,7 @@
     CLONE JavaScript file
     - - - - - - - - - - - - - - - - - - - */
         const
-        CLONE_VERSION = "0.3.0",
+        CLONE_VERSION = "0.3.2",
         CLONE_RELEASE = "alpha",
         CLONE_EDITION = "lawnmower";
     /* - - - - - - - - - - - - - - - - - - -
@@ -292,6 +292,7 @@ const CLONE_Game = (function(){
                     if (game.artifices[selectedItemGameId]) return null
                     else game.artifices[selectedItemGameId] = 1
                     Artifices[selectedItemGameId].use()
+                    Menu.updateArtifices()
                 }
                 else if (game[selectedItemGameCategory][selectedItemGameId]) game[selectedItemGameCategory][selectedItemGameId] += selectedQuantity
                 else game[selectedItemGameCategory][selectedItemGameId] = selectedQuantity
@@ -365,7 +366,6 @@ const CLONE_Game = (function(){
                 dom.tools[key].onclick = event => _setDetails(Tools,"tools",key)
             }
             for (let key in Augmentations) {
-                if (key[0] === "_") continue // ignore "private" functions
                 dom.augmentations[key] = createHtmlElement("div",{
                     innerHTML: _itemHtml(Augmentations[key])
                 })
@@ -379,7 +379,6 @@ const CLONE_Game = (function(){
                 dom.artifices.container.appendChild(dom.artifices[key])
                 dom.artifices[key].onclick = event => _setDetails(Artifices,"artifices",key)
             }
-            // for (key in Artifices) {}
             // behavior
             let adjustQuantity = (key,quantity) => {
                 if (!selectedItem.cost) return null
@@ -418,9 +417,23 @@ const CLONE_Game = (function(){
             dom.readout.perished.clones.innerHTML = game.perishedClones
             dom.readout.perished.mutant.innerHTML = game.perishedMutant
             dom.readout.perished.foreign.innerHTML = game.perishedForeign
-            // var production = 0
-            // cloneMap.forEach( clone => production += clone.production )
-            // production *= Framerate.fps()
+            dom.readout.resources.innerHTML = numberToCurrency(game.resources)
+            var production = 0
+            cloneMap.forEach( clone => production += clone.production )
+            production *= Framerate.fps()
+            dom.readout.production.innerHTML = `~${numberToCurrency(production)}/s`
+        }
+        const updateArtifices = (clearExisting) => {
+            if (clearExisting) {
+                while (dom.readout.artifices.firstElementChild) dom.readout.artifices.removeChild(dom.readout.artifices.firstElementChild)
+                dom.readout.artificeItems = {}
+            }
+            for (let key in game.artifices) if (!dom.readout.artificeItems[key]) {
+                dom.readout.artificeItems[key] = createHtmlElement("div",{
+                    innerHTML: Artifices[key].name
+                })
+                dom.readout.artifices.appendChild(dom.readout.artificeItems[key])
+            }
         }
         const updateTools = (useInspect) => {
             for (var key in game.tools) dom.tools[key].innerHTML = game.tools[key]
@@ -449,6 +462,10 @@ const CLONE_Game = (function(){
                     openReadoutButton: document.getElementById("menu-openButton-readout"),
                     readout: {
                         container: document.getElementById("menu-readout"),
+                        resources: document.getElementById("menu-resources"),
+                        production: document.getElementById("menu-production"),
+                        artifices: document.getElementById("menu-artifices"),
+                        artificeItems: {},
                         countBar: {
                             clones: document.getElementById("menu-readout-countBar-clones"),
                             mutant: document.getElementById("menu-readout-countBar-mutant"),
@@ -511,7 +528,8 @@ const CLONE_Game = (function(){
                 }
             },
             update : update,
-            updateTools : updateTools
+            updateTools : updateTools,
+            updateArtifices : updateArtifices
         }
     })()
 
@@ -530,14 +548,11 @@ const CLONE_Game = (function(){
             Artist.resize()
         }
         const applyAugmentations = () => {
-            Array.from(dom.augmentations.pending.children).map( e => new Object({
-                key: e.dataset.key,
-                quantity: parseInt(e.children[1].innerHTML)
-            })).forEach( aug => {
-                game.unusedAugmentations[aug.key] -= aug.quantity
-                for (aug.quantity; aug.quantity--;) {
-                    Augmentations[aug.key].use(cloneMap.get(id))
-                }
+            Array.from(dom.augmentations.pending.children).map( e => e.dataset.key ).forEach( augKey => {
+                game.unusedAugmentations[augKey] -= 1
+                let clone = cloneMap.get(id)
+                Augmentations[augKey].use(clone)
+                clone.augmentations[augKey] = 1
             })
             updateAugmentations()
             update()
@@ -557,23 +572,18 @@ const CLONE_Game = (function(){
             while (dom.augmentations.pending.firstElementChild) dom.augmentations.pending.removeChild(dom.augmentations.pending.firstElementChild)
             while (dom.augmentations.applied.firstElementChild) dom.augmentations.applied.removeChild(dom.augmentations.applied.firstElementChild)
             for (let key in game.unusedAugmentations) if (game.unusedAugmentations[key]) {
-                let elem = _augElem(key,game.unusedAugmentations[key])
-                dom.augmentations.available.appendChild(elem)
-                elem.onclick = event => {
+                let available = _augElem(key,game.unusedAugmentations[key])
+                dom.augmentations.available.appendChild(available)
+                available.onclick = event => {
                     if (!game.unusedAugmentations[key]) throw new Error("should not happen")
-                    if (clone.augmentations[key] || parseInt(elem.children[1].innerHTML) === 0) return null
-                    elem.children[1].innerHTML = parseInt(elem.children[1].innerHTML) - 1
-                    let extantPending = Array.from(dom.augmentations.pending.children).find(e=>e.dataset.key==key)
-                    let pending = extantPending || _augElem(key,1)
-                    if (!extantPending) {
-                        dom.augmentations.pending.appendChild(pending)
-                        pending.onclick = () => {
-                            elem.children[1].innerHTML = parseInt(elem.children[1].innerHTML) + 1
-                            pending.children[1].innerHTML = parseInt(pending.children[1].innerHTML) - 1
-                            if (parseInt(pending.children[1].innerHTML) === 0) dom.augmentations.pending.removeChild(pending)
-                        }
+                    if (clone.augmentations[key] || Array.from(dom.augmentations.pending.children).find(e=>e.dataset.key==key) || parseInt(available.children[1].innerHTML) === 0) return null
+                    available.children[1].innerHTML = parseInt(available.children[1].innerHTML) - 1
+                    let pending = _augElem(key,"")
+                    dom.augmentations.pending.appendChild(pending)
+                    pending.onclick = () => {
+                        available.children[1].innerHTML = parseInt(available.children[1].innerHTML) + 1
+                        dom.augmentations.pending.removeChild(pending)
                     }
-                    else pending.children[1].innerHTML = parseInt(pending.children[1].innerHTML) + 1
                 }
             }
             for (var k in clone.augmentations) dom.augmentations.applied.appendChild(_augElem(k,""))
@@ -603,8 +613,8 @@ const CLONE_Game = (function(){
             // always update:
             dom.info.age.innerHTML = clone.age
             dom.info.maxAge.innerHTML = clone.maxAge
-            dom.info.production.innerHTML = clone.production.toFixed(2)
-            dom.info.lifetimeProduction.innerHTML = clone.lifetimeProduction.toFixed(2)
+            dom.info.production.innerHTML = clone.production.toFixed(3)
+            dom.info.lifetimeProduction.innerHTML = clone.lifetimeProduction.toFixed(3)
             dom.info.cloningRate.innerHTML = ((1 - clone.cloningFailureChance)*100).toFixed(2)+ "%"
             dom.info.descendants.innerHTML = clone.descendants
         }
@@ -757,6 +767,9 @@ const CLONE_Game = (function(){
         // clone self
         if (this.age > this.fertileAge && Math.random() > this.cloningFailureChance) return this.clone()
         // production
+        if (this.augmentations.allelopathicDeathTendrils && Math.random() > 0.9) {
+            let p = this._getRandomPosition()
+        }
         game.resources += this.production
         this.lifetimeProduction += this.production
     }
@@ -903,40 +916,50 @@ const CLONE_Game = (function(){
 
     // AUGMENTATIONS
     var Augmentations = {
-        _increment: (clone,key) => {
-            if (!clone.augmentations[key]) clone.augmentations[key] = 1
-            else clone.augmentations[key] += 1
-        },
         ribonucleicInjection: {
             use: clone => {
-                Augmentations._increment(clone,"ribonucleicInjection")
-                clone.maxAge += 250
+                clone.maxAge += 500
             },
             name: "Ribonucleic Injection",
-            description: "<div class='storeDescEffect'>Max Age +250</div>Prolong -- wait, sorry, our mistake -- <i>extend</i> the happy, very happy, life of a clone!",
-            cost: 910
+            description: "<div class='storeDescEffect'>Max Age +500</div>Prolong -- wait, sorry, our mistake -- <i>extend</i> the happy, very happy, life of a clone!",
+            cost: 12.95
+        },
+        psychicHarness: {
+            use: clone => {
+                clone.production += 0.07
+            },
+            name: "Psychic Harness",
+            description: `<div class='storeDescEffect'>Production +0.07</div>Make no mistake, that little "+0.07" is pushing them to their breaking point.  You know, "psychologically" speaking.`,
+            cost: 13.75
         },
         longevityPump: {
             use: clone => {
-                Augmentations._increment(clone,"longevityPump")
-                clone.maxAge *= 2
+                clone.maxAge *= 7
             },
             name: "Longevity Pump",
             description: "<div class='storeDescEffect'>Max Age x2</div>Works great!  And trust us, they barely notice the pump.  In fact, uh, clones love it.  Don't ask them about it though, they're selfish and would probably just want the next step up in our product line and seriously, who can afford that?  Oh but if you could, oh man.  That's the stuff.",
-            cost: 1225
+            cost: 299.95
+        },
+        orificeInterconnectivitySystem: {
+            use: clone => {
+                clone.production *= 7
+            },
+            name: "Orifice Interconnectivity System",
+            description: "<div class='storeDescEffect'>Production x3</div>This system ingeniously interconnects all the clone's orifices, filtering and recycling waste and providing substantial efficiency boosts.  We <i>highly</i> recommend installing a psychic harness prior to this augmentation.",
+            cost: 350
         },
         organicTransmutation: {
             use: clone => {
-                Augmentations._increment(clone,"organicTransmutation")
-                clone.maxAge *= 2000
+                clone.maxAge *= 3
+                clone.productivity *= 3
             },
             name: "Organic Transmutation",
             description: `<div class='storeDescEffect'>Max Age x2000</div>While this modification is, well, "difficult" on the clone, the potential rewards are fantastic.  For you.`,
-            cost: 7000
+            cost: 1999.99
         },
+
         immortalitySerum: {
             use: clone => {
-                Augmentations._increment(clone,"immortalitySerum")
                 clone.maxAge = Infinity
                 clone._color = "rgb(255,215,0)";
                 clone.draw()
@@ -947,7 +970,6 @@ const CLONE_Game = (function(){
         },
         geneticResequencingNodules: {
             use: clone => {
-                Augmentations._increment(clone,"geneticResequencingNodules")
             },
             name: "Genetic Resequencing Nodules",
             description: "Only the finest implanted nodules crafted from 100% reprocessed... material.  Allows clone's organic sequences to stay intact, preventing mutant offspring (is that a paradox? hahahaha....).",
@@ -955,7 +977,6 @@ const CLONE_Game = (function(){
         },
         exophagicAfterbirth: {
             use: clone => {
-                Augmentations._increment(clone,"exophagicAfterbirth")
             },
             name: "Exophagic Afterbirth",
             description: "How to put it?  Ahhh... Part of the, er, cloning process, umm, allows dissimilar clones to be *ahem* consumed. You may opt to not watch this miracle of science. Actually, nobody should see this.  In fact, this augmentation automagically blinds the clone.  It was the only humane thing to do.",
@@ -966,10 +987,9 @@ const CLONE_Game = (function(){
         // allelopathicOffspring: {},
         allelopathicDeathTendrils: {
             use: clone => {
-                Augmentations._increment(clone,"allelopathicDeathTendrils")
             },
             name: "Allelopathic Death Tendrils",
-            description: "Gives your clone an automatic defense net that will strike out at dissimilar clones.",
+            description: "Gives your clone an automatic defense net that will strike out at dissimilar clones. What could go wrong?",
             cost: 500000
         }
     }
@@ -990,7 +1010,8 @@ const CLONE_Game = (function(){
                 Artist.redraw()
             },
             name: "Hyper-static Induction Engine",
-            description: "<div class='storeDescEffect'>World Radius +3</div>",
+            description: "<div class='storeDescEffect'>World Radius +3</div>We believe no stone should be left unturned, and we kicked quite the ant-nest with this one.  Highly unstable but wildly successful (probably because we're sellin' em cheap).",
+            cost: 195000
         },
         bioschismaticExtractionEngine: {
             use: () => {
@@ -1141,6 +1162,7 @@ var openFile = function(event) {
         new Sprites.worldBoundary()
         Artist.resize()
         Menu.update()
+        Menu.updateArtifices(true)
         Framerate.reset()
         Input.enable()
         gameplay()

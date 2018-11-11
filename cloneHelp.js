@@ -28,138 +28,17 @@
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-    CLONE JavaScript file -- "Clone names"
-    v2
+    CLONE JavaScript help file
+    v0
 
 
 */
 
 "use strict";
 
-const CLONE_NAMES = {
+const CloneHelp = (function(){
 
-FIRST:`
+    // this file is a placeholder
 
-Aziz
-B'ki
-Burdo
-Ckally
-Chamwin
-Chuz
-Daxia
-Dwik
-Dogen
-Elbert
-Ferble
-Fosley
-Glag
-Gorg
-Heinril
-Ibben
-Iidor
-Justice
-Kah'les
-Klahn
-Lasly
-LoreMonson
-Mackle
-Mirnum
-Nin
-Nurbert
-Nrylar
-Ogden
-Oz
-Peter
-Queequeg
-Ricker
-Sandsky
-Simril
-Trigger
-Urizen
-Vio
-Wo-xio
-Xor
-Yal
-Y'po
-Zumley
+})()
 
-`,MIDDLE:`
-
-Ansibel
-Bartock
-Buddy
-Critin
-Dobek
-Drask
-Eribus
-Fiz
-Frip
-Gojir
-Hauser
-Iomi
-Joruun
-Klurz
-Kym
-Llamama
-Mohtel
-Naal
-Nash
-Ohm
-Pickles
-Prestoni
-Quinn
-Rho
-Rhemmy
-Sidar
-Toonses
-Trucker
-Ulvinar
-Von
-Vor
-Wexley
-Xim
-Yatha
-Zardak
-
-`,LAST:`
-
-Arden
-Barden
-Cage
-Cardon
-Dardon
-Egger
-Flohh
-Genner
-Gnoering
-Hovanek
-Immerman
-Ipswich
-Jorlatz
-Jugson
-Jwenks
-Koller
-Krizler
-Lobo
-Mog
-Murden
-Narlson
-Nkibitson
-Ord
-Oxby
-Qi-xiao
-Rhevkin
-Ratjack
-Sohbud
-Szklyzky
-Talax
-Tugzak
-Ulthu
-Varrek
-Vrakenthal
-Weazlough
-Xanaxar
-Yalman
-Z'kar
-
-`};(function(){for(var k in CLONE_NAMES)CLONE_NAMES[k]=CLONE_NAMES[k].split(/\s+/g).filter(n=>n)})()

@@ -41,6 +41,7 @@
         <link href="https://fonts.googleapis.com/css?family=VT323" rel="stylesheet">
         <!-- CLONE application files -->
         <link rel="stylesheet" href="clone.css">
+        <script src="cloneHelp.js"></script>
         <script src="cloneNames.js"></script>
         <script src="clone.js"></script>
     </head>
@@ -59,23 +60,34 @@
                     <div id="menu-openButton-readout" class="menu-button">Readout</div>
                     <div id="menu-openButton-tools" class="menu-button">Tools</div>
                 </div>
-                <div id="menu-readout" class="flexRow occlude">
-                    <div id="menu-artifices"></div>
-                    <div id="menu-resources"></div>
-                    <div id="menu-readout-countBar" class="flexColumn menu-readout-countArea">
-                        <div>living</div>
-                        <div class="flexRow">
-                            <div id="menu-readout-countBar-clones" class="bg-clones menu-readout-countBar-count">0</div>
-                            <div id="menu-readout-countBar-foreign" class="bg-foreign menu-readout-countBar-count">0</div>
-                            <div id="menu-readout-countBar-mutant" class="bg-mutant menu-readout-countBar-count">0</div>
+                <div id="menu-readout" class="flexColumn occlude">
+                    <div id="menu-readout-topBar" class="flexRow flexWrap">
+                        <div class="menu-readout-topBar-item flexColumn">
+                            <div>resources</div>
+                            <div id="menu-resources" class="menu-readout-topBar-value"></div>
                         </div>
+                        <div class="menu-readout-topBar-item flexColumn">
+                            <div>production</div>
+                            <div id="menu-production" class="menu-readout-topBar-value"></div>
+                        </div>
+                        <div id="menu-artifices"></div>
                     </div>
-                    <div id="menu-readout-perished" class="flexColumn menu-readout-countArea">
-                        <div>perished</div>
-                        <div class="flexRow">
-                            <div id="menu-readout-perishedClones" class="bg-clones menu-readout-perishedValue">0</div>
-                            <div id="menu-readout-perishedForeign" class="bg-foreign menu-readout-perishedValue">0</div>
-                            <div id="menu-readout-perishedMutant" class="bg-mutant menu-readout-perishedValue">0</div>
+                    <div class="flexRow">
+                        <div id="menu-readout-countBar" class="flexColumn menu-readout-countArea">
+                            <div>living</div>
+                            <div class="flexRow">
+                                <div id="menu-readout-countBar-clones" class="bg-clones menu-readout-countBar-count">0</div>
+                                <div id="menu-readout-countBar-foreign" class="bg-foreign menu-readout-countBar-count">0</div>
+                                <div id="menu-readout-countBar-mutant" class="bg-mutant menu-readout-countBar-count">0</div>
+                            </div>
+                        </div>
+                        <div id="menu-readout-perished" class="flexColumn menu-readout-countArea">
+                            <div>perished</div>
+                            <div class="flexRow">
+                                <div id="menu-readout-perishedClones" class="bg-clones menu-readout-perishedValue">0</div>
+                                <div id="menu-readout-perishedForeign" class="bg-foreign menu-readout-perishedValue">0</div>
+                                <div id="menu-readout-perishedMutant" class="bg-mutant menu-readout-perishedValue">0</div>
+                            </div>
                         </div>
                     </div>
                     <div id="menu-readout-production"></div>
