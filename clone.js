@@ -460,8 +460,8 @@ const CLONE_Game = (function(){
                 dom = {
                     pauseWarningBar: document.getElementById("pauseWarningBar"),
                     callsign: document.getElementById("menu-callsign"),
-                    saveButton: document.getElementById(""),
-                    loadButton: document.getElementById(""),
+                    saveButton: document.getElementById("menu-saveButton"),
+                    loadButton: document.getElementById("menu-loadButton"),
                     openShopButton: document.getElementById("menu-openButton-shop"),
                     openToolsButton: document.getElementById("menu-openButton-tools"),
                     openReadoutButton: document.getElementById("menu-openButton-readout"),
@@ -519,6 +519,17 @@ const CLONE_Game = (function(){
                     dom.tools[key] = toolElement.children[1]
                 }
                 // set behavior
+                dom.saveButton.onclick = save
+                dom.loadButton.onclick = () => {
+                    document.getElementById("loadDialog").classList.remove("occlude")
+                }
+                document.getElementById("loadDialog-exit").onclick = () => {
+                    document.getElementById("loadDialog").classList.add("occlude")
+                }
+                document.getElementById("loadFileInput").onchange = event => {
+                    console.log(event)
+                    readLoadFile(event)
+                }
                 dom.openShopButton.onclick = Store.open
                 dom.openReadoutButton.onclick = () => {
                     dom.openReadoutButton.classList.toggle("menu-openButton-opened")
@@ -663,8 +674,8 @@ const CLONE_Game = (function(){
         this.xHash = xHash
         this.yHash = yHash
         this.id = `${this.xHash.toString()}_${this.yHash.toString()}`
-        this.uid = `${this.id}_${game.steps.toString()}`
-        this.yOdd = Math.abs(this.yHash%2) === 1 ? 1 : 0
+        this.uid = override.uid || `${this.id}_${game.steps.toString()}`
+        this.yOdd = override.yOdd || Math.abs(this.yHash%2) === 1 ? 1 : 0
         this.worldPosition = this.getWorldPosition()
         // out of bounds or exists
         if (
@@ -675,41 +686,46 @@ const CLONE_Game = (function(){
             delete this.id
             return null
         }
-        this.name = [
+        this.name = override.name || [
             this.nameLexicon.FIRST[Math.floor(Math.random()*this.nameLexicon.FIRST.length)],
             this.nameLexicon.MIDDLE[Math.floor(Math.random()*this.nameLexicon.MIDDLE.length)],
             this.nameLexicon.LAST[Math.floor(Math.random()*this.nameLexicon.LAST.length)]
         ].join(" ")
-        this.age = 0
+        this.age = override.age || 0
         this.maxAge = override.maxAge || 50
         this.generation = override.generation || 1
         // type
         this.mutant = override.mutant ? true : (Math.random() > 1 - this.generation / 1e8 ? true : false)
         this.foreign = override.foreign || false
         // augmentations
-        this.augmentations = {}
+        this.augmentations = override.augmentations || {}
         // cloning
         this.fertileAge = override.fertileAge || 20
-        this.cloningFailureChance = override.cloningFailureChance || 0.965
-        if (this.mutant) this.cloningFailureChance *= 0.99
+        this.cloningFailureChance = override.cloningFailureChance || (0.965 * (this.mutant ? 0.99 : 1))
         // production
-        this.production = (this.mutant||this.foreign) ? 0 : (override.production || 0.005)
-        this.lifetimeProduction = 0
-        this.descendants = 0
+        this.production = override.production || ( (this.mutant||this.foreign) ? 0 : (override.production || 0.005) )
+        this.lifetimeProduction = override.lifetimeProduction || 0
+        this.descendants = override.descendants || 0
         this.radius = this.maxRadius*0.7
         this._drawn = false
-        if (this.mutant) {
-            this._color = `rgb(${Math.floor(Math.random()*70+85)},${Math.floor(Math.random()*20)},${Math.floor(Math.random()*70+85)})`
-            game.extantMutant += 1
+        // was from a load (had a UID)
+        if (override.uid) {
+            this._color = override._color
         }
-        else if (this.foreign) {
-            this._color = `rgb(${Math.floor(Math.random()*90+100)},${Math.floor(Math.random()*20)},${Math.floor(Math.random()*20)})`
-            game.extantForeign += 1
-        }
+        // overrides may exist, but this is a new clone)
         else {
-            this._color = `rgb(${Math.floor(Math.random()*20)},${Math.floor(Math.random()*100 + 110)},${Math.floor(Math.random()*80)})`
-            game.extantClones += 1
-            game.perishedClones += 1
+            if (this.mutant) {
+                this._color = `rgb(${Math.floor(Math.random()*70+85)},${Math.floor(Math.random()*20)},${Math.floor(Math.random()*70+85)})`
+                game.extantMutant += 1
+            }
+            else if (this.foreign) {
+                this._color = `rgb(${Math.floor(Math.random()*90+100)},${Math.floor(Math.random()*20)},${Math.floor(Math.random()*20)})`
+                game.extantForeign += 1
+            }
+            else {
+                this._color = `rgb(${Math.floor(Math.random()*20)},${Math.floor(Math.random()*100 + 110)},${Math.floor(Math.random()*80)})`
+                game.extantClones += 1
+            }
         }
         cloneMap.set(this.id,this)
         this.draw()
@@ -1073,11 +1089,6 @@ const CLONE_Game = (function(){
     // maths of urizen - 49/50 mutation rate (clones)
     // light of urizen - 9/10 mutation rate (clones)
     // labor of urizen - 1/2 mutation rate
-    // cobalt fusion engine - world radius +2
-    // hyperstate induction engine - world radius +3
-    // bioschismatic extraction engine - world radius +5
-    // dark energy transmutation engine - world radius +10
-    // hawking-cipolla expansion limit engine - world radius +20
     // link stone - random clone spawns
     // aran stone - smiting bolt infinite ammo ???
     // freeman stone - double production and reproduction rate, half lifespan !!! ultimate
@@ -1115,7 +1126,6 @@ const CLONE_Game = (function(){
     const save = () => {
         var saveData = JSON.stringify({
             cloneMap: Array.from(cloneMap).map( clone => clone[1] ),
-            spriteMap: Array.from(spriteMap).map( sprite => sprite[1] ),
             view:view,
             game:game
         })
@@ -1125,29 +1135,19 @@ const CLONE_Game = (function(){
         document.body.removeChild(anchor)
         delete anchor
     }
-    const load = saveData => {
-/*
-var openFile = function(event) {
-        var input = event.target;
-        var reader = new FileReader();
+    const readLoadFile = () => {
+        var input = document.getElementById("loadFileInput")
+        var reader = new FileReader()
         reader.onload = function(){
-          var text = reader.result;
-          var node = document.getElementById('output');
-          node.innerText = text;
-          console.log(reader.result.substring(0, 200));
-        };
-        reader.readAsText(input.files[0]);
-      };
-    </script>
-    </head>
-    <body>
-    <input type='file' accept='text/plain' onchange='openFile(event)'><br>
-*/
+            load(JSON.parse(atob(reader.result)))
+            document.getElementById("loadDialog").classList.add("occlude")
+        }
+        reader.readAsText(input.files[0])
+    }
+
+    const load = saveData => {
         saveData = saveData || {}
         cloneMap = new Map()
-        if (saveData.cloneMap) saveData.cloneMap.forEach( cloneInfo => {
-            new Clone(cloneInfo.xHash,cloneInfo.yHash,cloneInfo)
-        })
         spriteMap = new Map()
         view = saveData.view || {
             scale:7,
@@ -1176,6 +1176,9 @@ var openFile = function(event) {
             pause:false,
             worldRadius:20
         }
+        if (saveData.cloneMap) saveData.cloneMap.forEach( cloneInfo => {
+            new Clone(cloneInfo.xHash,cloneInfo.yHash,cloneInfo)
+        })
         new Sprites.worldBoundary()
         Artist.resize()
         Menu.update()
@@ -1199,5 +1202,22 @@ var openFile = function(event) {
 
 window.onload = CLONE_Game
 
-
+        
+/*
+var openFile = function(event) {
+        var input = event.target;
+        var reader = new FileReader();
+        reader.onload = function(){
+          var text = reader.result;
+          var node = document.getElementById('output');
+          node.innerText = text;
+          console.log(reader.result.substring(0, 200));
+        };
+        reader.readAsText(input.files[0]);
+      };
+    </script>
+    </head>
+    <body>
+    <input type='file' accept='text/plain' onchange='openFile(event)'><br>
+*/
 

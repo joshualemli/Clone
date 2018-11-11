@@ -46,6 +46,15 @@
         <script src="clone.js"></script>
     </head>
     <body>
+        <div id="loadDialog" class="occlude">
+            <div id="loadDialog-inner" class="flexColumn">
+                <div id="loadDialog-exit" class="loadDialog-justify">[CANCEL]</div>
+                <label id="loadDialog-label" class="loadDialog-justify flexColumn">
+                    <div>Select your load file</div>
+                    <input type="file" id="loadFileInput">
+                </label>
+            </div>
+        </div>
         <div id="pauseWarningBar" class="occlude">PAUSED</div>
         <!-- GAMEPLAY CONTAINER -->
         <div id="container" class="flexColumn">

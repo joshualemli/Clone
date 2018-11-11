@@ -71,7 +71,29 @@ html,body {
     text-align:center;
     color:black;
 }
-
+#loadDialog {
+    position:fixed;
+    z-index:1000;
+    top:0;
+    left:0;
+    width:100vw;
+    height:100vh;
+    background-color:#0007;
+    color:#0F0;
+}
+    #loadDialog-inner {
+        height:100%;
+        flex:1 1 auto;
+        justify-content:center;
+        align-items:center;
+    }
+    .loadDialog-justify {
+        display:flex;
+        flex:0 0 auto;
+        padding:1em;
+        margin:1em;
+        background:#222;
+    }
 
 #container {
     flex:0 0 0;
