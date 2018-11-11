@@ -135,14 +135,17 @@ const CLONE_Game = (function(){
         const mainCanvasMouseDownHandler = event => {
             let x = (event.offsetX - view.screenSize.x/2) / view.scale + view.xPos
             let y = (view.screenSize.y/2 - event.offsetY) / view.scale + view.yPos
-            if (Math.sqrt(x*x+y*y) > game.worldRadius + 0.5) return console.log("click out of world bounds")
+            console.log(x,y)
+            if (Math.sqrt(x*x+y*y) > game.worldRadius + 0.5) {
+                CloneUI.clear()
+                return console.log("click out of world bounds")
+            }
             let yHash = Math.round(y / Clone.prototype.yMultiplier)
             let yOdd = yHash % 2 !== 0 ? Clone.prototype.xStagger : 0
             let xHash = Math.round((x - yOdd) / Clone.prototype.xMultiplier)
             switch (clickMode) {
                 case 0: // Inspect
                     let id = `${xHash}_${yHash}`
-                    console.log(id)
                     if (cloneMap.has(id)) CloneUI.update(id)
                     else CloneUI.clear()
                     break
@@ -928,6 +931,7 @@ const CLONE_Game = (function(){
         csrd: {
             use: () => {
                 cloneMap.forEach( clone => clone.perish() )
+                return true
             },
             name: "CRQW",
             description: "The Cascade Resonance Quantum Warhead (CRQW) is the finest world-refreshing armament on the market.  Nothing survives, guaranteed.",
