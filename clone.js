@@ -31,7 +31,7 @@
     CLONE JavaScript file
     - - - - - - - - - - - - - - - - - - - */
         const
-        CLONE_VERSION = "0.3.2",
+        CLONE_VERSION = "0.3.3",
         CLONE_RELEASE = "alpha",
         CLONE_EDITION = "lawnmower";
     /* - - - - - - - - - - - - - - - - - - -
@@ -131,6 +131,7 @@ const CLONE_Game = (function(){
             state[action] = true
             toggle(action)
         }
+        console.log("y seems too high on zoom out")
         const mainCanvasMouseDownHandler = event => {
             let x = (event.offsetX - view.screenSize.x/2) / view.scale + view.xPos
             let y = (view.screenSize.y/2 - event.offsetY) / view.scale + view.yPos
@@ -937,7 +938,7 @@ const CLONE_Game = (function(){
                 clone.maxAge *= 7
             },
             name: "Longevity Pump",
-            description: "<div class='storeDescEffect'>Max Age x2</div>Works great!  And trust us, they barely notice the pump.  In fact, uh, clones love it.  Don't ask them about it though, they're selfish and would probably just want the next step up in our product line and seriously, who can afford that?  Oh but if you could, oh man.  That's the stuff.",
+            description: "<div class='storeDescEffect'>Max Age x7</div>Works great!  And trust us, they barely notice the pump.  In fact, uh, clones love it.  Don't ask them about it though, they're selfish and would probably just want the next step up in our product line and seriously, who can afford that?  Oh but if you could, oh man.  That's the stuff.",
             cost: 299.95
         },
         orificeInterconnectivitySystem: {
@@ -945,16 +946,16 @@ const CLONE_Game = (function(){
                 clone.production *= 7
             },
             name: "Orifice Interconnectivity System",
-            description: "<div class='storeDescEffect'>Production x3</div>This system ingeniously interconnects all the clone's orifices, filtering and recycling waste and providing substantial efficiency boosts.  We <i>highly</i> recommend installing a psychic harness prior to this augmentation.",
+            description: "<div class='storeDescEffect'>Production x7</div>This system ingeniously interconnects all the clone's orifices, filtering and recycling waste and providing substantial efficiency boosts.  We <i>highly</i> recommend installing a psychic harness prior to this augmentation.",
             cost: 350
         },
         organicTransmutation: {
             use: clone => {
                 clone.maxAge *= 3
-                clone.productivity *= 3
+                clone.production *= 3
             },
             name: "Organic Transmutation",
-            description: `<div class='storeDescEffect'>Max Age x2000</div>While this modification is, well, "difficult" on the clone, the potential rewards are fantastic.  For you.`,
+            description: `<div class='storeDescEffect'>Max Age x3</div><div class='storeDescEffect'>Production x3</div>While this modification is, well, "difficult" on the clone, the potential rewards are fantastic.  For you.`,
             cost: 1999.99
         },
 
