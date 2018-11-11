@@ -66,8 +66,9 @@ html,body {
     bottom:0;
     left:0;
     width:100%;
-    background:#CC5;
+    background:linear-gradient(#DD3,#FF0);
     font-family: 'VT323', monospace;
+    font-weight:bold;
     text-align:center;
     color:black;
 }
@@ -354,7 +355,13 @@ html,body {
     font-size:0.8em;
     color:#AAA;
 }
-
+#cloneUI-close {
+    width:100%;
+    justify-content:center;
+    background:linear-gradient(#FFFA,#000A);
+    color:#FFF;
+    margin-top:0.6em;
+}
 
 
 

@@ -642,6 +642,7 @@ const CLONE_Game = (function(){
         const init = () => {
             dom = {
                 container: document.getElementById("cloneUI"),
+                close: document.getElementById("cloneUI-close"),
                 augmentations: {
                     available: document.getElementById("cloneUI-augmentations-available"),
                     pending: document.getElementById("cloneUI-augmentations-pending"),
@@ -662,6 +663,7 @@ const CLONE_Game = (function(){
             }
             // behavior
             dom.augmentations.applyButton.onclick = applyAugmentations
+            dom.close.onclick = hide
         }
         return {
             init : init,
