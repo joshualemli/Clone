@@ -52,6 +52,7 @@ Dogen
 Elbert
 Ferble
 Fosley
+Frodrik
 Glag
 Gorg
 Heinril
@@ -86,6 +87,7 @@ Zumley
 `,MIDDLE:`
 
 Ansibel
+Aygor
 Bartock
 Buddy
 Critin
@@ -125,10 +127,12 @@ Zardak
 
 Arden
 Barden
+Braylor
 Cage
 Cardon
 Dardon
 Egger
+Eastwood
 Flohh
 Genner
 Gnoering

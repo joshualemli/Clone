@@ -414,11 +414,13 @@ html,body {
 }
 
 #store-yourResources {
-    margin:0.5rem 0;
-    font-size:1.5rem;
+    margin:0.6rem 0 0 0;
+    font-size:1.4rem;
 }
 #store-yourResources-value {
     font-family:monospace;
+    font-size:1.5rem;
+    font-weight:bold;
     color:#CFC;
 }
 .store-section {
@@ -441,6 +443,13 @@ html,body {
 }
 #store-itemDetails-topBar {
     justify-content:space-between;
+}
+#store-itemDetails-basics {
+    flex:3 1 auto;
+}
+#store-itemDetails-ownedArea {
+    flex:1 1 auto;
+    margin-left:2em;
 }
 #store-itemDetails-icon {}
 #store-itemDetails-name {
@@ -465,10 +474,8 @@ html,body {
         font-style:italic;
     }
 #store-itemDetails-purchaseArea {
-    margin-top:0.75em;
-    padding:0.25em;
-    border:1px solid #777;
-    background:#111;
+    justify-content:center;
+    align-items:center;
     align-self:start;
 }
     #store-itemDetails-arrowsContainer {
@@ -476,41 +483,35 @@ html,body {
         padding:0.5em;
         border-radius:1em;
     }
+#store-itemDetails-costCalculation {
+    margin:0.8em;
+    font-size:1.5rem;
+    font-family:monospace;
+    font-weight:bold;
+    color:#F33;
+}
     #store-itemDetails-quantity {
-        font-family:monospace;
-        padding:0 0.5em;
-        font-size:1.5rem;
-        color:#FFF;
-    }
-    #store-itemDetails-costMultiplier {
-        font-family:monospace;
-        padding:0 0.5em;
-        font-size:1.5rem;
-        color:#AAA;
+        margin-right:1em;
     }
     #store-itemDetails-subtotal {
-        font-family:monospace;
-        padding:0 0.5em;
-        font-size:1.5rem;
-        font-weight:bold;
-        color:#F55;
     }
 .store-itemDetails-quantityArrow {
     text-align:center;
     padding:0.2em;
     margin:0.2em;
-    color:rgb(197, 197, 197);
+    color:rgb(156, 163, 235);
+    cursor:pointer;
 }
 .store-itemDetails-quantityArrow:hover {
-    color:rgb(115, 255, 0);
+    color:rgb(86, 139, 255);
 }
 .store-itemDetails-quantityArrow:active {
-    color:rgb(51, 184, 51);
+    color:rgb(28, 0, 185);
 }
 #store-itemDetails-purchase {
     padding:0.3em;
-    border:1px solid #777;
-    background-color:#CCC;
+    border:1px solid #333;
+    background-color:#AAA;
     align-self:center;
     width:calc(100% - 0.8em);
     text-align:center;
@@ -520,7 +521,7 @@ html,body {
 }
 #store-itemDetails-purchase:hover {
     color:#000;
-    border-color:#FFF;
+    border-color:#000;
 }
 
 

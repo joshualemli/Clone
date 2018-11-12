@@ -330,7 +330,6 @@ const CLONE_Game = (function(){
             dom.itemDetails.description.innerHTML = selectedItem.description || ""
             let costString = selectedItem.cost ? (numberToCurrency(selectedItem.cost)) : ""
             dom.itemDetails.cost.innerHTML = costString
-            dom.itemDetails.costMultiplier.innerHTML = costString ? (" x " + costString + " = ") : ""
             dom.itemDetails.quantity.innerHTML = selectedItem.cost ? selectedQuantity : ""
             dom.itemDetails.subtotal.innerHTML = selectedItem.cost ? numberToCurrency((selectedItem.cost || 0) * selectedQuantity) : ""
             _setOwnedQuantity()
@@ -352,7 +351,6 @@ const CLONE_Game = (function(){
                     plusOne: document.getElementById("store-itemDetails-plusOne"),
                     cost: document.getElementById("store-itemDetails-cost"),
                     quantity: document.getElementById("store-itemDetails-quantity"),
-                    costMultiplier: document.getElementById("store-itemDetails-costMultiplier"),
                     subtotal: document.getElementById("store-itemDetails-subtotal"),
                     purchase: document.getElementById("store-itemDetails-purchase")
                 },
@@ -428,7 +426,7 @@ const CLONE_Game = (function(){
             var production = 0
             cloneMap.forEach( clone => production += clone.production )
             production *= Framerate.fps()
-            dom.readout.production.innerHTML = `~${numberToCurrency(production)}/s`
+            dom.readout.production.innerHTML = `${numberToCurrency(production)}/s`
         }
         const updateArtifices = (clearExisting) => {
             if (clearExisting) {
@@ -762,6 +760,7 @@ const CLONE_Game = (function(){
         return {x:xHash,y:yHash}
     }
     Clone.prototype.clone = function(){
+        if (this.mutant && this.generation > 600 * Math.random()) return null
         var attempted = new Array(6).fill(0)
         var hash
         while (true) {
@@ -974,7 +973,7 @@ const CLONE_Game = (function(){
                 clone.production *= 7
             },
             name: "Orifice Interconnectivity System",
-            description: "<div class='storeDescEffect'>Production x7</div>This system ingeniously interconnects all the clone's orifices, filtering and recycling waste and providing substantial efficiency boosts.  We <i>highly</i> recommend installing a psychic harness prior to this augmentation.",
+            description: "<div class='storeDescEffect'>Production x7</div>This system ingeniously interconnects a clone's orifices, filtering and recycling waste directly back into the clone. Ah, the circle of life!",
             cost: 350
         },
         organicTransmutation: {
