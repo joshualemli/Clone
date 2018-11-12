@@ -199,15 +199,13 @@ html,body {
     padding:0.3em;
 }
 
-
-    .menu-readout-topBar-item {
+    .menu-readout-item {
         align-items:center;
         margin:0.25em;
         padding:0.25em;
-        border:1px solid #555;
         color:#FFF;
     }
-        .menu-readout-topBar-value {
+        .menu-readout-item-value {
             font-family:monospace;
         }
     #menu-resources {
@@ -221,6 +219,7 @@ html,body {
 .menu-readout-countArea {
     text-align:center;
     color:#FFF;
+    margin:0 0.25em;
 }
 
 #menu-readout-countBar {
@@ -237,7 +236,7 @@ html,body {
     }
 
 #menu-readout-perished {
-    padding-left:2vw;
+    padding-left:0.5rem;
     flex:1 1 auto;
     color:#FFF;
 }
@@ -460,6 +459,7 @@ html,body {
     margin-left:1em;
 }
 #store-itemDetails-cost {
+    margin-bottom:0.5em;
     font-size:1.5rem;
     color:rgb(66, 164, 255);
 }

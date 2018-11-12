@@ -56,13 +56,14 @@
             </div>
         </div>
         <div id="pauseWarningBar" class="occlude">PAUSED</div>
+        <div id="fps" style="position:fixed;bottom:0;right:0;z-index:2000;color:#00F;"></div>
         <!-- GAMEPLAY CONTAINER -->
         <div id="container" class="flexColumn">
             <!-- GAMEPLAY MENU -->
             <div id="menu" class="flexColumn">
                 <div id="menu-persistent" class="flexRow">
                     <div id="menu-about">?</div>
-                    <input id="menu-callsign" value="Captain Clone">
+                    <input id="menu-callsign" value="">
                     <div id="menu-saveButton" class="menu-button">SAVE</div>
                     <div id="menu-loadButton" class="menu-button">LOAD</div>
                     <div id="menu-openButton-shop" class="menu-button">$$$ The Money Pit $$$</div>
@@ -72,13 +73,13 @@
                 <div id="menu-readout" class="flexColumn occlude">
                     <div id="menu-artifices"></div>
                     <div class="flexRow">
-                        <div class="menu-readout-topBar-item flexColumn">
+                        <div class="menu-readout-item flexColumn">
                             <div>resources</div>
-                            <div id="menu-resources" class="menu-readout-topBar-value"></div>
+                            <div id="menu-resources" class="menu-readout-item-value"></div>
                         </div>
-                        <div class="menu-readout-topBar-item flexColumn">
+                        <div class="menu-readout-item flexColumn">
                             <div>production</div>
-                            <div id="menu-production" class="menu-readout-topBar-value"></div>
+                            <div id="menu-production" class="menu-readout-item-value"></div>
                         </div>
                         <div id="menu-readout-countBar" class="flexColumn menu-readout-countArea">
                             <div>living</div>
@@ -114,6 +115,10 @@
                     <div class="cloneUI-info-item">
                         <div class="cloneUI-info-item-label">Max age</div>
                         <div id="cloneUI-info-maxAge">-</div>
+                    </div>
+                    <div class="cloneUI-info-item">
+                        <div class="cloneUI-info-item-label">Fertile Age</div>
+                        <div id="cloneUI-info-fertileAge">-</div>
                     </div>
                     <div class="cloneUI-info-item">
                         <div class="cloneUI-info-item-label">Generation</div>

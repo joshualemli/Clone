@@ -31,7 +31,7 @@
     CLONE JavaScript file
     - - - - - - - - - - - - - - - - - - - */
         const
-        CLONE_VERSION = "0.3.4",
+        CLONE_VERSION = "0.3.5",
         CLONE_RELEASE = "alpha",
         CLONE_EDITION = "lawnmower";
     /* - - - - - - - - - - - - - - - - - - -
@@ -96,7 +96,8 @@ const CLONE_Game = (function(){
             "ArrowLeft" : "panLeft",
             "ArrowRight" : "panRight",
             " " : "pause",
-            "0" : "recenterView"
+            "0" : "recenterView",
+            "s" : "openShop"
         }
         var state = {}
         const toggle = action => {
@@ -111,6 +112,8 @@ const CLONE_Game = (function(){
                     view.scale = 7
                     Artist.redraw()
                     break
+                case "openShop":
+                    Store.toggle()
             }
         }
         const apply = () => {
@@ -274,6 +277,10 @@ const CLONE_Game = (function(){
         var dom, resumeGameplayOnClose, selectedQuantity, selectedItem, selectedItemGameCategory, selectedItemGameId
         const _setResourcesHtml = () => dom.resources.innerHTML = numberToCurrency(game.resources)
         const _setOwnedQuantity = () => dom.itemDetails.owned.innerHTML = (selectedItemGameCategory&&selectedItemGameId&&game[selectedItemGameCategory][selectedItemGameId]) ? game[selectedItemGameCategory][selectedItemGameId] : "0"
+        const _closeStoreListenerCallback = function(event) {
+            window.removeEventListener("keydown",_closeStoreListenerCallback)
+            close()
+        }
         const open = () => {
             if (!game.pause) resumeGameplayOnClose = game.pause = true
             else resumeGameplayOnClose = false
@@ -281,6 +288,7 @@ const CLONE_Game = (function(){
             _setResourcesHtml()
             dom.container.classList.remove("occlude")
             Input.disable()
+            window.addEventListener("keydown",_closeStoreListenerCallback)
         }
         const close = () => {
             Input.enable()
@@ -405,7 +413,8 @@ const CLONE_Game = (function(){
             init : init,
             open : open,
             close : close,
-            confirm : confirm
+            confirm : confirm,
+            toggle : () => Store[dom.container.classList.contains("occlude") ? "open" : "close"]()
         }
     })()
 
@@ -519,6 +528,7 @@ const CLONE_Game = (function(){
                     dom.tools[key] = toolElement.children[1]
                 }
                 // set behavior
+                dom.callsign.oninput = event => game.callsign = event.target.value
                 dom.saveButton.onclick = save
                 dom.loadButton.onclick = () => {
                     document.getElementById("loadDialog").classList.remove("occlude")
@@ -568,10 +578,11 @@ const CLONE_Game = (function(){
         }
         const applyAugmentations = () => {
             Array.from(dom.augmentations.pending.children).map( e => e.dataset.key ).forEach( augKey => {
-                game.unusedAugmentations[augKey] -= 1
                 let clone = cloneMap.get(id)
                 Augmentations[augKey].use(clone)
                 clone.augmentations[augKey] = 1
+                game.unusedAugmentations[augKey] -= 1
+                console.log(game)
             })
             updateAugmentations()
             update()
@@ -632,9 +643,10 @@ const CLONE_Game = (function(){
             // always update:
             dom.info.age.innerHTML = clone.age
             dom.info.maxAge.innerHTML = clone.maxAge
-            dom.info.production.innerHTML = clone.production.toFixed(3)
+            dom.info.fertileAge.innerHTML = clone.fertileAge
+            dom.info.production.innerHTML = "$"+clone.production.toString()
             dom.info.lifetimeProduction.innerHTML = clone.lifetimeProduction.toFixed(3)
-            dom.info.cloningRate.innerHTML = ((1 - clone.cloningFailureChance)*100).toFixed(2)+ "%"
+            dom.info.cloningRate.innerHTML = `${((1 - clone.cloningFailureChance)*100).toFixed(2)}%`
             dom.info.descendants.innerHTML = clone.descendants
         }
         const init = () => {
@@ -652,6 +664,7 @@ const CLONE_Game = (function(){
                     name: document.getElementById("cloneUI-info-name"),
                     age: document.getElementById("cloneUI-info-age"),
                     maxAge: document.getElementById("cloneUI-info-maxAge"),
+                    fertileAge: document.getElementById("cloneUI-info-fertileAge"),
                     generation: document.getElementById("cloneUI-info-generation"),
                     production :document.getElementById("cloneUI-info-production"),
                     lifetimeProduction: document.getElementById("cloneUI-info-lifetimeProduction"),
@@ -700,7 +713,7 @@ const CLONE_Game = (function(){
         this.maxAge = override.maxAge || 50
         this.generation = override.generation || 1
         // type
-        this.mutant = override.mutant ? true : (Math.random() > 1 - this.generation / 1e8 ? true : false)
+        this.mutant = override.mutant ? true : (Math.random() > 1 - this.generation / 1e6 ? true : false)
         this.foreign = override.foreign || false
         // augmentations
         this.augmentations = override.augmentations || {}
@@ -720,15 +733,16 @@ const CLONE_Game = (function(){
         // overrides may exist, but this is a new clone)
         else {
             if (this.mutant) {
-                this._color = `rgb(${Math.floor(Math.random()*70+85)},${Math.floor(Math.random()*20)},${Math.floor(Math.random()*70+85)})`
+                let _rb = Math.floor(Math.random()*100+90)
+                this._color = `rgb(${_rb},${Math.floor(Math.random()*20)},${_rb})`
                 game.extantMutant += 1
             }
             else if (this.foreign) {
-                this._color = `rgb(${Math.floor(Math.random()*90+100)},${Math.floor(Math.random()*20)},${Math.floor(Math.random()*20)})`
+                this._color = `rgb(${Math.floor(Math.random()*100+100)},${Math.floor(Math.random()*20)},${Math.floor(Math.random()*20)})`
                 game.extantForeign += 1
             }
             else {
-                this._color = `rgb(${Math.floor(Math.random()*20)},${Math.floor(Math.random()*100 + 110)},${Math.floor(Math.random()*80)})`
+                this._color = `rgb(${Math.floor(Math.random()*20)},${Math.floor(Math.random()*100 + 100)},${Math.floor(Math.random()*20)})`
                 game.extantClones += 1
             }
         }
@@ -827,7 +841,7 @@ const CLONE_Game = (function(){
         spriteMap.set(this.id,this)
     }
     Sprites.worldBoundary.prototype.draw = function() {
-        Artist.outlineCircle(0,0,game.worldRadius+1,0.25,"rgb(117, 120, 138)")
+        Artist.outlineCircle(0,0,game.worldRadius+0.5,0.05,"rgb(117, 120, 138)")
     }
     Sprites.worldBoundary.prototype.step = function() {
         return null
@@ -960,6 +974,14 @@ const CLONE_Game = (function(){
             description: `<div class='storeDescEffect'>Production +0.07</div>Make no mistake, that little "+0.07" is pushing them to their breaking point.  You know, "psychologically" speaking.`,
             cost: 13.75
         },
+        mtbde: {
+            use: clone => {
+                clone.cloningFailureChance -= 0.01
+            },
+            name: "MTBDE",
+            description: "<div class='storeDescEffect'>Cloning Rate +1%</div>Methyl-tribromoDioxylicEther (MTBDE) is an all-natural way of enhancing a clone's reproductive capabilities.",
+            cost: 34e3
+        },
         longevityPump: {
             use: clone => {
                 clone.maxAge *= 7
@@ -984,14 +1006,6 @@ const CLONE_Game = (function(){
             name: "Organic Transmutation",
             description: `<div class='storeDescEffect'>Max Age x3</div><div class='storeDescEffect'>Production x3</div>While this modification is, well, "difficult" on the clone, the potential rewards are fantastic.  For you.`,
             cost: 1999.99
-        },
-        syntheticHormoneGland: {
-            use: clone => {
-                clone.cloningFailureChance -= 0.01
-            },
-            name: "Synthetic Hormone Gland",
-            description: "<div class='storeDescEffect'>Cloning Rate +1%</div>Encourages friskiness.",
-            cost: 34e3
         },
         immortalitySerum: {
             use: clone => {
@@ -1023,28 +1037,22 @@ const CLONE_Game = (function(){
         },
         hereditaryServitudeEngrams: {
             use: clone => {},
-            name: "Progenic Servitude Engrams",
-            description: "<div class='storeDescEffect'>Max Age +110 (descendants only)</div><div class='storeDescEffect'>Production +0.005 (descendants only)</div>Descendants will posses genotypes that increases longevity and productivity (they just won't know it).",
+            name: "Hereditary Servitude Engrams",
+            description: "<div class='storeDescEffect'>Max Age +110 (descendants)</div><div class='storeDescEffect'>Production +0.005 (descendants)</div>Descendants will posses genotypes that increases longevity and productivity (they just won't know it).",
             cost: 390e6
-        },
-        allelopathicOffspring: {
-            use: clone => {},
-            name: "Allelopathic Offspring",
-            description: "",
-            cost: 5.5e9
-        },
-        exophagicOffspring: {
-            use: clone => {},
-            name: "Exophagic Offspring",
-            description: "",
-            cost: 20e9
         },
         progenicResequencing: {
             use: clone => {},
             name: "Progenic Resequencing",
             description: "Descendants will inherit the ability to resequence flaws in their own organic sequences.  All future generations descended from clones with this augmentation will carry this augmentation.",
-            cost: 950e9
-        }
+            cost: 3.7e9
+        },
+        exophagicOffspring: {
+            use: clone => {},
+            name: "Exophagic Offspring",
+            description: "<div class='storeDescEffect'>Exophagic Afterbirth (descendants)</div><div class='storeDescEffect'>Exophagic Offspring (descendants)</div>They're gunna f*ck sh*t up. Seriously.",
+            cost: 999e9
+        },
     }
 
     var Artifices = {
@@ -1095,36 +1103,15 @@ const CLONE_Game = (function(){
         }
     }
 
-    // ARTIFACTS (in value/order?)
-    //
-    // purchase, discover, engineer
-    //
-    // shogoth's helix
-    // architect's code
-    // django's pick - toggle soundtrack
-    // opalescent ward - 99/100 foreign spawn rate
-    // fluorescent ward - 49/50 foreign spawn rate
-    // viridescent ward - 9/10 foreign spawn rate
-    // tears of urizen - 99/100 mutation rate (clones)
-    // maths of urizen - 49/50 mutation rate (clones)
-    // light of urizen - 9/10 mutation rate (clones)
-    // labor of urizen - 1/2 mutation rate
-    // link stone - random clone spawns
-    // aran stone - smiting bolt infinite ammo ???
-    // freeman stone - double production and reproduction rate, half lifespan !!! ultimate
-    // stellar fragment
+
 
     // GAMEPLAY LOOP
     const gameplay = () => {
         Input.apply()
+        Framerate.register()
         if (!game.pause) {
-            Framerate.register()
             game.steps += 1
             if (Math.random() > 0.99) {
-                // new Clone(
-                //     Math.floor( (Math.random() * 2 - 1) * game.worldRadius/Clone.prototype.xMultiplier),
-                //     Math.floor( (Math.random() * 2 - 1) * game.worldRadius/Clone.prototype.yMultiplier),
-                // )
                 new Clone(
                     Math.floor( (Math.random() * 2 - 1) * game.worldRadius/Clone.prototype.xMultiplier),
                     Math.floor( (Math.random() * 2 - 1) * game.worldRadius/Clone.prototype.yMultiplier),
@@ -1177,6 +1164,7 @@ const CLONE_Game = (function(){
             screenSize: {}
         }
         game = saveData.game || {
+            callsign:"Captain Clone",
             steps:0,
             resources:0,
             extantClones:0,
@@ -1196,6 +1184,7 @@ const CLONE_Game = (function(){
             pause:false,
             worldRadius:20
         }
+        document.getElementById("menu-callsign").value = game.callsign
         if (saveData.cloneMap) saveData.cloneMap.forEach( cloneInfo => {
             new Clone(cloneInfo.xHash,cloneInfo.yHash,cloneInfo)
         })
@@ -1206,6 +1195,8 @@ const CLONE_Game = (function(){
         Framerate.reset()
         Input.enable()
     }
+
+    window.cht = () => game.resources += 1e6
 
     return function() {
         // initialization
@@ -1223,8 +1214,28 @@ const CLONE_Game = (function(){
 window.onload = CLONE_Game
 
 
+/*
+ARTIFACTS (in value/order?)
 
+purchase, discover, engineer
 
-/* word dungeon
-progenic
+shogoth's helix
+architect's code
+django's pick - toggle soundtrack
+opalescent ward - 99/100 foreign spawn rate
+fluorescent ward - 49/50 foreign spawn rate
+viridescent ward - 9/10 foreign spawn rate
+tears of urizen - 99/100 mutation rate (clones)
+maths of urizen - 49/50 mutation rate (clones)
+light of urizen - 9/10 mutation rate (clones)
+labor of urizen - 1/2 mutation rate
+link stone - random clone spawns
+aran stone - smiting bolt infinite ammo ???
+freeman stone - double production and reproduction rate, half lifespan !!! ultimate
+stellar fragment
+
+--------------
+ word dungeon
+--------------
+
 */
