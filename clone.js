@@ -434,6 +434,7 @@ const CLONE_Game = (function(){
             dom.readout.resources.innerHTML = numberToCurrency(game.resources)
             var production = 0
             cloneMap.forEach( clone => production += clone.production )
+            if (game.artifices.netsOfUrizen) production += game.extantClones * 0.05
             production *= Framerate.fps()
             dom.readout.production.innerHTML = `${numberToCurrency(production)}/s`
         }
@@ -536,10 +537,7 @@ const CLONE_Game = (function(){
                 document.getElementById("loadDialog-exit").onclick = () => {
                     document.getElementById("loadDialog").classList.add("occlude")
                 }
-                document.getElementById("loadFileInput").onchange = event => {
-                    console.log(event)
-                    readLoadFile(event)
-                }
+                document.getElementById("loadFileInput").onchange = readLoadFile
                 dom.openShopButton.onclick = Store.open
                 dom.openReadoutButton.onclick = () => {
                     dom.openReadoutButton.classList.toggle("menu-openButton-opened")
@@ -834,7 +832,10 @@ const CLONE_Game = (function(){
 
     // SPRITES
 
-    const Sprites = {}
+    const Sprites = {
+        _SEED:0
+    }
+    // -- WORLD BOUNDARY --
     Sprites.worldBoundary = function() {
         this.id = "worldBoundary"
         this.draw()
@@ -846,6 +847,7 @@ const CLONE_Game = (function(){
     Sprites.worldBoundary.prototype.step = function() {
         return null
     }
+    // -- CLONE HIGHLIGHT --
     Sprites.cloneHighlight = function(clone) {
         this.id = "cloneHighlight"
         this.clone = clone
@@ -919,7 +921,7 @@ const CLONE_Game = (function(){
                 return false
             },
             name: "Smiting Bolt",
-            description: "Painlessly (yes, that sounds good, that should sell these matter-dissolving hell engi... is this thing on?) eliminates a single clone.",
+            description: "Instantly eliminate a single clone.",
             cost: 400
         },
         deionizer: {
@@ -974,14 +976,6 @@ const CLONE_Game = (function(){
             description: `<div class='storeDescEffect'>Production +0.07</div>Make no mistake, that little "+0.07" is pushing them to their breaking point.  You know, "psychologically" speaking.`,
             cost: 13.75
         },
-        mtbde: {
-            use: clone => {
-                clone.cloningFailureChance -= 0.01
-            },
-            name: "MTBDE",
-            description: "<div class='storeDescEffect'>Cloning Rate +1%</div>Methyl-tribromoDioxylicEther (MTBDE) is an all-natural way of enhancing a clone's reproductive capabilities.",
-            cost: 34e3
-        },
         longevityPump: {
             use: clone => {
                 clone.maxAge *= 7
@@ -1006,6 +1000,14 @@ const CLONE_Game = (function(){
             name: "Organic Transmutation",
             description: `<div class='storeDescEffect'>Max Age x3</div><div class='storeDescEffect'>Production x3</div>While this modification is, well, "difficult" on the clone, the potential rewards are fantastic.  For you.`,
             cost: 1999.99
+        },
+        mtbde: {
+            use: clone => {
+                clone.cloningFailureChance -= 0.01
+            },
+            name: "MTBDE",
+            description: `<div class="'storeDescEffect">Cloning Rate +1%</div>Methyl-tribromodioxylic Ether (MTBDE) is an "all-natural" way of enhancing a clone's... reproductive capabilities.`,
+            cost: 34e3
         },
         immortalitySerum: {
             use: clone => {
@@ -1056,6 +1058,59 @@ const CLONE_Game = (function(){
     }
 
     var Artifices = {
+
+        netsOfUrizen: {
+            use: () => {},
+            name: "Nets of Urizen",
+            description: `<div class='storeDescEffect'>+.01 Production per living clone</div>
+                Of the primeval Priests assum'd power,<br>
+                When Eternals spurn'd back his religion;<br>
+                And gave him a place in the north,<br>
+                Obscure, shadowy, void, solitary.<br>
+                Eternals I hear your call gladly,<br>
+                Dictate swift winged words, & fear not<br>
+                To unfold your dark visions of torment.<br>-William Blake`,
+            cost: 10000
+        },
+        bookOfUrizen: {
+            use: () => {},
+            name: "Book of Urizen",
+            description: `<div class='storeDescEffect'>+.02 Production per living clone</div>
+                Lo, a shadow of horror is risen<br>
+                In Eternity! Unknown, unprolific!<br>
+                Self-closd, all-repelling: what Demon<br>
+                Hath form'd this abominable void<br>
+                This soul-shudd'ring vacuum? — Some said<br>
+                "It is Urizen", But unknown, abstracted<br>
+                Brooding secret, the dark power hid.<br>-William Blake`,
+            cost: 2e5
+        },
+        lightOfUrizen: {
+            use: () => {},
+            name: "Light of Urizen",
+            description: `<div class='storeDescEffect'>+.05 Production per living clone</div>
+                In anguish dividing & dividing<br>
+                For pity divides the soul<br>
+                In pangs eternity on eternity<br>
+                Life in cataracts pourd down his cliffs<br>
+                The void shrunk the lymph into Nerves<br>
+                Wand'ring wide on the bosom of night<br>
+                And left a round globe of blood<br>
+                Trembling upon the Void<br>-William Blake`,
+            cost: 70e6
+        },
+        laborOfUrizen: {
+            use: () => {},
+            name: "Labor of Urizen",
+            description: `<div class='storeDescEffect'>+.01 Production per living clone of any type</div>
+                They began to weave curtains of darkness<br>
+                They erected large pillars round the Void<br>
+                With golden hooks fastend in the pillars<br>
+                With infinite labour the Eternals<br>
+                A woof wove, and called it Science<br>-William Blake`,
+            cost: 120e9
+        },
+
         cobaltFusionEngine: {
             use: () => {
                 game.worldRadius += 2
@@ -1120,6 +1175,7 @@ const CLONE_Game = (function(){
             }
             cloneMap.forEach( clone => clone.step() )
             spriteMap.forEach( sprite => sprite.step() )
+            if (game.artifices.netsOfUrizen) game.resources += game.extantClones * 0.05
             if (game.steps % 30 === 0) {
                 Menu.update()
                 CloneUI.update()
@@ -1165,6 +1221,7 @@ const CLONE_Game = (function(){
         }
         game = saveData.game || {
             callsign:"Captain Clone",
+            // experience:0,
             steps:0,
             resources:0,
             extantClones:0,
@@ -1225,10 +1282,14 @@ django's pick - toggle soundtrack
 opalescent ward - 99/100 foreign spawn rate
 fluorescent ward - 49/50 foreign spawn rate
 viridescent ward - 9/10 foreign spawn rate
-tears of urizen - 99/100 mutation rate (clones)
-maths of urizen - 49/50 mutation rate (clones)
-light of urizen - 9/10 mutation rate (clones)
-labor of urizen - 1/2 mutation rate
+nets of urizen - +1 production / clone
+book of urizen - +1 production / clone
+light of urizen - +1 production / clone
+labor of urizen - +2 production / clone
+??? - 99/100 mutation rate (clones)
+??? - 49/50 mutation rate (clones)
+??? - 9/10 mutation rate (clones)
+??? - 1/2 mutation rate
 link stone - random clone spawns
 aran stone - smiting bolt infinite ammo ???
 freeman stone - double production and reproduction rate, half lifespan !!! ultimate
