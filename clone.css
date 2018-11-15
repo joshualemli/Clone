@@ -66,9 +66,10 @@ html,body {
     bottom:0;
     left:0;
     width:100%;
-    background:linear-gradient(#DD3,#FF0);
+    background:#FF0A;
     font-family: 'VT323', monospace;
     font-weight:bold;
+    font-size:1.4rem;
     text-align:center;
     color:black;
 }
@@ -422,18 +423,29 @@ html,body {
     font-weight:bold;
     color:#CFC;
 }
-.store-section {
-    margin:0.3em 1em;
+
+
+#store-contentWrapper {
+    margin-top:1em;
     width:100%;
-}
-.store-section-label {
-    color:#EEE;
-    font-size:1.2em;
-    margin-left:0.5em;
+    overflow:hidden;
 }
 
+#store-merchSections {
+    flex:2 1 0;
+    overflow-y:auto;
+}
+    .store-section {
+        margin:0.3em 1em;
+    }
+    .store-section-label {
+        color:#EEE;
+        font-size:1.2em;
+        margin-left:0.5em;
+    }
+
 #store-itemDetails {
-    flex:0 1 auto;
+    flex:1 1 0;
     margin:0.5em;
     padding:1em;
     background:rgba(0,0,0,0.5);
@@ -524,26 +536,30 @@ html,body {
     border-color:#000;
 }
 
-
-.store-section-merchandise {
-    width:100%;
+.store-merchandise-item {
+    display:flex;
+    flex:0 1 auto;
+    justify-content:center;
+    padding:0.35rem 0.7rem;
+    margin:0.35rem;
+    font-size:1.2em;
+    border:2px solid #666;
+    border-radius:0.25em;
+    transition:border-color 0.3s,color 0.1s;
+    background:linear-gradient(#112,#311);
 }
-    .store-section-merchandise-item {
-        display:flex;
-        flex:1 1 auto;
-        justify-content:center;
-        padding:0.1em 0.5em;
-        margin:0.12em 0.2em;
-        border:1px solid #666;
-        border-radius:0.25em;
-        transition:border-color 0.13s,color 0.13s;
-        background:linear-gradient(#112,#311);
-    }
-    .store-section-merchandise-item:hover {
-        border-color:#AAA;
-        color:#FFF;
-    }
-
+.store-merchandise-item:hover {
+    border-color:#AAA;
+    color:#FFF;
+}
+.store-merchandise-selectedItem {
+    border-color:#09F;
+    color:#09F;
+}
+.store-merchandise-selectedItem:hover {
+    color:#0FF;
+    border-color:#0FF;
+}
 
 
 .occlude {
