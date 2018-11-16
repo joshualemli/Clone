@@ -109,7 +109,7 @@ const CLONE_Game = (function(){
                     break
                 case "recenterView":
                     view.xPos = view.yPos = 0
-                    view.scale = 7
+                    view.scale = 10
                     Artist.redraw()
                     break
                 case "openShop":
@@ -137,7 +137,7 @@ const CLONE_Game = (function(){
         const mainCanvasMouseDownHandler = event => {
             let x = (event.offsetX - view.screenSize.x/2) / view.scale + view.xPos
             let y = (view.screenSize.y/2 - event.offsetY) / view.scale + view.yPos
-            Artist.fillCircle(x,y,0.1,"rgb(0,0,255)")
+            // Artist.fillCircle(x,y,0.1,"rgb(0,0,255)")
             if (Math.sqrt(x*x+y*y) > game.worldRadius + 0.5) {
                 CloneUI.clear()
                 return console.log("click out of world bounds")
@@ -206,6 +206,7 @@ const CLONE_Game = (function(){
 
     var Artist = (function(){
         var canvas, context, windowResizeTimeout
+        const RESIZE_TIME_INTERVAL = 200
         const redraw = () => {
             context.setTransform(1,0,0,1,0,0)
             context.clearRect(0,0,context.canvas.width,context.canvas.height)
@@ -225,14 +226,14 @@ const CLONE_Game = (function(){
             canvas.parentElement.addEventListener("resize",event=>console.log(event))
             window.addEventListener("resize", () => {
                 if (windowResizeTimeout) clearTimeout(windowResizeTimeout)
-                windowResizeTimeout = setTimeout(resize,64)
+                windowResizeTimeout = setTimeout(resize,RESIZE_TIME_INTERVAL)
             })
             setInterval(()=>{
                 if (canvas.height != canvas.parentElement.offsetHeight || canvas.width != canvas.parentElement.offsetWidth) {
                     if (windowResizeTimeout) clearTimeout(windowResizeTimeout)
-                    windowResizeTimeout = setTimeout(resize,64)
+                    windowResizeTimeout = setTimeout(resize,RESIZE_TIME_INTERVAL)
                 }
-            },500)
+            },400)
         }
         return {
             init : init,
@@ -288,8 +289,8 @@ const CLONE_Game = (function(){
         const open = () => {
             if (!game.pause) resumeGameplayOnClose = game.pause = true
             else resumeGameplayOnClose = false
-            _setDetails()
             _setResourcesHtml()
+            _setOwnedQuantity()
             dom.container.classList.remove("occlude")
             Input.disable()
             window.addEventListener("keydown",_closeStoreListenerCallback)
@@ -325,24 +326,24 @@ const CLONE_Game = (function(){
             else console.log("not enough dough")
         }
         const _setDetails = (_Section,gameSection,key) => {
-            if (!_Section) {
-                dom.itemDetails.topBar.classList.add("occlude")
-                selectedItem = {description:"[awaiting selection]"}
-                selectedItemGameCategory = null
-                selectedItemGameId = null
-            }
-            else {
+            // if (!_Section) {
+            //     dom.itemDetails.topBar.classList.add("occlude")
+            //     selectedItem = {description:"[awaiting selection]"}
+            //     selectedItemGameCategory = null
+            //     selectedItemGameId = null
+            // }
+            // else {
                 dom.itemDetails.topBar.classList.remove("occlude")
                 selectedItem = _Section[key]
                 selectedItemGameCategory = gameSection
                 selectedItemGameId = key
-            }
+            // }
             selectedQuantity = 1
             dom.itemDetails.name.innerHTML = selectedItem.name || ""
             dom.itemDetails.description.innerHTML = selectedItem.description || ""
-            let costString = selectedItem.cost ? (numberToCurrency(selectedItem.cost)) : ""
+            let costString = selectedItem.cost ? numberToCurrency(selectedItem.cost) : ""
             dom.itemDetails.cost.innerHTML = costString
-            dom.itemDetails.quantity.innerHTML = selectedItem.cost ? selectedQuantity : ""
+            dom.itemDetails.quantity.innerHTML = selectedItem.cost ? ("x"+selectedQuantity.toString()) : ""
             dom.itemDetails.subtotal.innerHTML = selectedItem.cost ? numberToCurrency((selectedItem.cost || 0) * selectedQuantity) : ""
             _setOwnedQuantity()
         }
@@ -391,36 +392,11 @@ const CLONE_Game = (function(){
                     dom[sectionInfo[1]].container.appendChild(dom[sectionInfo[1]][key])
                     dom[sectionInfo[1]][key].onclick = event => {
                         _handleItemClick(event)
-                        _setDetails(sectionInfo[0],"tools",key)
+                        _setDetails(sectionInfo[0],sectionInfo[1],key)
                     }
                 }
             })
 
-
-            // for (let key in Tools) {
-            //     dom.tools[key] = _itemHtml(Tools[key])
-            //     dom.tools.container.appendChild(dom.tools[key])
-            //     dom.tools[key].onclick = event => {
-            //         _handleItemClick(event)
-            //         _setDetails(Tools,"tools",key)
-            //     }
-            // }
-            // for (let key in Augmentations) {
-            //     dom.augmentations[key] = _itemHtml(Augmentations[key])
-            //     dom.augmentations.container.appendChild(dom.augmentations[key])
-            //     dom.augmentations[key].onclick = event => {
-            //         _handleItemClick(event)
-            //         _setDetails(Augmentations,"augmentations",key)
-            //     }
-            // }
-            // for (let key in Artifices) {
-            //     dom.artifices[key] = _itemHtml(Artifices[key])
-            //     dom.artifices.container.appendChild(dom.artifices[key])
-            //     dom.artifices[key].onclick = event => {
-            //         _handleItemClick(event)
-            //         _setDetails(Artifices,"artifices",key)
-            //     }
-            // }
             // behavior
             let adjustQuantity = (key,quantity) => {
                 if (!selectedItem.cost) return null
@@ -607,8 +583,9 @@ const CLONE_Game = (function(){
             if (clear) id = null
         }
         const applyAugmentations = () => {
+            let clone = cloneMap.get(id)
+            if (clone.alienSpliced) return null
             Array.from(dom.augmentations.pending.children).map( e => e.dataset.key ).forEach( augKey => {
-                let clone = cloneMap.get(id)
                 Augmentations[augKey].use(clone)
                 clone.augmentations[augKey] = 1
                 game.augmentations[augKey] -= 1
@@ -658,9 +635,10 @@ const CLONE_Game = (function(){
                     new Array("clones","mutant","foreign").forEach( classPart => dom.container.classList.remove(`border-${classPart}`) )
                     // update once:
                     new Sprites.cloneHighlight(clone)
-                    if (clone.mutant) dom.container.classList.add("border-mutant")
-                    else if (clone.foreign) dom.container.classList.add("border-foreign")
-                    else dom.container.classList.add("border-clones")
+                    dom.container.style.border = `4px solid ${clone._color}`
+                    // if (clone.mutant) dom.container.classList.add("border-mutant")
+                    // else if (clone.foreign) dom.container.classList.add("border-foreign")
+                    // else dom.container.classList.add("border-clones")
                     dom.info.name.innerHTML = clone.name
                     dom.info.generation.innerHTML = clone.generation
                     updateAugmentations()
@@ -776,6 +754,15 @@ const CLONE_Game = (function(){
             else {
                 this._color = `rgb(${Math.floor(Math.random()*20)},${Math.floor(Math.random()*100 + 100)},${Math.floor(Math.random()*20)})`
                 game.extantClones += 1
+                // alien spliced!
+                if (override.alienSpliced) {
+                    this.alienSpliced = true
+                    this.production = 0.13
+                    this.fertileAge = 978
+                    this.cloningFailureChance = 0.9997
+                    this.maxAge = 1107
+                    this._color = `rgb(${Math.floor(Math.random()*40+120)},${Math.floor(Math.random()*40+160)},${Math.floor(Math.random()*40+130)})`
+                }
             }
         }
         cloneMap.set(this.id,this)
@@ -1181,13 +1168,16 @@ const CLONE_Game = (function(){
                 Artist.redraw()
             },
             name: "Dark Energy Transmutation Engine",
-            description: "<div class='storeDescEffect'>World Radius +20</div>Dirty whore of a cocksucker works great!",
+            description: "<div class='storeDescEffect'>World Radius +10</div>Dirty whore of a cocksucker works great!",
             cost: 1.5e6
         },
         chronofilamentEngine: {
-            use: () => {},
-            name: "Chrono-filament Engine.",
-            description: "The inventor said the hyphen will dropped from the name in the future, but what does that egghead know? Bends spacetime (more the time part, to be specific) to extract energy from the fabric of the universe itself. Extended use may shatter reality.",
+            use: () => {
+                game.worldRadius += 14
+                Artist.redraw()
+            },
+            name: "Chrono-filament Engine",
+            description: "<div class='storeDescEffect'>World Radius +14</div>The inventor said the hyphen will dropped from the name in the future, but what does that egghead know? Bends spacetime (mostly the time part) to extract energy from the fabric of the universe itself. Extended use may shatter reality.",
             cost: 30e6,
         },
         hawkingCipollaExpansionLimitEngine: {
@@ -1198,9 +1188,41 @@ const CLONE_Game = (function(){
             name: "Hawking-Cipolla Expansion Limit Engine",
             description: "<div class='storeDescEffect'>World Radius +20</div>Do NOT let the clones near the glow-zone (and trust us, they're gunna want to wander in there).  They come back... changed.",
             cost: 75e9
-        }
-    }
+        },
 
+        
+        cygniStellarFragment: {
+            use: () => game.artifices.cygniStellarFragment ? 0.0000001 : 0,
+            name: "Cygni Stellar Fragment",
+            description: "<div class='storeDescEffect'>Alien DNA Splicing Success Rate +1</div>",
+            cost: 5e3
+        },
+        glieseStellarFragment: {
+            use: () => game.artifices.glieseStellarFragment ? 0.0000001 : 0,
+            name: "Gliese Stellar Fragment",
+            description: "<div class='storeDescEffect'>Alien DNA Splicing Success Rate +1</div><div class='storeDescEffect'>Alien-spliced Clones x2 Production</div>",
+            cost: 11e3
+        },
+        pleiadesStellarFragment: {
+            use: () => game.artifices.pleiadesStellarFragment ? 0.0000001 : 0,
+            name: "Pleiades Stellar Fragment",
+            description: "<div class='storeDescEffect'>Alien DNA Splicing Success Rate +1</div><div class='storeDescEffect'>Alien-spliced Clones x2 Production</div>",
+            cost: 65e3
+        },
+        westerlundStellarFragment: {
+            use: () => game.artifices.westerlundStellarFragment ? 0.0000003 : 0,
+            name: "Westerlund Stellar Fragment",
+            description: "<div class='storeDescEffect'></div>",
+            cost: 35e6
+        },
+        magellanicStellarFragment: {
+            use: () => game.artifices.magellanicStellarFragment ? 0.0000004 : 0,
+            name: "Magellanic Stellar Fragment",
+            description: "<div class='storeDescEffect'></div>",
+            cost: 109e6
+        }
+
+    }
 
 
     // GAMEPLAY LOOP
@@ -1218,10 +1240,26 @@ const CLONE_Game = (function(){
             }
             cloneMap.forEach( clone => clone.step() )
             spriteMap.forEach( sprite => sprite.step() )
+            // active effects / artifices
             if (game.artifices.netsOfUrizen) game.resources += game.extantClones * 0.01
             if (game.artifices.bookOfUrizen) game.resources += game.extantClones * 0.02
-            if (game.artifices.LightOfUrizen) game.resources += game.extantClones * 0.05
-            if (game.artifices.LaborOfUrizen) game.resources += cloneMap.size * 0.01
+            if (game.artifices.lightOfUrizen) game.resources += game.extantClones * 0.05
+            if (game.artifices.laborOfUrizen) game.resources += cloneMap.size * 0.01
+            if (
+                Artifices.cygniStellarFragment.use() +
+                Artifices.glieseStellarFragment.use() +
+                Artifices.pleiadesStellarFragment.use() +
+                Artifices.westerlundStellarFragment.use() +
+                Artifices.magellanicStellarFragment.use()
+                > Math.pow(Math.random(),2)
+            ) {
+                new Clone(
+                    Math.floor( (Math.random() * 2 - 1) * game.worldRadius/Clone.prototype.xMultiplier),
+                    Math.floor( (Math.random() * 2 - 1) * game.worldRadius/Clone.prototype.yMultiplier),
+                    {alienSpliced:true}
+                )
+            }
+            // ui update
             if (game.steps % 30 === 0) {
                 Menu.update()
                 CloneUI.update()
@@ -1259,14 +1297,17 @@ const CLONE_Game = (function(){
         cloneMap = new Map()
         spriteMap = new Map()
         view = saveData.view || {
-            scale:7,
+            scale:10,
             xPos:0,
             yPos:0,
             bounds: {},
             screenSize: {}
         }
         game = saveData.game || {
-            callsign:"Captain Clone",
+            callsign:(function(){
+                let c = ["Mitochondrion familiar","Type O zealot","Slugdge acolyte","inductee of The Elder","Melvin.","Acid Bath baptized","Cooper clone"]
+                return c[Math.floor(Math.random()*c.length)]
+            })(),
             // experience:0,
             steps:0,
             resources:0,
@@ -1287,6 +1328,7 @@ const CLONE_Game = (function(){
             pause:false,
             worldRadius:3
         }
+        window.game=game
         document.getElementById("menu-callsign").value = game.callsign
         if (saveData.cloneMap) saveData.cloneMap.forEach( cloneInfo => {
             new Clone(cloneInfo.xHash,cloneInfo.yHash,cloneInfo)
@@ -1328,10 +1370,6 @@ django's pick - toggle soundtrack
 opalescent ward - 99/100 foreign spawn rate
 fluorescent ward - 49/50 foreign spawn rate
 viridescent ward - 9/10 foreign spawn rate
-nets of urizen - +1 production / clone
-book of urizen - +1 production / clone
-light of urizen - +1 production / clone
-labor of urizen - +2 production / clone
 ??? - 99/100 mutation rate (clones)
 ??? - 49/50 mutation rate (clones)
 ??? - 9/10 mutation rate (clones)
@@ -1339,7 +1377,11 @@ labor of urizen - +2 production / clone
 link stone - random clone spawns
 aran stone - smiting bolt infinite ammo ???
 freeman stone - double production and reproduction rate, half lifespan !!! ultimate
-stellar fragment
+cygni stellar fragment - +0.001 chance of alien-spliced clone
+gliese stellar fragment - +0.001 chance of alien-spliced clone
+pleiades stellar fragment - +0.001 chance of alien-spliced clone
+westerlund stellar fragment - +0.001 chance of alien-spliced clone
+magellanic stellar fragment - +0.001 chance of alien-spliced clone
 
 --------------
  word dungeon

@@ -66,7 +66,7 @@
                     <input id="menu-callsign" value="">
                     <div id="menu-saveButton" class="menu-button">SAVE</div>
                     <div id="menu-loadButton" class="menu-button">LOAD</div>
-                    <div id="menu-openButton-shop" class="menu-button">$$$ The Money Pit $$$</div>
+                    <div id="menu-openButton-shop" class="menu-button">The Money Pit</div>
                     <div id="menu-openButton-readout" class="menu-button">Readout</div>
                     <div id="menu-openButton-tools" class="menu-button">Tools</div>
                 </div>
@@ -173,8 +173,12 @@
         <!-- STORE DIALOG -->
         <div id="store" class="flexColumn occlude">
             <div id="store-header" class="flexRow flexWrap">
-                <div id="store-banner">$$$ The Money Pit $$$</div>
-                <div id="store-exit">&nearhk; exit store &nwarhk;</div>
+                <div id="store-exit">&nwarhk; EXIT STORE</div>
+                <div id="store-banner">The Money Pit</div>
+                <div id="store-yourResources" class="flexRow">
+                    <div id="store-yourResources-label">Resources:</div>
+                    <div id="store-yourResources-value"></div>
+                </div>
             </div>
             <div id="store-contentWrapper" class="flexRow">
                 <div id="store-merchSections" class="flexColumn">
@@ -203,7 +207,7 @@
                         </div>
                     </div>
                     <div id="store-itemDetails-cost"></div>
-                    <div id="store-itemDetails-description"></div>
+                    <div id="store-itemDetails-purchase">PAY YER BLOODMONEY</div>
                     <div id="store-itemDetails-purchaseArea" class="flexRow">
                         <div id="store-itemDetails-arrowsContainer" class="flexRow">
                             <div id="store-itemDetails-minusTen" class="store-itemDetails-quantityArrow">-10<br><b style="font-size:1.5em;">&ll;</b></div>
@@ -216,10 +220,7 @@
                             <div id="store-itemDetails-subtotal"></div>
                         </div>
                     </div>
-                    <div id="store-itemDetails-purchase">PAY YER BLOODMONEY</div>
-                    <div id="store-yourResources">
-                        resources <span id="store-yourResources-value"></span>
-                    </div>
+                    <div id="store-itemDetails-description">[awaiting selection]</div>
                 </div>
             </div>
         </div>

@@ -56,9 +56,7 @@ html,body {
 .bg-clones  { background-color:rgb(28, 124, 19); }
 .bg-foreign { background-color:rgb(148, 33, 33); }
 .bg-mutant  { background-color:rgb(102, 35, 110); }
-.border-clones  { border:2px solid rgb(49, 160, 39); }
-.border-foreign { border:2px solid rgb(158, 25, 25); }
-.border-mutant  { border:2px solid rgb(129, 25, 143); }
+
 
 #pauseWarningBar {
     display:block;
@@ -389,6 +387,8 @@ html,body {
 }
     #store-banner {
         display:flex;
+        justify-content:center;
+        flex:1 1 auto;
         font-size:calc(1.5em + 2vmin);
         font-style:italic;
         color:#FFF;
@@ -396,16 +396,14 @@ html,body {
         text-decoration:underline;
     }
     #store-exit {
-        text-shadow:0.02em -0.05em 0.2em rgb(135, 92, 255);
         display:flex;
-        margin:1em 1em 1em 2em;
-        padding:0.2em 1em;
+        flex:0 1 auto;
+        text-shadow:0.02em -0.05em 0.2em rgb(135, 92, 255);
+        padding:0.7em;
         justify-content:center;
         align-self:center;
-        font-size:calc(1em + 0.3vmin);
+        font-size:calc(1.25em + 0.5vmin);
         color:#CCC;
-        border-radius:0.4rem;
-        border:1px solid #AAA;
         cursor:pointer;
     }
     #store-exit:hover {
@@ -414,13 +412,12 @@ html,body {
 }
 
 #store-yourResources {
-    margin:0.6rem 0 0 0;
-    font-size:1.4rem;
+    font-size:2em;
 }
+#store-yourResources-label {}
 #store-yourResources-value {
+    flex:0 1 auto;
     font-family:monospace;
-    font-size:1.5rem;
-    font-weight:bold;
     color:#CFC;
 }
 
@@ -455,27 +452,29 @@ html,body {
 #store-itemDetails-topBar {
     justify-content:space-between;
 }
+#store-itemDetails-ownedArea {
+    margin-left:2rem;
+    color:#FF8;
+    align-items:center;
+}
+    #store-itemDetails-owned {
+        margin-left:0.7rem;
+        font-size:1.4em;
+    }
 #store-itemDetails-basics {
     flex:3 1 auto;
-}
-#store-itemDetails-ownedArea {
-    flex:1 1 auto;
-    margin-left:2em;
 }
 #store-itemDetails-icon {}
 #store-itemDetails-name {
     font-size:1.7rem;
     color:rgb(47, 218, 61);
 }
-#store-itemDetails-owned {
-    margin-left:1em;
-}
 #store-itemDetails-cost {
-    margin-bottom:0.5em;
     font-size:1.5rem;
     color:rgb(66, 164, 255);
 }
 #store-itemDetails-description {
+    margin:1em 0;
     font-size:1.2rem;
     color:#CBB;
 }
@@ -492,7 +491,6 @@ html,body {
 }
     #store-itemDetails-arrowsContainer {
         align-self:start;
-        padding:0.5em;
         border-radius:1em;
     }
 #store-itemDetails-costCalculation {
@@ -511,23 +509,23 @@ html,body {
     text-align:center;
     padding:0.2em;
     margin:0.2em;
-    color:rgb(156, 163, 235);
+    color:rgb(226, 207, 194);
     cursor:pointer;
 }
 .store-itemDetails-quantityArrow:hover {
-    color:rgb(86, 139, 255);
+    color:rgb(255, 255, 255);
 }
 .store-itemDetails-quantityArrow:active {
-    color:rgb(28, 0, 185);
+    color:rgb(175, 175, 175);
 }
 #store-itemDetails-purchase {
-    padding:0.3em;
+    margin-top:1rem;
+    padding:0.25rem 0;
     border:1px solid #333;
-    background-color:#AAA;
-    align-self:center;
-    width:calc(100% - 0.8em);
+    background-color:#CCC;
     text-align:center;
-    font-size:1.3rem;
+    width:calc(100% - 0.8em);
+    font-size:1.2rem;
     color:#333;
     cursor:pointer;
 }
