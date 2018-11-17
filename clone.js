@@ -31,7 +31,7 @@
     CLONE JavaScript file
     - - - - - - - - - - - - - - - - - - - */
         const
-        CLONE_VERSION = "0.4.0",
+        CLONE_VERSION = "0.4.3",
         CLONE_RELEASE = "alpha",
         CLONE_EDITION = "dog balancer";
     /* - - - - - - - - - - - - - - - - - - -
@@ -207,7 +207,7 @@ const CLONE_Game = (function(){
     var Artist = (function(){
         var canvas, context, lastResizeTime, resizeTimeout
         const _timeSinceLastResize = () => new Date().getTime() - lastResizeTime
-        const RESIZE_TIME_INTERVAL = 500
+        const RESIZE_TIME_INTERVAL = 250
         const redraw = () => {
             context.setTransform(1,0,0,1,0,0)
             context.clearRect(0,0,context.canvas.width,context.canvas.height)
@@ -223,9 +223,7 @@ const CLONE_Game = (function(){
             lastResizeTime = new Date().getTime()
         }
         const _meteredResize = () => {
-            if (_timeSinceLastResize() > RESIZE_TIME_INTERVAL) {
-                resize()
-            }
+            if (_timeSinceLastResize() > RESIZE_TIME_INTERVAL) resize()
             else {
                 if (resizeTimeout) clearTimeout(resizeTimeout)
                 resizeTimeout = setTimeout(resize, RESIZE_TIME_INTERVAL)
@@ -237,9 +235,7 @@ const CLONE_Game = (function(){
             canvas.parentElement.addEventListener("resize",event=>console.log(event))
             window.addEventListener("resize", _meteredResize)
             setInterval(()=>{
-                if (canvas.height != canvas.parentElement.offsetHeight || canvas.width != canvas.parentElement.offsetWidth) {
-                    _meteredResize()
-                }
+                if (canvas.height != canvas.parentElement.offsetHeight || canvas.width != canvas.parentElement.offsetWidth) _meteredResize()
             },2000)
         }
         return {
@@ -476,6 +472,7 @@ const CLONE_Game = (function(){
                 // element pointers
                 dom = {
                     pauseWarningBar: document.getElementById("pauseWarningBar"),
+                    about: document.getElementById("menu-about"),
                     callsign: document.getElementById("menu-callsign"),
                     saveButton: document.getElementById("menu-saveButton"),
                     loadButton: document.getElementById("menu-loadButton"),
@@ -536,6 +533,10 @@ const CLONE_Game = (function(){
                     dom.tools[key] = toolElement.children[1]
                 }
                 // set behavior
+                dom.about.onclick = event => {
+                    game.pause = true
+                    CloneHelp.open()
+                }
                 dom.callsign.oninput = event => game.callsign = event.target.value
                 dom.saveButton.onclick = save
                 dom.loadButton.onclick = () => {
@@ -591,6 +592,7 @@ const CLONE_Game = (function(){
             })
             updateAugmentations()
             update()
+            clone.draw()
         }
         const _augElem = (key,quantity) => {
             let augElem = createHtmlElement("div",{
@@ -815,6 +817,7 @@ const CLONE_Game = (function(){
             this.worldPosition.y - this.radius < view.bounds.yMax
         ) {
             Artist.fillCircle(this.worldPosition.x,this.worldPosition.y,this.radius,this._color)
+            if (Object.keys(this.augmentations).length) Artist.outlineCircle(this.worldPosition.x,this.worldPosition.y,this.radius-0.05,0.1,"#0F0")
         }
     }
     Clone.prototype.step = function(){
@@ -874,15 +877,15 @@ const CLONE_Game = (function(){
         spriteMap.set(this.id,this)
     }
     Sprites.cloneHighlight.prototype.draw = function() {
-        Artist.outlineCircle(this.clone.worldPosition.x,this.clone.worldPosition.y,this.clone.radius+0.07,0.1,"#07F")
+        Artist.outlineCircle(this.clone.worldPosition.x,this.clone.worldPosition.y,this.clone.radius+0.05,0.1,"#07F")
     }
     Sprites.cloneHighlight.prototype.destroy = function() {
-        Artist.clipCircle(this.clone.worldPosition.x,this.clone.worldPosition.y,this.clone.maxRadius*2)
-        for (var p = 0; p < 6; p++) {
-            var hash = this.clone._getHashFromPosition(p)
-            var neighbor = cloneMap.get(`${hash.x}_${hash.y}`)
-            if (neighbor) neighbor.draw()
-        }
+        Artist.clipCircle(this.clone.worldPosition.x,this.clone.worldPosition.y,this.clone.maxRadius)
+        // for (var p = 0; p < 6; p++) {
+        //     var hash = this.clone._getHashFromPosition(p)
+        //     var neighbor = cloneMap.get(`${hash.x}_${hash.y}`)
+        //     if (neighbor) neighbor.draw()
+        // }
         spriteMap.delete("cloneHighlight")
         let clone = cloneMap.get(`${this.clone.xHash}_${this.clone.yHash}`)
         if (clone) clone.draw()
@@ -1024,7 +1027,7 @@ const CLONE_Game = (function(){
                 clone.fertileAge = Infinity
             },
             name: "Sterilization Clamp",
-            description: `<div class="storeDescEffect">Fertility Age &rarr; <b>&infin;</b></div>Permanently inhibits production of reproductive biochemicals in a clone. `,
+            description: `<div class="storeDescEffect">Fertility Age &rarr; <b>&infin;</b></div>This non-surgical method inhibits production of reproductive biochemicals in a clone. You may notice they plump up a bit without a sex drive. The clamps are self-installing, so just place one within the vicinity of a clone and step back (way back).`,
             cost: 5e3
         },
         mtbde: {
@@ -1038,7 +1041,7 @@ const CLONE_Game = (function(){
         immortalitySerum: {
             use: clone => {
                 clone.maxAge = Infinity
-                clone._color = "rgb(255,215,0)";
+                clone._color = "rgb(255,215,0)"
                 clone.draw()
             },
             name: "Immortality Serum",
@@ -1386,6 +1389,7 @@ const CLONE_Game = (function(){
 
     return function() {
         // initialization
+        CloneHelp.init()
         CloneUI.init()
         Artist.init()
         Store.init()

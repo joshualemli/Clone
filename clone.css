@@ -57,6 +57,72 @@ html,body {
 .bg-foreign { background-color:rgb(148, 33, 33); }
 .bg-mutant  { background-color:rgb(102, 35, 110); }
 
+#helpDialog {
+    position:fixed;
+    top:0;
+    left:0;
+    width:100vw;
+    height:100vh;
+    background:rgba(5, 88, 47, 0.75);
+    color:#FFF;
+    font-family: 'VT323', monospace;
+    font-size:calc(0.8em + 1.6vmin);
+}
+#helpExit {
+    position:absolute;
+    top:1em;
+    left:1em;
+    padding:0.25em 0.5em;
+    border:3px solid #AAA;
+    border-radius:0.5rem;
+    color:#CCC;
+    font-size:0.9em;
+    cursor:pointer;
+}
+#helpExit:hover {
+    color:#FFF;
+    border-color:#FFF;
+}
+#helpStatic {
+    width:100%;
+    text-align:center;
+    background:rgba(0,0,0,0.5);
+    padding:0.5em 0;
+}
+    #helpVersion {
+        margin:0 0 0.5em 0;
+        font-size:0.8em;
+        color:#CCC;
+    }
+.helpKey {
+    display:inline-block;
+    padding:0.2em 0.6em;
+    margin:0.25em;
+    border:0.5px solid #222;
+    border-radius:0.25em;
+    background:#AAA;
+    color:#000;
+    font-family:monospace;
+}
+#helpTopicTitle {
+    font-size:2em;
+}
+#helpSections {
+    padding:0.5em 1em 0.5em 0.5em;
+    flex:0 0 auto;
+}
+.helpSectionItem {
+    margin:0 0 0.25em 0;
+    color:#AAB;
+}
+.helpSectionItem:hover {
+    color:#55F;
+    font-weight:bold;
+}
+#helpTopic {
+    padding:0.5em;
+    flex:1 1 auto;
+}
 
 #pauseWarningBar {
     display:block;
@@ -144,7 +210,8 @@ html,body {
 }
 #menu-about:hover {
     color:#FF0;
-    font-size:calc(1.5rem + 0.7vw);
+    font-size:calc(2rem + 1vw);
+    border-color:#FF0;
 }
 #menu-callsign {
     display:flex;
