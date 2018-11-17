@@ -1013,11 +1013,19 @@ const CLONE_Game = (function(){
         },
         organicTransmutation: {
             use: clone => {
-                clone.production *= 11
+                clone.production *= 7
             },
             name: "Organic Transmutation",
             description: `<div class='storeDescEffect'>Production x11</div>While this modification is, well, "difficult" on the clone, the potential rewards are fantastic.  For you.`,
             cost: 999.99
+        },
+        sterilizationClamp: {
+            use: clone => {
+                clone.fertileAge = Infinity
+            },
+            name: "Sterilization Clamp",
+            description: `<div class="storeDescEffect">Fertility Age &rarr; <b>&infin;</b></div>Permanently inhibits production of reproductive biochemicals in a clone. `,
+            cost: 5e3
         },
         mtbde: {
             use: clone => {
@@ -1049,7 +1057,7 @@ const CLONE_Game = (function(){
                 clone.cloningFailureChance -= 0.015
             },
             name: "Cybernetic Genitals",
-            description: `<div class="storeDescEffect">Cloning Rate +1.5%</div><div class="storeDescEffect">Ferility Age x1/2</div>Once the swelling goes down and the risk of deadly infection has passed, you know the "upgrade" has been successful, so just kick back and... ahem... watch the fireworks.`,
+            description: `<div class="storeDescEffect">Cloning Rate +1.5%</div><div class="storeDescEffect">Fertility Age x1/2</div>Once the swelling goes down and the risk of deadly infection has passed, you know the "upgrade" has been successful, so just kick back and... ahem... watch the fireworks.`,
             cost: 5e6
         },
         allelopathicDeathTendrils: {
@@ -1138,11 +1146,9 @@ const CLONE_Game = (function(){
             cost: 120e9
         },
 
-        //3....
-        //1
-        //1
-        //4
-        
+        // 3
+        // 1 2 3 4 -- > 13
+        // 5
 
         microFissionEngine: {
             use: () => {
@@ -1155,29 +1161,29 @@ const CLONE_Game = (function(){
         },
         redMercuryCyclotronEngine: {
             use: () => {
-                game.worldRadius += 1
-                Artist.redraw()
-            },
-            name: "Red Mercury Cyclotron Engine",
-            description: "<div class='storeDescEffect'>World Radius +1</div>Powered by cobalt fusion, the modern standard in energy delivery systems. The fusion chain produces only high-grade Terbium as a byproduct (and some high-intesity beta radiation, but the clones will soak most of that up).",
-            cost: 1200
-        },
-        cobaltFusionEngine: {
-            use: () => {
                 game.worldRadius += 2
                 Artist.redraw()
             },
-            name: "Cobalt Fusion Engine",
-            description: "<div class='storeDescEffect'>World Radius +2</div>Powered by cobalt fusion, the modern standard in energy delivery systems. The fusion chain produces only high-grade Terbium as a byproduct (and some high-intesity beta radiation, but the clones will soak most of that up).",
-            cost: 9200
+            name: "Red Mercury Cyclotron Engine",
+            description: "<div class='storeDescEffect'>World Radius +2</div>",
+            cost: 2.3e3
         },
-        hyperstaticInductionEngine: {
+        cobaltFusionEngine: {
             use: () => {
                 game.worldRadius += 3
                 Artist.redraw()
             },
+            name: "Cobalt Fusion Engine",
+            description: "<div class='storeDescEffect'>World Radius +3</div>Powered by cobalt fusion, the modern standard in energy delivery systems. The fusion chain produces only high-grade Terbium as a byproduct (and some high-intesity beta radiation, but the clones will soak most of that up).",
+            cost: 9.2e3
+        },
+        hyperstaticInductionEngine: {
+            use: () => {
+                game.worldRadius += 4
+                Artist.redraw()
+            },
             name: "Hyper-static Induction Engine",
-            description: "<div class='storeDescEffect'>World Radius +3</div>We believe no stone should be left unturned, and we kicked quite the ant-nest with this one.  Highly unstable but wildly successful (probably because we're sellin' em cheap).",
+            description: "<div class='storeDescEffect'>World Radius +4</div>We believe no stone should be left unturned, and we really turned up an ant-nest with this one.  Highly unstable but who can argue with the price?",
             cost: 20e3
         },
         bioschismaticExtractionEngine: {
@@ -1189,31 +1195,40 @@ const CLONE_Game = (function(){
             description: "<div class='storeDescEffect'>World Radius +5</div>Directly harnesses the clones bioenergy.  Just give 'em an extra half scoop of feed at night, they'll be fine.",
             cost: 77e3,
         },
+        leptonRuptureEngine: {
+            use: () => {
+                game.worldRadius += 6
+                Artist.redraw()
+            },
+            name: "Lepton Rupture Engine",
+            description: "<div class='storeDescEffect'>World Radius +6</div>The best part about this engine is the maelstrom of superheated plasma. You can pretty much just toss stuff in from the observation deck and watch it erupt in a shower of flames! Not saying that an overabundance of clones should provide fodder for that sort of purile behavior but....",
+            cost: 77e3,
+        },
         darkEnergyTransmutationEngine: {
             use: () => {
-                game.worldRadius += 10
+                game.worldRadius += 7
                 Artist.redraw()
             },
             name: "Dark Energy Transmutation Engine",
-            description: "<div class='storeDescEffect'>World Radius +10</div>Dirty whore of a cocksucker works great!",
+            description: "<div class='storeDescEffect'>World Radius +7</div>Dirty whore of a cocksucker works great!",
             cost: 1.5e6
         },
         chronofilamentEngine: {
             use: () => {
-                game.worldRadius += 14
+                game.worldRadius += 8
                 Artist.redraw()
             },
             name: "Chrono-filament Engine",
-            description: "<div class='storeDescEffect'>World Radius +14</div>The inventor said the hyphen will dropped from the name in the future, but what does that egghead know? Bends spacetime (mostly the time part) to extract energy from the fabric of the universe itself. Extended use may shatter reality.",
+            description: "<div class='storeDescEffect'>World Radius +8</div>The inventor said the hyphen will dropped from the name in the future, but what does that egghead know? Bends spacetime (mostly the time part) to extract energy from the fabric of the universe itself. Extended use may shatter reality.",
             cost: 30e6,
         },
         hawkingCipollaExpansionLimitEngine: {
             use: () => {
-                game.worldRadius += 30
+                game.worldRadius += 11
                 Artist.redraw()
             },
             name: "Hawking-Cipolla Expansion Limit Engine",
-            description: "<div class='storeDescEffect'>World Radius +20</div>Do NOT let the clones near the glow-zone (and trust us, they're gunna want to wander in there).  They come back... changed.",
+            description: "<div class='storeDescEffect'>World Radius +11</div>Do NOT let the clones near the glow-zone (and trust us, they're gunna want to wander in there).  They come back... changed.",
             cost: 75e9
         },
 
@@ -1314,6 +1329,7 @@ const CLONE_Game = (function(){
         reader.onload = function(){
             load(JSON.parse(atob(reader.result)))
             document.getElementById("loadDialog").classList.add("occlude")
+            input.value = ""
         }
         reader.readAsText(input.files[0])
     }

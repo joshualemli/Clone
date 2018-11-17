@@ -288,6 +288,7 @@ html,body {
 
 
 #cloneUI-augmentations {
+    flex:1 1 auto;
 }
 #cloneUI-augmentationsAreaLabel {
     color:#FFF;
@@ -355,7 +356,8 @@ html,body {
     flex:1 1 auto;
     color:#AAA;
     border-bottom:0.5px solid #222;
-    padding-right:1em
+    padding-right:1em;
+    align-items:center;
 }
 .cloneUI-info-item-value {
     border-bottom:0.5px solid #222;
@@ -363,6 +365,7 @@ html,body {
     flex:1 1 auto;
     color:#CCC;
     font-size:1.2em;
+    align-items:center;
 }
 #cloneUI-close {
     width:100%;
