@@ -238,9 +238,9 @@ const CLONE_Game = (function(){
             window.addEventListener("resize", _meteredResize)
             setInterval(()=>{
                 if (canvas.height != canvas.parentElement.offsetHeight || canvas.width != canvas.parentElement.offsetWidth) {
-                    _meteredResize
+                    _meteredResize()
                 }
-            },1500)
+            },2000)
         }
         return {
             init : init,
@@ -651,7 +651,7 @@ const CLONE_Game = (function(){
             dom.info.maxAge.innerHTML = clone.maxAge
             dom.info.fertileAge.innerHTML = clone.fertileAge
             dom.info.production.innerHTML = numberToCurrency(clone.production)
-            dom.info.lifetimeProduction.innerHTML = clone.lifetimeProduction.toFixed(3)
+            dom.info.lifetimeProduction.innerHTML = numberToCurrency(clone.lifetimeProduction)
             dom.info.cloningRate.innerHTML = `${((1 - clone.cloningFailureChance)*100).toFixed(2)}%`
             dom.info.descendants.innerHTML = clone.descendants
         }

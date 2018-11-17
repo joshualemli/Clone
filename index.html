@@ -61,7 +61,7 @@
         <div id="container" class="flexColumn">
             <!-- GAMEPLAY MENU -->
             <div id="menu" class="flexColumn">
-                <div id="menu-persistent" class="flexRow">
+                <div id="menu-persistent" class="flexRow flexWrap">
                     <div id="menu-about">?</div>
                     <input id="menu-callsign" value="">
                     <div id="menu-saveButton" class="menu-button">SAVE</div>
@@ -107,59 +107,53 @@
             </div>
             <!-- INSPECT CLONE UI -->
             <div id="cloneUI" class="flexColumn occlude">
-                <div id="cloneUI-info" class="flexRow flexWrap">
-                    <div class="cloneUI-info-item">
-                        <div class="cloneUI-info-item-label">Name</div>
-                        <div id="cloneUI-info-name">-</div>
-                    </div>
-                    <div class="cloneUI-info-item">
-                        <div class="cloneUI-info-item-label">Age</div>
-                        <div id="cloneUI-info-age">-</div>
-                    </div>
-                    <div class="cloneUI-info-item">
-                        <div class="cloneUI-info-item-label">Max age</div>
-                        <div id="cloneUI-info-maxAge">-</div>
-                    </div>
-                    <div class="cloneUI-info-item">
-                        <div class="cloneUI-info-item-label">Fertile Age</div>
-                        <div id="cloneUI-info-fertileAge">-</div>
-                    </div>
-                    <div class="cloneUI-info-item">
-                        <div class="cloneUI-info-item-label">Generation</div>
-                        <div id="cloneUI-info-generation">-</div>
-                    </div>
-                    <div class="cloneUI-info-item">
-                        <div class="cloneUI-info-item-label">Production</div>
-                        <div id="cloneUI-info-production">-</div>
-                    </div>
-                    <div class="cloneUI-info-item">
-                        <div class="cloneUI-info-item-label">Lifetime production</div>
-                        <div id="cloneUI-info-lifetimeProduction">-</div>
-                    </div>
-                    <div class="cloneUI-info-item">
-                        <div class="cloneUI-info-item-label">Cloning rate</div>
-                        <div id="cloneUI-info-cloningRate">-</div>
-                    </div>
-                    <div class="cloneUI-info-item">
-                        <div class="cloneUI-info-item-label">Descendants</div>
-                        <div id="cloneUI-info-descendants">-</div>
-                    </div>
-                </div>
-                <div class="flexColumn">
-                    <div id="cloneUI-augmentationsAreaLabel">Augmentations</div>
-                    <div id="cloneUI-augmentations" class="flexRow">
-                        <div class="cloneUI-augmentations-section" class="flexColumn">
-                            <div class="cloneUI-augmentations-section-label">available</div>
-                            <div id="cloneUI-augmentations-available"></div>
+                <div class="flexRow flexWrap">
+                    <div class="cloneUI-info flexRow">
+                        <div class="cloneUI-info-labels flexColumn">
+                            <div class="cloneUI-info-item-label">Name</div>
+                            <div class="cloneUI-info-item-label">Generation</div>
+                            <div class="cloneUI-info-item-label">Production</div>
+                            <div class="cloneUI-info-item-label">Net prod.</div>
                         </div>
-                        <div class="cloneUI-augmentations-section" class="flexColumn">
-                            <div class="cloneUI-augmentations-section-label">pending</div>
-                            <div id="cloneUI-augmentations-pending"></div>
+                        <div class="cloneUI-info-values flexColumn">
+                            <div id="cloneUI-info-name" class="cloneUI-info-item-value">-</div>
+                            <div id="cloneUI-info-generation" class="cloneUI-info-item-value">-</div>
+                            <div id="cloneUI-info-production" class="cloneUI-info-item-value">-</div>
+                            <div id="cloneUI-info-lifetimeProduction" class="cloneUI-info-item-value">-</div>
                         </div>
-                        <div id="cloneUI-augmentations-applyButton">&zigrarr;</div>
-                        <div class="cloneUI-augmentations-section" class="flexColumn">
-                            <div class="cloneUI-augmentations-section-label">applied</div>
-                            <div id="cloneUI-augmentations-applied"></div>
+                    </div>
+                    <div class="cloneUI-info flexRow">
+                        <div class="cloneUI-info-labels flexColumn">
+                            <div class="cloneUI-info-item-label">Age</div>
+                            <div class="cloneUI-info-item-label">Max age</div>
+                            <div class="cloneUI-info-item-label">Fertile age</div>
+                            <div class="cloneUI-info-item-label">Cloning rate</div>
+                            <div class="cloneUI-info-item-label">Descendants</div>
+                        </div>
+                        <div class="cloneUI-info-values flexColumn">
+                            <div id="cloneUI-info-age" class="cloneUI-info-item-value">-</div>
+                            <div id="cloneUI-info-maxAge" class="cloneUI-info-item-value">-</div>
+                            <div id="cloneUI-info-fertileAge" class="cloneUI-info-item-value">-</div>
+                            <div id="cloneUI-info-cloningRate" class="cloneUI-info-item-value">-</div>                        
+                            <div id="cloneUI-info-descendants" class="cloneUI-info-item-value">-</div>
+                        </div>
+                    </div>
+                    <div class="flexColumn">
+                        <div id="cloneUI-augmentationsAreaLabel">Augmentations</div>
+                        <div id="cloneUI-augmentations" class="flexRow">
+                            <div class="cloneUI-augmentations-section" class="flexColumn">
+                                <div class="cloneUI-augmentations-section-label">available</div>
+                                <div id="cloneUI-augmentations-available"></div>
+                            </div>
+                            <div class="cloneUI-augmentations-section" class="flexColumn">
+                                <div class="cloneUI-augmentations-section-label">pending</div>
+                                <div id="cloneUI-augmentations-pending"></div>
+                            </div>
+                            <div id="cloneUI-augmentations-applyButton">&zigrarr;</div>
+                            <div class="cloneUI-augmentations-section" class="flexColumn">
+                                <div class="cloneUI-augmentations-section-label">applied</div>
+                                <div id="cloneUI-augmentations-applied"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
