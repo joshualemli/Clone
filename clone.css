@@ -536,12 +536,12 @@ html,body {
 
 .store-merchandise-item {
     display:flex;
-    flex:0 1 auto;
+    flex:1 1 auto;
     justify-content:center;
-    padding:0.35rem 0.7rem;
-    margin:0.35rem;
+    padding:0.1rem 0.3rem;
+    margin:0.25rem;
     font-size:1.2em;
-    border:2px solid #666;
+    border:1px solid #666;
     border-radius:0.25em;
     transition:border-color 0.3s,color 0.1s;
     background:linear-gradient(#112,#311);

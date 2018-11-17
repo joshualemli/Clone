@@ -205,8 +205,9 @@ const CLONE_Game = (function(){
 
 
     var Artist = (function(){
-        var canvas, context, windowResizeTimeout
-        const RESIZE_TIME_INTERVAL = 200
+        var canvas, context, lastResizeTime, resizeTimeout
+        const _timeSinceLastResize = () => new Date().getTime() - lastResizeTime
+        const RESIZE_TIME_INTERVAL = 500
         const redraw = () => {
             context.setTransform(1,0,0,1,0,0)
             context.clearRect(0,0,context.canvas.width,context.canvas.height)
@@ -219,21 +220,27 @@ const CLONE_Game = (function(){
             canvas.width = context.canvas.width = view.screenSize.x = canvas.parentElement.offsetWidth
             canvas.height =  context.canvas.height = view.screenSize.y = canvas.parentElement.offsetHeight
             redraw()
+            lastResizeTime = new Date().getTime()
+        }
+        const _meteredResize = () => {
+            if (_timeSinceLastResize() > RESIZE_TIME_INTERVAL) {
+                resize()
+            }
+            else {
+                if (resizeTimeout) clearTimeout(resizeTimeout)
+                resizeTimeout = setTimeout(resize, RESIZE_TIME_INTERVAL)
+            }
         }
         const init = () => {
             canvas = document.querySelector("#mainCanvas")
             context = canvas.getContext("2d")
             canvas.parentElement.addEventListener("resize",event=>console.log(event))
-            window.addEventListener("resize", () => {
-                if (windowResizeTimeout) clearTimeout(windowResizeTimeout)
-                windowResizeTimeout = setTimeout(resize,RESIZE_TIME_INTERVAL)
-            })
+            window.addEventListener("resize", _meteredResize)
             setInterval(()=>{
                 if (canvas.height != canvas.parentElement.offsetHeight || canvas.width != canvas.parentElement.offsetWidth) {
-                    if (windowResizeTimeout) clearTimeout(windowResizeTimeout)
-                    windowResizeTimeout = setTimeout(resize,RESIZE_TIME_INTERVAL)
+                    _meteredResize
                 }
-            },400)
+            },1500)
         }
         return {
             init : init,
@@ -296,11 +303,11 @@ const CLONE_Game = (function(){
             window.addEventListener("keydown",_closeStoreListenerCallback)
         }
         const close = () => {
-            Input.enable()
             dom.container.classList.add("occlude")
+            if (resumeGameplayOnClose) game.pause = false
             Menu.update()
             CloneUI.updateAugmentations()
-            if (resumeGameplayOnClose) game.pause = false
+            Input.enable()
         }
         const purchase = () => {
             let subtotal = selectedQuantity * selectedItem.cost
@@ -332,7 +339,7 @@ const CLONE_Game = (function(){
             if (selectedQuantity < 0) selectedQuantity = 0
             if (selectedItemGameCategory === "artifices" && selectedQuantity > 1) selectedQuantity = 1
             dom.itemDetails.quantity.innerHTML = "x"+selectedQuantity.toString()
-            dom.itemDetails.subtotal.innerHTML = "-"+numberToCurrency(selectedItem.cost * selectedQuantity)
+            dom.itemDetails.subtotal.innerHTML = numberToCurrency(selectedItem.cost * selectedQuantity)
         }
         const _setDetails = (_Section,gameSection,key) => {
             dom.itemDetails.topBar.classList.remove("occlude")
@@ -746,10 +753,10 @@ const CLONE_Game = (function(){
                 // alien spliced!
                 if (override.alienSpliced) {
                     this.alienSpliced = true
-                    this.production = 0.13
-                    this.fertileAge = 978
+                    this.production = 2.07
+                    this.fertileAge = 2265
                     this.cloningFailureChance = 0.9997
-                    this.maxAge = 1107
+                    this.maxAge = 2273
                     this._color = `rgb(${Math.floor(Math.random()*40+120)},${Math.floor(Math.random()*40+160)},${Math.floor(Math.random()*40+130)})`
                 }
             }
@@ -795,7 +802,8 @@ const CLONE_Game = (function(){
         new Clone(hash.x, hash.y, {
             generation: this.generation+1,
             mutant: this.mutant,
-            foreign: this.foreign
+            foreign: this.foreign,
+            alienSpliced: this.alienSpliced
         })
         this.descendants += 1
     }
@@ -815,10 +823,11 @@ const CLONE_Game = (function(){
         if (this.age > this.maxAge) return this.perish()
         // clone self
         if (this.age > this.fertileAge && Math.random() > this.cloningFailureChance) return this.clone()
-        // production
+        // augmented behavior
         // if (this.augmentations.allelopathicDeathTendrils && Math.random() > 0.9) {
-        //     let p = this._getRandomPosition()
+            //     let p = this._getRandomPosition()
         // }
+        // production
         game.resources += this.production
         this.lifetimeProduction += this.production
     }
@@ -899,7 +908,7 @@ const CLONE_Game = (function(){
             },
             name: "Genesis Pod",
             description: "Used to spit out... we mean gently bring a new clone into existence.",
-            cost: 3.75,
+            cost: 3.65,
             icon: "1_20"
         },
         genesisRay: {
@@ -918,7 +927,7 @@ const CLONE_Game = (function(){
             },
             name: "Genesis Ray",
             description: "By jetisoning organic tissue into a high-energy control ray, an entire group of clones can be grotesquely reanimated... I mean beautifully, er, coalesced back to their, uh, intended forms.",
-            cost: 125.95,
+            cost: 45.50,
             icon: "1_20"
         },
         smitingBolt: {
@@ -932,7 +941,7 @@ const CLONE_Game = (function(){
             },
             name: "Smiting Bolt",
             description: "Instantly eliminate a single clone.",
-            cost: 400
+            cost: 19.95
         },
         deionizer: {
             use: (xHash,yHash) => {
@@ -955,7 +964,7 @@ const CLONE_Game = (function(){
             },
             name: "Deionizer",
             description: "Renders all clones' essential biochemical processes, um... inert. Works over a sizeable radius.",
-            cost: 795.99
+            cost: 55
         },
         cascadeResonanceQuantumWarhead: {
             use: () => {
@@ -976,40 +985,39 @@ const CLONE_Game = (function(){
             },
             name: "Ribonucleic Injection",
             description: "<div class='storeDescEffect'>Max Age +500</div>Prolong -- wait, sorry, our mistake -- <i>extend</i> the happy, very happy, life of a clone!",
-            cost: 12.95
+            cost: 10.50
         },
         psychicHarness: {
             use: clone => {
-                clone.production += 0.07
+                clone.production += 0.09
             },
             name: "Psychic Harness",
-            description: `<div class='storeDescEffect'>Production +0.07</div>Make no mistake, that little "+0.07" is pushing them to their breaking point.  You know, "psychologically" speaking.`,
-            cost: 13.75
+            description: `<div class='storeDescEffect'>Production +0.09</div>Make no mistake, that little "+0.07" is pushing them to their breaking point.  You know, "psychologically" speaking.`,
+            cost: 15.99
         },
         longevityPump: {
             use: clone => {
-                clone.maxAge *= 7
+                clone.maxAge *= 9
             },
             name: "Longevity Pump",
-            description: "<div class='storeDescEffect'>Max Age x7</div>Works great!  And trust us, they barely notice the pump.  In fact, uh, clones love it.  Don't ask them about it though, they're selfish and would probably just want the next step up in our product line and seriously, who can afford that?  Oh but if you could, oh man.  That's the stuff.",
-            cost: 299.95
+            description: "<div class='storeDescEffect'>Max Age x9</div>Works great!  And trust us, they barely notice the pump.  In fact, uh, clones love it.  Don't ask them about it though, they're selfish and would probably just want the next step up in our product line and seriously, who can afford that?  Oh but if you could, oh man.  That's the stuff.",
+            cost: 90
         },
         orificeInterconnectivitySystem: {
             use: clone => {
-                clone.production *= 7
+                clone.production *= 4
             },
             name: "Orifice Interconnectivity System",
-            description: "<div class='storeDescEffect'>Production x7</div>This system ingeniously interconnects a clone's orifices, filtering and recycling waste directly back into the clone. Ah, the circle of life!",
-            cost: 350
+            description: "<div class='storeDescEffect'>Production x4</div>This system ingeniously interconnects a clone's orifices, filtering and recycling waste directly back into the clone. Ah, the circle of life!",
+            cost: 175
         },
         organicTransmutation: {
             use: clone => {
-                clone.maxAge *= 3
-                clone.production *= 3
+                clone.production *= 11
             },
             name: "Organic Transmutation",
-            description: `<div class='storeDescEffect'>Max Age x3</div><div class='storeDescEffect'>Production x3</div>While this modification is, well, "difficult" on the clone, the potential rewards are fantastic.  For you.`,
-            cost: 1999.99
+            description: `<div class='storeDescEffect'>Production x11</div>While this modification is, well, "difficult" on the clone, the potential rewards are fantastic.  For you.`,
+            cost: 999.99
         },
         mtbde: {
             use: clone => {
@@ -1130,6 +1138,30 @@ const CLONE_Game = (function(){
             cost: 120e9
         },
 
+        //3....
+        //1
+        //1
+        //4
+        
+
+        microFissionEngine: {
+            use: () => {
+                game.worldRadius += 1
+                Artist.redraw()
+            },
+            name: "Micro Fission Engine",
+            description: "<div class='storeDescEffect'>World Radius +1</div>Although it's not enough to improve the clones' quality of life, it is enough to cram a few more of 'em in there.",
+            cost: 760.55
+        },
+        redMercuryCyclotronEngine: {
+            use: () => {
+                game.worldRadius += 1
+                Artist.redraw()
+            },
+            name: "Red Mercury Cyclotron Engine",
+            description: "<div class='storeDescEffect'>World Radius +1</div>Powered by cobalt fusion, the modern standard in energy delivery systems. The fusion chain produces only high-grade Terbium as a byproduct (and some high-intesity beta radiation, but the clones will soak most of that up).",
+            cost: 1200
+        },
         cobaltFusionEngine: {
             use: () => {
                 game.worldRadius += 2
@@ -1270,7 +1302,7 @@ const CLONE_Game = (function(){
             view:view,
             game:game
         })
-        var anchor = createHtmlElement("a", { href: "data:text/html,"+btoa(saveData), download: `CLONE_save_${new Date().getTime()}.txt` })
+        var anchor = createHtmlElement("a", { href: "data:text/plain,"+btoa(saveData), download: `CLONE_save_${new Date().getTime()}.txt` })
         document.body.appendChild(anchor)
         anchor.click()
         document.body.removeChild(anchor)
@@ -1322,7 +1354,6 @@ const CLONE_Game = (function(){
             pause:false,
             worldRadius:3
         }
-        window.game=game
         document.getElementById("menu-callsign").value = game.callsign
         if (saveData.cloneMap) saveData.cloneMap.forEach( cloneInfo => {
             new Clone(cloneInfo.xHash,cloneInfo.yHash,cloneInfo)
@@ -1334,7 +1365,7 @@ const CLONE_Game = (function(){
         Framerate.reset()
         Input.enable()
     }
-
+    
     window.cht = () => game.resources += 100e9
 
     return function() {
