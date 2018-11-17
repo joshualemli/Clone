@@ -31,9 +31,9 @@
     CLONE JavaScript file
     - - - - - - - - - - - - - - - - - - - */
         const
-        CLONE_VERSION = "0.3.5",
+        CLONE_VERSION = "0.4.0",
         CLONE_RELEASE = "alpha",
-        CLONE_EDITION = "lawnmower";
+        CLONE_EDITION = "dog balancer";
     /* - - - - - - - - - - - - - - - - - - -
 
 
@@ -325,26 +325,26 @@ const CLONE_Game = (function(){
             }
             else console.log("not enough dough")
         }
+        const _adjustQuantity = (quantity) => {
+            if (!selectedItem.cost) return null
+            if (!selectedQuantity) selectedQuantity = 0
+            selectedQuantity += quantity
+            if (selectedQuantity < 0) selectedQuantity = 0
+            if (selectedItemGameCategory === "artifices" && selectedQuantity > 1) selectedQuantity = 1
+            dom.itemDetails.quantity.innerHTML = "x"+selectedQuantity.toString()
+            dom.itemDetails.subtotal.innerHTML = "-"+numberToCurrency(selectedItem.cost * selectedQuantity)
+        }
         const _setDetails = (_Section,gameSection,key) => {
-            // if (!_Section) {
-            //     dom.itemDetails.topBar.classList.add("occlude")
-            //     selectedItem = {description:"[awaiting selection]"}
-            //     selectedItemGameCategory = null
-            //     selectedItemGameId = null
-            // }
-            // else {
-                dom.itemDetails.topBar.classList.remove("occlude")
-                selectedItem = _Section[key]
-                selectedItemGameCategory = gameSection
-                selectedItemGameId = key
-            // }
+            dom.itemDetails.topBar.classList.remove("occlude")
+            selectedItem = _Section[key]
+            selectedItemGameCategory = gameSection
+            selectedItemGameId = key
             selectedQuantity = 1
             dom.itemDetails.name.innerHTML = selectedItem.name || ""
             dom.itemDetails.description.innerHTML = selectedItem.description || ""
             let costString = selectedItem.cost ? numberToCurrency(selectedItem.cost) : ""
             dom.itemDetails.cost.innerHTML = costString
-            dom.itemDetails.quantity.innerHTML = selectedItem.cost ? ("x"+selectedQuantity.toString()) : ""
-            dom.itemDetails.subtotal.innerHTML = selectedItem.cost ? numberToCurrency((selectedItem.cost || 0) * selectedQuantity) : ""
+            _adjustQuantity(0)
             _setOwnedQuantity()
         }
         const init = () => {
@@ -398,19 +398,11 @@ const CLONE_Game = (function(){
             })
 
             // behavior
-            let adjustQuantity = (key,quantity) => {
-                if (!selectedItem.cost) return null
-                if (!selectedQuantity) selectedQuantity = 0
-                selectedQuantity += quantity
-                if (selectedQuantity < 0) selectedQuantity = 0
-                if (selectedItemGameCategory === "artifices" && selectedQuantity > 1) selectedQuantity = 1
-                dom.itemDetails.quantity.innerHTML = selectedQuantity
-                dom.itemDetails.subtotal.innerHTML = numberToCurrency(selectedItem.cost * selectedQuantity)
-            }
-            dom.itemDetails.plusTen.onclick = event => adjustQuantity(selectedItem,10)
-            dom.itemDetails.plusOne.onclick = event => adjustQuantity(selectedItem,1)
-            dom.itemDetails.minusOne.onclick = event => adjustQuantity(selectedItem,-1)
-            dom.itemDetails.minusTen.onclick = event => adjustQuantity(selectedItem,-10)
+
+            dom.itemDetails.plusTen.onclick = event => _adjustQuantity(10)
+            dom.itemDetails.plusOne.onclick = event => _adjustQuantity(1)
+            dom.itemDetails.minusOne.onclick = event => _adjustQuantity(-1)
+            dom.itemDetails.minusTen.onclick = event => _adjustQuantity(-10)
             dom.itemDetails.purchase.onclick = purchase
             dom.exit.onclick = close
         }
@@ -989,14 +981,6 @@ const CLONE_Game = (function(){
             description: "<div class='storeDescEffect'>Max Age +500</div>Prolong -- wait, sorry, our mistake -- <i>extend</i> the happy, very happy, life of a clone!",
             cost: 12.95
         },
-        psychicHarness: {
-            use: clone => {
-                clone.production += 0.07
-            },
-            name: "Psychic Harness",
-            description: `<div class='storeDescEffect'>Production +0.07</div>Make no mistake, that little "+0.07" is pushing them to their breaking point.  You know, "psychologically" speaking.`,
-            cost: 13.75
-        },
         longevityPump: {
             use: clone => {
                 clone.maxAge *= 7
@@ -1004,6 +988,14 @@ const CLONE_Game = (function(){
             name: "Longevity Pump",
             description: "<div class='storeDescEffect'>Max Age x7</div>Works great!  And trust us, they barely notice the pump.  In fact, uh, clones love it.  Don't ask them about it though, they're selfish and would probably just want the next step up in our product line and seriously, who can afford that?  Oh but if you could, oh man.  That's the stuff.",
             cost: 299.95
+        },
+        psychicHarness: {
+            use: clone => {
+                clone.production += 0.07
+            },
+            name: "Psychic Harness",
+            description: `<div class='storeDescEffect'>Production +0.07</div>Make no mistake, that little "+0.07" is pushing them to their breaking point.  You know, "psychologically" speaking.`,
+            cost: 13.75
         },
         orificeInterconnectivitySystem: {
             use: clone => {
@@ -1022,17 +1014,6 @@ const CLONE_Game = (function(){
             description: `<div class='storeDescEffect'>Max Age x3</div><div class='storeDescEffect'>Production x3</div>While this modification is, well, "difficult" on the clone, the potential rewards are fantastic.  For you.`,
             cost: 1999.99
         },
-        mtbde: {
-            use: clone => {
-                clone.cloningFailureChance -= 0.01
-            },
-            name: "MTBDE",
-            description: `<div class="'storeDescEffect">Cloning Rate +1%</div>Methyl-tribromodioxylic Ether (MTBDE) is an "all-natural" way of enhancing a clone's... reproductive capabilities.`,
-            cost: 34e3
-        },
-        cyberneticGenitals: {
-
-        },
         immortalitySerum: {
             use: clone => {
                 clone.maxAge = Infinity
@@ -1042,6 +1023,23 @@ const CLONE_Game = (function(){
             name: "Immortality Serum",
             description: "<div class='storeDescEffect'>Max Age &rarr; <b>&infin;</b></div>Literally, no shit, your clone will be immortal.  Will do nothing for their temperment, however.",
             cost: 1e5
+        },
+        mtbde: {
+            use: clone => {
+                clone.cloningFailureChance -= 0.01
+            },
+            name: "MTBDE",
+            description: `<div class="storeDescEffect">Cloning Rate +1%</div>Methyl-tribromodioxylic Ether (MTBDE) is an "all-natural" way of enhancing a clone's... reproductive capabilities.`,
+            cost: 34e3
+        },
+        cyberneticGenitals: {
+            use: clone => {
+                clone.fertileAge = Math.round(clone.fertileAge/2)
+                clone.cloningFailureChance -= 0.015
+            },
+            name: "Cybernetic Genitals",
+            description: `<div class="storeDescEffect">Cloning Rate +1.5%</div><div class="storeDescEffect">Ferility Age x1/2</div>Once the swelling goes down and the risk of deadly infection has passed, you know the "upgrade" has been successful, so just kick back and... ahem... watch the fireworks.`,
+            cost: 5e6
         },
         geneticResequencingNodules: {
             use: clone => {},
@@ -1058,7 +1056,7 @@ const CLONE_Game = (function(){
         exophagicAfterbirth: {
             use: clone => {},
             name: "Exophagic Afterbirth",
-            description: "How to put it?  Ahhh... Part of the, er, cloning process, umm, allows dissimilar clones to be *ahem* consumed. You may opt to not watch this miracle of science. Actually, nobody should see this.  In fact, this augmentation automagically blinds the clone.  It was the only humane thing to do.",
+            description: "How to put it?  Ahhh... Part of the, er, cloning process, umm, allows dissimilar clones to be *ahem* consumed. You may opt to not watch this miracle of science. Actually, nobody should see this.  In fact, this augmentation also blinds the clone.  It was the only humane thing to do.",
             cost: 12e6
         },
         hereditaryServitudeEngrams: {
@@ -1094,7 +1092,7 @@ const CLONE_Game = (function(){
                 Eternals I hear your call gladly,<br>
                 Dictate swift winged words, & fear not<br>
                 To unfold your dark visions of torment.<br>-William Blake`,
-            cost: 10000
+            cost: 10e3
         },
         bookOfUrizen: {
             use: () => {},
@@ -1107,7 +1105,7 @@ const CLONE_Game = (function(){
                 This soul-shudd'ring vacuum? — Some said<br>
                 "It is Urizen", But unknown, abstracted<br>
                 Brooding secret, the dark power hid.<br>-William Blake`,
-            cost: 2e5
+            cost: 200e3
         },
         lightOfUrizen: {
             use: () => {},
@@ -1190,7 +1188,6 @@ const CLONE_Game = (function(){
             cost: 75e9
         },
 
-        
         cygniStellarFragment: {
             use: () => game.artifices.cygniStellarFragment ? 0.0000001 : 0,
             name: "Cygni Stellar Fragment",
