@@ -628,9 +628,6 @@ const CLONE_Game = (function(){
                     // update once:
                     new Sprites.cloneHighlight(clone)
                     dom.container.style.border = `4px solid ${clone._color}`
-                    // if (clone.mutant) dom.container.classList.add("border-mutant")
-                    // else if (clone.foreign) dom.container.classList.add("border-foreign")
-                    // else dom.container.classList.add("border-clones")
                     dom.info.name.innerHTML = clone.name
                     dom.info.generation.innerHTML = clone.generation
                     updateAugmentations()
@@ -981,14 +978,6 @@ const CLONE_Game = (function(){
             description: "<div class='storeDescEffect'>Max Age +500</div>Prolong -- wait, sorry, our mistake -- <i>extend</i> the happy, very happy, life of a clone!",
             cost: 12.95
         },
-        longevityPump: {
-            use: clone => {
-                clone.maxAge *= 7
-            },
-            name: "Longevity Pump",
-            description: "<div class='storeDescEffect'>Max Age x7</div>Works great!  And trust us, they barely notice the pump.  In fact, uh, clones love it.  Don't ask them about it though, they're selfish and would probably just want the next step up in our product line and seriously, who can afford that?  Oh but if you could, oh man.  That's the stuff.",
-            cost: 299.95
-        },
         psychicHarness: {
             use: clone => {
                 clone.production += 0.07
@@ -996,6 +985,14 @@ const CLONE_Game = (function(){
             name: "Psychic Harness",
             description: `<div class='storeDescEffect'>Production +0.07</div>Make no mistake, that little "+0.07" is pushing them to their breaking point.  You know, "psychologically" speaking.`,
             cost: 13.75
+        },
+        longevityPump: {
+            use: clone => {
+                clone.maxAge *= 7
+            },
+            name: "Longevity Pump",
+            description: "<div class='storeDescEffect'>Max Age x7</div>Works great!  And trust us, they barely notice the pump.  In fact, uh, clones love it.  Don't ask them about it though, they're selfish and would probably just want the next step up in our product line and seriously, who can afford that?  Oh but if you could, oh man.  That's the stuff.",
+            cost: 299.95
         },
         orificeInterconnectivitySystem: {
             use: clone => {
@@ -1014,6 +1011,14 @@ const CLONE_Game = (function(){
             description: `<div class='storeDescEffect'>Max Age x3</div><div class='storeDescEffect'>Production x3</div>While this modification is, well, "difficult" on the clone, the potential rewards are fantastic.  For you.`,
             cost: 1999.99
         },
+        mtbde: {
+            use: clone => {
+                clone.cloningFailureChance -= 0.01
+            },
+            name: "MTBDE",
+            description: `<div class="storeDescEffect">Cloning Rate +1%</div>Methyl-tribromodioxylic Ether (MTBDE) is an "all-natural" way of enhancing a clone's... reproductive capabilities.`,
+            cost: 34e3
+        },
         immortalitySerum: {
             use: clone => {
                 clone.maxAge = Infinity
@@ -1022,15 +1027,13 @@ const CLONE_Game = (function(){
             },
             name: "Immortality Serum",
             description: "<div class='storeDescEffect'>Max Age &rarr; <b>&infin;</b></div>Literally, no shit, your clone will be immortal.  Will do nothing for their temperment, however.",
-            cost: 1e5
+            cost: 100e3
         },
-        mtbde: {
-            use: clone => {
-                clone.cloningFailureChance -= 0.01
-            },
-            name: "MTBDE",
-            description: `<div class="storeDescEffect">Cloning Rate +1%</div>Methyl-tribromodioxylic Ether (MTBDE) is an "all-natural" way of enhancing a clone's... reproductive capabilities.`,
-            cost: 34e3
+        geneticResequencingNodules: {
+            use: clone => {},
+            name: "Genetic Resequencing Nodules",
+            description: "Only the finest implanted nodules crafted from 100% reprocessed... material.  Allows clone's organic sequences to stay intact, preventing mutant offspring (is that a paradox? hahahaha....).  Descendents do not inherit this augmentation.",
+            cost: 200e3
         },
         cyberneticGenitals: {
             use: clone => {
@@ -1041,17 +1044,11 @@ const CLONE_Game = (function(){
             description: `<div class="storeDescEffect">Cloning Rate +1.5%</div><div class="storeDescEffect">Ferility Age x1/2</div>Once the swelling goes down and the risk of deadly infection has passed, you know the "upgrade" has been successful, so just kick back and... ahem... watch the fireworks.`,
             cost: 5e6
         },
-        geneticResequencingNodules: {
-            use: clone => {},
-            name: "Genetic Resequencing Nodules",
-            description: "Only the finest implanted nodules crafted from 100% reprocessed... material.  Allows clone's organic sequences to stay intact, preventing mutant offspring (is that a paradox? hahahaha....).  Descendents do not inherit this augmentation.",
-            cost: 2e5
-        },
         allelopathicDeathTendrils: {
             use: clone => {},
             name: "Allelopathic Death Tendrils",
             description: "Gives your clone an automatic defense net that will strike out at dissimilar clones. What could go wrong?",
-            cost: 7e5
+            cost: 7e6
         },
         exophagicAfterbirth: {
             use: clone => {},
@@ -1062,19 +1059,19 @@ const CLONE_Game = (function(){
         hereditaryServitudeEngrams: {
             use: clone => {},
             name: "Hereditary Servitude Engrams",
-            description: "<div class='storeDescEffect'>Max Age +110 (descendants)</div><div class='storeDescEffect'>Production +0.005 (descendants)</div>Descendants will posses genotypes that increases longevity and productivity (they just won't know it).",
+            description: "<div class='storeDescEffect'>Max Age +110 (descendants)</div><div class='storeDescEffect'>Production +0.005 (descendants)</div><div class='storeDescEffect'>+Hereditary Servitude Engrams (descendants)</div>Descendants will posses genotypes that increases longevity and productivity (they just won't know it).",
             cost: 390e6
         },
         progenicResequencing: {
             use: clone => {},
             name: "Progenic Resequencing",
-            description: "Descendants will inherit the ability to resequence flaws in their own organic sequences.  All future generations descended from clones with this augmentation will carry this augmentation.",
+            description: `<div class='storeDescEffect'>+Genetic Resequencing Nodules (descendants)</div><div class='storeDescEffect'>+Progenic Resequencing (descendants)</div>You know the old adage, "the apple never falls far from the tree"?  Well now the apple will fall with atomic-level precision exactly 1 tree-length away, ensuring, uh, I'm not sure where this analogy was going but let's just say the clones might start looking a little, um, even more homogenous.`,
             cost: 3.7e9
         },
         exophagicOffspring: {
             use: clone => {},
             name: "Exophagic Offspring",
-            description: "<div class='storeDescEffect'>Exophagic Afterbirth (descendants)</div><div class='storeDescEffect'>Exophagic Offspring (descendants)</div>They're gunna f*ck sh*t up. Seriously.",
+            description: "<div class='storeDescEffect'>+Exophagic Afterbirth (descendants)</div><div class='storeDescEffect'>+Exophagic Offspring (descendants)</div>They're gunna f*ck sh*t up. Seriously.",
             cost: 999e9
         },
     }
@@ -1338,7 +1335,7 @@ const CLONE_Game = (function(){
         Input.enable()
     }
 
-    window.cht = () => game.resources += 1e6
+    window.cht = () => game.resources += 100e9
 
     return function() {
         // initialization
