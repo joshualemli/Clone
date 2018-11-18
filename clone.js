@@ -599,7 +599,6 @@ const CLONE_Game = (function(){
         }
         const applyAugmentations = () => {
             let clone = cloneMap.get(id)
-            if (clone.alienSpliced) return null
             Array.from(dom.augmentations.pending.children).map( e => e.dataset.key ).forEach( augKey => {
                 Augmentations[augKey].use(clone)
                 clone.augmentations[augKey] = 1
@@ -629,7 +628,10 @@ const CLONE_Game = (function(){
                 dom.augmentations.available.appendChild(available)
                 available.onclick = event => {
                     if (!game.augmentations[key]) throw new Error("should not happen")
-                    if (clone.augmentations[key] || Array.from(dom.augmentations.pending.children).find(e=>e.dataset.key==key) || parseInt(available.children[1].innerHTML) === 0) return null
+                    // aug exists as applied or pending
+                    if (clone.augmentations[key] || Array.from(dom.augmentations.pending.children).find(e=>e.dataset.key==key)) return null
+                    // aug not compatible with alien spliced
+                    if (clone.alienSpliced && key.indexOf("alien") === -1) return null
                     available.children[1].innerHTML = parseInt(available.children[1].innerHTML) - 1
                     let pending = _augElem(key,"")
                     dom.augmentations.pending.appendChild(pending)
@@ -736,7 +738,7 @@ const CLONE_Game = (function(){
         this.maxAge = override.maxAge || 50
         this.generation = override.generation || 1
         // type
-        this.mutant = override.mutant ? true : (Math.random() > 1 - this.generation / 1e6 ? true : false)
+        this.mutant = override.mutant !== undefined ? override.mutant : (Math.random() > 1 - this.generation / 1e6 ? true : false)
         this.foreign = override.foreign || false
         // augmentations
         this.augmentations = override.augmentations || {}
@@ -806,7 +808,6 @@ const CLONE_Game = (function(){
         return {x:xHash,y:yHash}
     }
     Clone.prototype.clone = function(){
-        // if (this.mutant && this.generation > 600 * Math.random()) return null
         var attempted = new Array(6).fill(0)
         var hash
         while (true) {
@@ -818,7 +819,7 @@ const CLONE_Game = (function(){
         }
         new Clone(hash.x, hash.y, {
             generation: this.generation+1,
-            mutant: this.mutant,
+            mutant: this.augmentations.geneticResequencingNodules ? false : this.mutant,
             foreign: this.foreign,
             alienSpliced: this.alienSpliced
         })
@@ -1053,6 +1054,21 @@ const CLONE_Game = (function(){
             description: `<div class="storeDescEffect">Cloning Rate +1%</div>Methyl-tribromodioxylic Ether (MTBDE) is an "all-natural" way of enhancing a clone's... reproductive capabilities.`,
             cost: 34e3
         },
+        geneticResequencingNodules: {
+            use: clone => {},
+            name: "Genetic Resequencing Nodules",
+            description: "<div class='storeDescEffect'>Mutation factor &rarr; 0</div>Only the finest implanted nodules crafted from 100% reprocessed... material.  Allows clone's organic sequences to stay intact, preventing mutant offspring (is that a paradox? hahahaha....).  Descendents do not inherit this augmentation.",
+            cost: 100e3
+        },
+        alienMotivationBioimplant: {
+            use: clone => {
+                clone.production *= 7
+                if (!clone.alienSpliced) clone.maxAge /= 20
+            },
+            name: "Alien Motivational Bioimplant",
+            description: `<div class="storeDescEffect">Production x7</div><div class="storeDescEffect">Max Age x1/20 (non-alien-DNA-spliced clones)</div>We're not sure if the alien-DNA-spliced clones even feel pain so we've been doing the implant procedure sans-anaesthesia. Don't put this implant into clones without the extra alien DNA sequences, they'll, ah, <i>reject</i> the implant.`,
+            cost: 330e3
+        },
         immortalitySerum: {
             use: clone => {
                 clone.maxAge = Infinity
@@ -1061,13 +1077,7 @@ const CLONE_Game = (function(){
             },
             name: "Immortality Serum",
             description: "<div class='storeDescEffect'>Max Age &rarr; <b>&infin;</b></div>Literally, no shit, your clone will be immortal.  Will do nothing for their temperment, however.",
-            cost: 100e3
-        },
-        geneticResequencingNodules: {
-            use: clone => {},
-            name: "Genetic Resequencing Nodules",
-            description: "Only the finest implanted nodules crafted from 100% reprocessed... material.  Allows clone's organic sequences to stay intact, preventing mutant offspring (is that a paradox? hahahaha....).  Descendents do not inherit this augmentation.",
-            cost: 200e3
+            cost: 900e3
         },
         cyberneticGenitals: {
             use: clone => {
@@ -1099,13 +1109,13 @@ const CLONE_Game = (function(){
         progenicResequencing: {
             use: clone => {},
             name: "Progenic Resequencing",
-            description: `<div class='storeDescEffect'>+Genetic Resequencing Nodules (descendants)</div><div class='storeDescEffect'>+Progenic Resequencing (descendants)</div>You know the old adage, "the apple never falls far from the tree"?  Well now the apple will fall with atomic-level precision exactly 1 tree-length away, ensuring, uh, I'm not sure where this analogy was going but let's just say the clones might start looking a little, um, even more homogenous.`,
+            description: `<div class='storeDescEffect'>+Genetic Resequencing Nodules (descendants)</div><div class='storeDescEffect'>+Progenic Resequencing (descendants)</div>You know the old adage, "the apple never falls far from the tree"?  Well, now the apple will fall with subatomic-level precision, ensuring, um, I'm not sure exactly where this analogy is going but let's just say the clones might start looking a little, uh, even <i>more</i> homogenous.`,
             cost: 3.7e9
         },
         exophagicOffspring: {
             use: clone => {},
             name: "Exophagic Offspring",
-            description: "<div class='storeDescEffect'>+Exophagic Afterbirth (descendants)</div><div class='storeDescEffect'>+Exophagic Offspring (descendants)</div>They're gunna f*ck sh*t up. Seriously.",
+            description: "<div class='storeDescEffect'>+Exophagic Afterbirth (descendants)</div><div class='storeDescEffect'>+Exophagic Offspring (descendants)</div>They're gunna f*ck sh*t up. Don't say we didn't warn you. Just don't make any godamned immortal exophagic nightmare clonepacolypse vampclones",
             cost: 999e9
         },
     }
@@ -1259,28 +1269,28 @@ const CLONE_Game = (function(){
         glieseStellarFragment: {
             use: () => game.artifices.glieseStellarFragment ? 0.0000001 : 0,
             name: "Gliese Stellar Fragment",
-            description: "<div class='storeDescEffect'>Alien DNA Splicing Success Rate +1</div><div class='storeDescEffect'>Alien-spliced Clones x2 Production</div>",
+            description: "<div class='storeDescEffect'>Alien DNA Splicing Success Rate +1</div>",
             cost: 11e3
         },
         pleiadesStellarFragment: {
             use: () => game.artifices.pleiadesStellarFragment ? 0.0000001 : 0,
             name: "Pleiades Stellar Fragment",
-            description: "<div class='storeDescEffect'>Alien DNA Splicing Success Rate +1</div><div class='storeDescEffect'>Alien-spliced Clones x2 Production</div>",
+            description: "<div class='storeDescEffect'>Alien DNA Splicing Success Rate +1</div>",
             cost: 65e3
         },
         westerlundStellarFragment: {
-            use: () => game.artifices.westerlundStellarFragment ? 0.0000003 : 0,
+            use: () => game.artifices.westerlundStellarFragment ? 0.0000002 : 0,
             name: "Westerlund Stellar Fragment",
-            description: "<div class='storeDescEffect'></div>",
+            description: "<div class='storeDescEffect'>Alien DNA Splicing Success Rate +2</div>",
             cost: 35e6
         },
         magellanicStellarFragment: {
             use: () => game.artifices.magellanicStellarFragment ? 0.0000004 : 0,
             name: "Magellanic Stellar Fragment",
-            description: "<div class='storeDescEffect'></div>",
+            description: "<div class='storeDescEffect'>Alien DNA Splicing Success Rate +4</div>",
             cost: 109e6
-        }
-
+        },
+        //<div class='storeDescEffect'>Alien-spliced Clones x2 Production</div>",
     }
 
 
@@ -1421,6 +1431,9 @@ window.onload = CLONE_Game
 
 /*
 ARTIFACTS (in value/order?)
+
+ultimates (+10e12 pricetag)
+need unlimited all ammo (
 
 purchase, discover, engineer
 
