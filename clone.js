@@ -1126,51 +1126,59 @@ const CLONE_Game = (function(){
             use: () => {},
             name: "Nets of Urizen",
             description: `<div class='storeDescEffect'>+.01 Production per living clone</div>
-                Of the primeval Priests assum'd power,<br>
-                When Eternals spurn'd back his religion;<br>
-                And gave him a place in the north,<br>
-                Obscure, shadowy, void, solitary.<br>
-                Eternals I hear your call gladly,<br>
-                Dictate swift winged words, & fear not<br>
-                To unfold your dark visions of torment.<br>-William Blake`,
+                <i>
+                    Of the primeval Priests assum'd power,<br>
+                    When Eternals spurn'd back his religion;<br>
+                    And gave him a place in the north,<br>
+                    Obscure, shadowy, void, solitary.<br>
+                    Eternals I hear your call gladly,<br>
+                    Dictate swift winged words, & fear not<br>
+                    To unfold your dark visions of torment.<br>
+                </i>-William Blake`,
             cost: 10e3
         },
         bookOfUrizen: {
             use: () => {},
             name: "Book of Urizen",
             description: `<div class='storeDescEffect'>+.02 Production per living clone</div>
-                Lo, a shadow of horror is risen<br>
-                In Eternity! Unknown, unprolific!<br>
-                Self-closd, all-repelling: what Demon<br>
-                Hath form'd this abominable void<br>
-                This soul-shudd'ring vacuum? — Some said<br>
-                "It is Urizen", But unknown, abstracted<br>
-                Brooding secret, the dark power hid.<br>-William Blake`,
+                <i>
+                    Lo, a shadow of horror is risen<br>
+                    In Eternity! Unknown, unprolific!<br>
+                    Self-closd, all-repelling: what Demon<br>
+                    Hath form'd this abominable void<br>
+                    This soul-shudd'ring vacuum? — Some said<br>
+                    "It is Urizen", But unknown, abstracted<br>
+                    Brooding secret, the dark power hid.<br>
+                </i>-William Blake`,
             cost: 200e3
         },
         lightOfUrizen: {
             use: () => {},
             name: "Light of Urizen",
             description: `<div class='storeDescEffect'>+.05 Production per living clone</div>
-                In anguish dividing & dividing<br>
-                For pity divides the soul<br>
-                In pangs eternity on eternity<br>
-                Life in cataracts pourd down his cliffs<br>
-                The void shrunk the lymph into Nerves<br>
-                Wand'ring wide on the bosom of night<br>
-                And left a round globe of blood<br>
-                Trembling upon the Void<br>-William Blake`,
+                <i>
+                    In anguish dividing & dividing<br>
+                    For pity divides the soul<br>
+                    In pangs eternity on eternity<br>
+                    Life in cataracts pourd down his cliffs<br>
+                    The void shrunk the lymph into Nerves<br>
+                    Wand'ring wide on the bosom of night<br>
+                    And left a round globe of blood<br>
+                    Trembling upon the Void<br>
+                </i>-William Blake`,
             cost: 70e6
         },
         laborOfUrizen: {
             use: () => {},
             name: "Labor of Urizen",
             description: `<div class='storeDescEffect'>+.01 Production per living clone of any type</div>
-                They began to weave curtains of darkness<br>
-                They erected large pillars round the Void<br>
-                With golden hooks fastend in the pillars<br>
-                With infinite labour the Eternals<br>
-                A woof wove, and called it Science<br>-William Blake`,
+                <i>
+                    They began to weave curtains of darkness<br>
+                    They erected large pillars round the Void<br>
+                    With golden hooks fastend in the pillars<br>
+                    With infinite labour the Eternals<br>
+                    A woof wove, and called it Science<br>
+                </i>-William Blake`,
             cost: 120e9
         },
 
@@ -1263,7 +1271,7 @@ const CLONE_Game = (function(){
         cygniStellarFragment: {
             use: () => game.artifices.cygniStellarFragment ? 0.0000001 : 0,
             name: "Cygni Stellar Fragment",
-            description: "<div class='storeDescEffect'>Alien DNA Splicing Success Rate +1</div>",
+            description: "<div class='storeDescEffect'>Alien DNA Splicing Success Rate +1</div>No promises, but we're like 99% certain that the DNA we found on this stellar fragment is alien SHHHhhh!... jesus, don't say anything here, man. Look, don't be nervous, just act casual, okay? We know it's illegal, but <i>think</i> man, think of the possibilities! Look, we already did the research. We weren't going to tell you, but one thing led to another blah blah, anyway, it happened, and now we know how to splice alien DNA with clones so... look, don't overthink this, man. Just buy this shiny, awesome, alien-DNA-impregnated stellar fragment and let's make some freakin' gray-backs!",
             cost: 5e3
         },
         glieseStellarFragment: {
