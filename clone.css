@@ -45,14 +45,14 @@ html,body {
     position:fixed;z-index:5555;top:0;left:0;width:100vw;height:100vh;
     justify-content:center;
     align-items:center;
-    background:#0005;
-    color:#FFF6;
+    background:#0004;
+    color:#06F7;
     font-family: 'VT323', monospace;
     text-shadow:0.2em 0.2em 0.3em #0009;
 }
-#splashscreenTitle {margin:1rem;font-size:4em;font-style:italic;text-decoration:underline;}
-#splashscreenAuthor {font-size:3em;}
-#splashscreenExit {font-size:1.2em;color:#CCC;margin-top:3.5em;text-shadow:0 0 0.5em #000;}
+#splashscreenTitle {font-size:calc(1.5em + 3vw);font-style:italic;text-decoration:underline;}
+#splashscreenAuthor {font-size:calc(1em + 1vw);font-style:italic;margin-top:0.2em;}
+#splashscreenExit {font-size:calc(1em + 0.5vw);color:#FFF7;margin-top:3em;}
 
 .flexRow {
     display:flex;
@@ -120,6 +120,7 @@ html,body {
 #helpTopicTitle {
     font-size:2em;
 }
+
 #helpSections {
     padding:0.5em 1em 0.5em 0.5em;
     flex:0 0 auto;
@@ -127,14 +128,22 @@ html,body {
 .helpSectionItem {
     margin:0 0 0.25em 0;
     color:#AAB;
+    cursor:pointer;
 }
 .helpSectionItem:hover {
-    color:#55F;
-    font-weight:bold;
+    color:#6AF;
+    text-decoration:underline;
+}
+.helpSectionSelected {
+    color:#FFF;
+    text-decoration:underline;
+    /* font-weight:bold; */
 }
 #helpTopic {
     padding:0.5em;
     flex:1 1 auto;
+    align-self:stretch;
+    overflow-y:auto;
 }
 .helpParagraph {
     padding:0.5em 0;

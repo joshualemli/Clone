@@ -64,7 +64,7 @@ const CloneHelp = (function(){
     `
     content["Basics / Getting Started"] = `
         <div>
-            The game revolves around clones, which for all you care are just "cells" that have a chance to reproduce ("clone" themselves).
+            The game revolves around clones, which for all you care are just cells/dots/entities that have a chance to reproduce ("clone" themselves).
             The clones exist within the "world", which is basically a big circle on your screen.
             This is the clones' world.  It is all they will ever know.
         </div>
@@ -73,12 +73,19 @@ const CloneHelp = (function(){
         </div>
         <div>
             Basically you create, destroy, and augment clones.  And watch them reproduce and die.
-            One you get going, it's hard to "lose", but starting out can be tough at first:
+            You can also buy <i>artifices</i> that permanently alter gameplay, typically in your favor.
+        </div>
+        <div>
+            Although there is no dying/losing in this game, starting out can be tricky.
             If you have no living "normal" clones (colored green) and
             you have zero resources, earning revenue is most likely (but not definitely)
             impossible and you may no longer have any means to interact with the world.
             You may restart (simply reload the page) or load a saved game at any time.
             You can check the <i>Readout</i> or <i>The Money Pit</i> at any time to see your current resources.
+        </div>
+        <div>
+            One you get going, however, getting "stuck" becomes virtually impossible, especially with
+            the ability to save and reload your game at any point.
         </div>
     `
     content["User Input"] = `
@@ -225,6 +232,10 @@ const CloneHelp = (function(){
         Array.from(dom.topic.children).forEach( (child,index) => {
             if (index > 0) child.classList.add("helpParagraph")
         })
+        Array.from(dom.sections.children).forEach( sectionItem => {
+            sectionItem.classList.remove("helpSectionSelected")
+            if (sectionItem.dataset.topic === topic) sectionItem.classList.add("helpSectionSelected")
+        })
     }
 
 
@@ -240,6 +251,7 @@ const CloneHelp = (function(){
         for (let topic in content) {
             let e = document.createElement("div")
             e.innerHTML = topic
+            e.dataset.topic = topic
             e.className = "helpSectionItem"
             dom.sections.appendChild(e)
             e.onclick = () => setTopic(topic)
