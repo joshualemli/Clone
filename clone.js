@@ -97,7 +97,9 @@ const CLONE_Game = (function(){
             "ArrowRight" : "panRight",
             " " : "pause",
             "0" : "recenterView",
-            "s" : "openShop"
+            "s" : "openShop",
+            "t" : "toggleTools",
+            "r" : "toggleReadout",
         }
         var state = {}
         const toggle = action => {
@@ -114,6 +116,13 @@ const CLONE_Game = (function(){
                     break
                 case "openShop":
                     Store.toggle()
+                    break
+                case "toggleTools":
+                    Menu.toggle.tools()
+                    break
+                case "toggleReadout":
+                    Menu.toggle.readout()
+                    break                
             }
         }
         const apply = () => {
@@ -537,6 +546,8 @@ const CLONE_Game = (function(){
                     game.pause = true
                     CloneHelp.open()
                 }
+                dom.callsign.onfocus = Input.disable
+                dom.callsign.onblur = Input.enable
                 dom.callsign.oninput = event => game.callsign = event.target.value
                 dom.saveButton.onclick = save
                 dom.loadButton.onclick = () => {
@@ -547,22 +558,26 @@ const CLONE_Game = (function(){
                 }
                 document.getElementById("loadFileInput").onchange = readLoadFile
                 dom.openShopButton.onclick = Store.open
-                dom.openReadoutButton.onclick = () => {
+                dom.openReadoutButton.onclick = Menu.toggle.readout
+                dom.openToolsButton.onclick = Menu.toggle.tools
+            },
+            update : update,
+            updateTools : updateTools,
+            updateArtifices : updateArtifices,
+            toggle : {
+                tools: () => {
+                    dom.openToolsButton.classList.toggle("menu-openButton-opened")
+                    toolsOpen = !dom.tools.container.classList.toggle("occlude")
+                    updateTools()
+                    Artist.resize()
+                },
+                readout: () => {
                     dom.openReadoutButton.classList.toggle("menu-openButton-opened")
                     readoutOpen = !dom.readout.container.classList.toggle("occlude")
                     updateReadout()
                     Artist.resize()
                 }
-                dom.openToolsButton.onclick = () => {
-                    dom.openToolsButton.classList.toggle("menu-openButton-opened")
-                    toolsOpen = !dom.tools.container.classList.toggle("occlude")
-                    updateTools()
-                    Artist.resize()
-                }
-            },
-            update : update,
-            updateTools : updateTools,
-            updateArtifices : updateArtifices
+            }
         }
     })()
 

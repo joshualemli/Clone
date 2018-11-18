@@ -43,20 +43,33 @@ const CloneHelp = (function(){
     const content = {}
     content["Welcome"] = `
         <div>
-            CLONE is an autamata-driven game.  Like life, it has no real
-            purpose, other than for you to figure out some purpose.  Like life,
-            exploration is key!  Unlike life, this is a simulation and you're free
-            to do as you please without (real life) consequences.
+            CLONE is an autamata-driven game.
+        </div>
+        <div>
+            Like life, there is no real purpose, other than for you to figure out your own purpose.
+            Like life, exploration is key!  Unlike life, this is a simulation and you may
+            do as you please without any (real life) consequences.  Clones may die, but... whatever.
+        </div>
+        <div>
+            Do you feel for the clones?  Do you?
+        </div>
+        <div>
+            This game was created by Joshua A. Lemli; he had to write it, he had to, he had no choice.
+            It was coded intermittently over the course of two spastic weeks and will be refined for who knows how long.
+        </div>
+        <div>
+            contact:
+            joshualemli@gmail.com
         </div>
     `
     content["Basics / Getting Started"] = `
         <div>
             The game revolves around clones, which are little dots that have a chance to reproduce ("clone" themselves).
             The clones exist within the "world", which is basically a circle on your screen.
-            This is the clones' world.  This is all they know.
+            This is the clones' world.  It is all they will ever know.
         </div>
         <div>
-            There are no rules to gameplay. It's important to try new things.  Exploration is key!
+            There are no rules to the gameplay. It's important to try new things.  Exploration is key!
         </div>
         <div>
             Basically you create, destroy, and augment clones.  And watch them reproduce and die.
@@ -78,6 +91,10 @@ const CloneHelp = (function(){
             <br>
             <span class="helpKey">0</span> recenter view
             <br>
+            <span class="helpKey">t</span> toggle "Tools" interface
+            <br>
+            <span class="helpKey">r</span> toggle "Readout"
+            <br>
             <span class="helpKey">s</span> open "The Money Pit" store
             <br>
             <span class="helpKey">any key</span> close "The Money Pit" store (while open)
@@ -88,7 +105,7 @@ const CloneHelp = (function(){
             At the top of your screen is a menu with several interactive items, such as the tools interface.
             You can click on the button labeled "Tools" to open the tools interface.  You can also open
             your readout, open a store called "The Money Pit" (don't worry, the currency is virtual),
-            change your player's name, save, and load the game.
+            change your player's name, and save/load the game.
         </div>
     `
     content["Clones"] = `
@@ -203,7 +220,12 @@ const CloneHelp = (function(){
         dom.container.classList.add("occlude")
     }
 
-    const setTopic = topic => dom.topic.innerHTML = `<div id="helpTopicTitle">${topic}</div>${content[topic]}`
+    const setTopic = topic => {
+        dom.topic.innerHTML = `<div id="helpTopicTitle">${topic}</div>${content[topic]}`
+        Array.from(dom.topic.children).forEach( (child,index) => {
+            if (index > 0) child.classList.add("helpParagraph")
+        })
+    }
 
 
     const init = () => {

@@ -123,6 +123,9 @@ html,body {
     padding:0.5em;
     flex:1 1 auto;
 }
+.helpParagraph {
+    padding:0.5em 0;
+}
 
 #pauseWarningBar {
     display:block;
