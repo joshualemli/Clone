@@ -41,6 +41,19 @@ html,body {
     user-select:none;
 }
 
+#splashscreen {
+    position:fixed;z-index:5555;top:0;left:0;width:100vw;height:100vh;
+    justify-content:center;
+    align-items:center;
+    background:#0005;
+    color:#FFF6;
+    font-family: 'VT323', monospace;
+    text-shadow:0.2em 0.2em 0.3em #0009;
+}
+#splashscreenTitle {margin:1rem;font-size:4em;font-style:italic;text-decoration:underline;}
+#splashscreenAuthor {font-size:3em;}
+#splashscreenExit {font-size:1.2em;color:#CCC;margin-top:3.5em;text-shadow:0 0 0.5em #000;}
+
 .flexRow {
     display:flex;
     flex-direction:row;

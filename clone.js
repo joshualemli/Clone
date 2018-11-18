@@ -738,7 +738,7 @@ const CLONE_Game = (function(){
         this.maxAge = override.maxAge || 50
         this.generation = override.generation || 1
         // type
-        this.mutant = override.mutant !== undefined ? override.mutant : (Math.random() > 1 - this.generation / 1e6 ? true : false)
+        this.mutant = override.mutant !== undefined ? override.mutant : (Math.random() > 1 - this.generation / 1e7 ? true : false)
         this.foreign = override.foreign || false
         // augmentations
         this.augmentations = override.augmentations || {}
@@ -817,12 +817,14 @@ const CLONE_Game = (function(){
             else break
             if (!attempted.some(x=>x===0)) return null
         }
-        new Clone(hash.x, hash.y, {
+        var hereditaryTraits = {
             generation: this.generation+1,
-            mutant: this.augmentations.geneticResequencingNodules ? false : this.mutant,
             foreign: this.foreign,
             alienSpliced: this.alienSpliced
-        })
+        }
+        if (this.augmentations.geneticResequencingNodules) hereditaryTraits.mutant = false
+        else if (this.mutant) hereditaryTraits.mutant = true
+        new Clone(hash.x, hash.y, hereditaryTraits)
         this.descendants += 1
     }
     Clone.prototype.draw = function(){
@@ -1277,7 +1279,7 @@ const CLONE_Game = (function(){
         glieseStellarFragment: {
             use: () => game.artifices.glieseStellarFragment ? 0.0000001 : 0,
             name: "Gliese Stellar Fragment",
-            description: "<div class='storeDescEffect'>Alien DNA Splicing Success Rate +1</div>",
+            description: "<div class='storeDescEffect'>Alien DNA Splicing Success Rate +1</div>Okay, you did <i>not</i> tell anyone about this, right? 'Cause I feel like I'm being, I dunno man, being followed or something. They know about the fragments, man, I just got this feeling like GET DOWN! THEY'RE HERE GET no, sorry, man, false alarm, I thought they were coming but, seriously man, I know it's not just me, I have proof they were already there, man, they knew about it, they KNOW MAN! THEY FOUND US, WE GOTTA GET OUTA HERE JUST...<br>...Whew, did that just happen?  Sorry.  We have to flip this stellar fragment quick. Gliese has the worse biophasic radiation.",
             cost: 11e3
         },
         pleiadesStellarFragment: {
@@ -1375,7 +1377,7 @@ const CLONE_Game = (function(){
         cloneMap = new Map()
         spriteMap = new Map()
         view = saveData.view || {
-            scale:10,
+            scale:24,
             xPos:0,
             yPos:0,
             bounds: {},
@@ -1427,8 +1429,47 @@ const CLONE_Game = (function(){
         Artist.init()
         Store.init()
         Menu.init()
-        // start gameplay
-        load()
+        // start demo with splashscreen
+        Input.disable()
+        load({
+            view: {
+                // scale:20,
+                scale: Math.min(document.body.offsetWidth,document.body.offsetHeight) / 50,
+                xPos:0,
+                yPos:0,
+                bounds: {},
+                screenSize: {}
+            },
+            game: {
+                callsign:"lemliDog",
+                steps:0,
+                resources:Math.random()*1e6,
+                extantClones:0,
+                extantMutant:0,
+                extantForeign:0,
+                perishedClones:0,
+                perishedMutant:0,
+                perishedForeign:0,
+                tools:{genesisPod:0,genesisRay:0,smitingBolt:0,deionizer:0},
+                augmentations:{},
+                artifices:{},
+                pause:false,
+                worldRadius:30
+            }
+        })
+        for (var _nClones = 0; _nClones < 200; _nClones++) new Clone(Math.round(Math.random()*40-20),Math.round(Math.random()*44-22),{
+            generation:1e3,
+            age:Math.floor(Math.random()*40),
+            foreign:Math.random()>0.8
+        })
+        Menu.toggle.readout()
+        let splashscreen = document.getElementById("splashscreen")
+        splashscreen.onclick = () => {
+            Menu.toggle.readout()
+            load()
+            splashscreen.parentElement.removeChild(splashscreen)
+        }
+        // start the gameplay loop
         gameplay()
     }
 

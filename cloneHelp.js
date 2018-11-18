@@ -64,12 +64,12 @@ const CloneHelp = (function(){
     `
     content["Basics / Getting Started"] = `
         <div>
-            The game revolves around clones, which are little dots that have a chance to reproduce ("clone" themselves).
-            The clones exist within the "world", which is basically a circle on your screen.
+            The game revolves around clones, which for all you care are just "cells" that have a chance to reproduce ("clone" themselves).
+            The clones exist within the "world", which is basically a big circle on your screen.
             This is the clones' world.  It is all they will ever know.
         </div>
         <div>
-            There are no rules to the gameplay. It's important to try new things.  Exploration is key!
+            There are no rules to the gameplay. It's important to try new things.  <b>Exploration is key!</b>
         </div>
         <div>
             Basically you create, destroy, and augment clones.  And watch them reproduce and die.
