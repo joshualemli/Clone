@@ -43,7 +43,7 @@ const CloneHelp = (function(){
     const content = {}
     content["Welcome"] = `
         <div>
-            CLONE is an autamata-driven game.
+            CLONE is an automata-driven game.
         </div>
         <div>
             Like life, there is no real purpose, other than for you to figure out your own purpose.

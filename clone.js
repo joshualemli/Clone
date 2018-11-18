@@ -31,9 +31,9 @@
     CLONE JavaScript file
     - - - - - - - - - - - - - - - - - - - */
         const
-        CLONE_VERSION = "0.4.3",
-        CLONE_RELEASE = "alpha",
-        CLONE_EDITION = "dog balancer";
+        CLONE_VERSION = "0.5.0",
+        CLONE_RELEASE = "beta",
+        CLONE_EDITION = "nuclear dog";
     /* - - - - - - - - - - - - - - - - - - -
 
 
