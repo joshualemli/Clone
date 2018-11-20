@@ -78,7 +78,7 @@ const CloneHelp = (function(){
         <div>
             Although there is no dying/losing in this game, starting out can be tricky.
             If you have no living "normal" clones (colored green) and
-            you have zero resources, earning revenue is most likely (but not definitely)
+            you have zero resources, producing resources is most likely (but not definitely)
             impossible and you may no longer have any means to interact with the world.
             You may restart (simply reload the page) or load a saved game at any time.
             You can check the <i>Readout</i> or <i>The Money Pit</i> at any time to see your current resources.
@@ -150,33 +150,44 @@ const CloneHelp = (function(){
             No refunds.
         </div>
         <div>
-            Artifices are unique only one of each type may be purchased.
+            Artifices are unique items; only one of each type of artifice may be purchased.
         </div>
     `
     content["Tools"] = `
         <div>
-            Tools must purchased from <i>The Money Pit</i>. The tools interface is opened by
+            Tools can purchased from <i>The Money Pit</i>. The tools interface is opened by
             selecting the "Tools" button in the main menu.  Once opened, you can select a
             tool to use.  Click on the world to use the tool.
         </div>
         <div>
             The "Inspect" tool is the default tool and is crucial to the game as it allows
-            you to apply augmentations to clones.  The inspect tool is unique does not need to be
+            you to apply augmentations to clones.  The inspect tool is unique because it does not need to be
             purchased or refilled at the store.
+        </div>
+        <div>
+            Another important tool is the <i>genesis pod</i>.  This is your only starting
+            item and your only initial way to earn revenue (<i>i.e.</i> by placing some clones).
+            Open the tools interface, select "Genesis Pod", and click inside the world on an empty
+            space to create a new clone.
+        <div>
+        </div>
+            I'll leave the rest of the tools for you to explore on your own.
         </div>
     `
     content["Augmentations"] = `
         <div>
             Augmentations modify a clone's behavior.  Only one augmentation of each type can
-            be applied to a clone.  Augmentations are permanent and are applied in order.
+            be applied to a clone.  Augmentations are permanent, and their effects are applied in
+            the order that you apply the augmentations.
             You can purchase augmentations at <i>The Money Pit</i>.
         </div>
         <div>
-            To apply augmentations, you must first inspect a living clone using the "Inspect"
-            tool.  After the clone has been selected, you can click on available augmentations
-            (remember to purchase some first) to add them to the "pending" list.  Remember
-            that augmentations cannot be undone!  Once you have selected the desired augmentations,
-            click the squiggly arrow button to apply the augmentations.
+            To apply augmentations, you must first inspect a living clone using the "Inspect" tool.
+            After the clone has been selected, you can click on any augmentations
+            in the "available" list (remember to purchase some first) to add them to the "pending" list.
+            To remove a pending augmentation, simply click it.
+            Once you put the desired augmentations into the "pending" list, click the squiggly arrow button to apply them.
+            Remember that once applied, augmentations cannot be undone!
         </div>
     `
     content["Artifices"] = `
@@ -188,7 +199,7 @@ const CloneHelp = (function(){
         <div>
             The effects of artifices range greatly, but one of the most important aspects of gameplay
             is to increase the size of the "world".  This is done most readily by purchasing any of the
-            "Engine" types of artifice.  The benefits and challenges of increasing the world size are
+            "Engine" type artifice.  The benefits and challenges of increasing the world size are
             not altogether trivial (or obvious).  Enjoy.
         </div>
     `
@@ -209,14 +220,32 @@ const CloneHelp = (function(){
             The file will automagically load once selected.
         </div>
     `
-    content["Tips"] = `
+    content["Strategy"] = `
         <div>
-            Although there is no "goal" to this game, it's good to have money.  Certain combinations of augmentations
-            are incredibly powerful and should be purchased as soon as possible to maximize your revenue stream's
-            stability.  Money makes money!
+            Although there is no "goal" to this game, you can start with the "SGR" ecological model --
+            survive, grow, and reproduce.  This means getting some (green/normal) clones and producing
+            some resouces so you can do new stuff.
         </div>
         <div>
-            There are no good or bad events.  There is only the fun and the not fun (ha, tell that to the clones!).
+            Start by opening the <i>readout</i> and <i>tools</i> interface. Select the "Genesis Pod" tool
+            and drop some clones down onto the world. If you get lucky, you'll get a little clone colony and make enough money
+            to buy some more genesis pods and an augmentation or two.  This is the key!  Apply augmentations
+            as soon as possible -- they are more efficient than simply creating more clones.
+        </div>
+        <div>
+            Once you have that down, you should be able to purchase more expensive items and your freedom
+            to experiment will increase dramatically.
+        </div>
+        <div>
+            While there are moments (like the beginning of a new game) when you may want to micromanage,
+            this game is intended to be played casually.  Your clones are not special (sorry), and if they die,
+            so be it.  Feel free to play however you like, but bear in mind that certain strategies will
+            more conducive to laissez-faire gameplay than others.
+            The rules that govern unadorned gameplay are meant to bent, and in some cases, broken.
+        </div>
+        <div>
+            Last, remember to save your game, especially if you feel you've reached a milestone or are about to
+            try something new (or unsavory).  There are no consequences to saving and loading often.
         </div>
     `
 

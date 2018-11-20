@@ -1013,7 +1013,7 @@ const CLONE_Game = (function(){
                 clone.production += 0.09
             },
             name: "Psychic Harness",
-            description: `<div class='storeDescEffect'>Production +0.09</div>Make no mistake, that little "+0.07" is pushing them to their breaking point.  You know, "psychologically" speaking.`,
+            description: `<div class='storeDescEffect'>Production +0.09</div>Make no mistake, that little "+0.09" is pushing them to their breaking point.  You know, "psychologically" speaking.`,
             cost: 15.99
         },
         longevityPump: {
@@ -1037,8 +1037,17 @@ const CLONE_Game = (function(){
                 clone.production *= 7
             },
             name: "Organic Transmutation",
-            description: `<div class='storeDescEffect'>Production x11</div>While this modification is, well, "difficult" on the clone, the potential rewards are fantastic.  For you.`,
+            description: `<div class='storeDescEffect'>Production x7</div>While this modification is, well, "difficult" on the clone, the potential rewards are fantastic.  For you.`,
             cost: 999.99
+        },
+        inorganicMelding: {
+            use: clone => {
+                clone.maxAge *= 3
+                clone.production += 0.065
+            },
+            name: "Inorganic Melding",
+            description: `<div class='storeDescEffect'>Production x11</div>You may not recognize their... "face"... after this augmentation, but we're not selling dreams here, alright?  If this is wh`,
+            cost: 5e3
         },
         sterilizationClamp: {
             use: clone => {
@@ -1046,7 +1055,7 @@ const CLONE_Game = (function(){
             },
             name: "Sterilization Clamp",
             description: `<div class="storeDescEffect">Fertility Age &rarr; <b>&infin;</b></div>This non-surgical method inhibits production of reproductive biochemicals in a clone. You may notice they plump up a bit without a sex drive. The clamps are self-installing, so just place one within the vicinity of a clone and step back (way back).`,
-            cost: 5e3
+            cost: 6e3
         },
         mtbde: {
             use: clone => {
@@ -1068,7 +1077,7 @@ const CLONE_Game = (function(){
                 if (!clone.alienSpliced) clone.maxAge /= 20
             },
             name: "Alien Motivational Bioimplant",
-            description: `<div class="storeDescEffect">Production x7</div><div class="storeDescEffect">Max Age x1/20 (non-alien-DNA-spliced clones)</div>We're not sure if the alien-DNA-spliced clones even feel pain so we've been doing the implant procedure sans-anaesthesia. Don't put this implant into clones without the extra alien DNA sequences, they'll, ah, <i>reject</i> the implant.`,
+            description: `<div class="storeDescEffect">Production x7</div><div class="storeDescEffect">Max Age x1/20 (non-alien-DNA-spliced clones)</div>We're not sure if the alien-DNA-spliced clones even feel pain so we've been doing the implant procedure sans-anaesthesia. Don't put this implant into clones without the extra alien DNA sequences, they'll, ah, <i>"reject"</i> the implant.`,
             cost: 330e3
         },
         immortalitySerum: {
@@ -1184,10 +1193,6 @@ const CLONE_Game = (function(){
             cost: 120e9
         },
 
-        // 3
-        // 1 2 3 4 -- > 13
-        // 5
-
         microFissionEngine: {
             use: () => {
                 game.worldRadius += 1
@@ -1273,7 +1278,7 @@ const CLONE_Game = (function(){
         cygniStellarFragment: {
             use: () => game.artifices.cygniStellarFragment ? 0.0000001 : 0,
             name: "Cygni Stellar Fragment",
-            description: "<div class='storeDescEffect'>Alien DNA Splicing Success Rate +1</div>No promises, but we're like 99% certain that the DNA we found on this stellar fragment is alien SHHHhhh!... jesus, don't say anything here, man. Look, don't be nervous, just act casual, okay? We know it's illegal, but <i>think</i> man, think of the possibilities! Look, we already did the research. We weren't going to tell you, but one thing led to another blah blah, anyway, it happened, and now we know how to splice alien DNA with clones so... look, don't overthink this, man. Just buy this shiny, awesome, alien-DNA-impregnated stellar fragment and let's make some freakin' gray-backs!",
+            description: "<div class='storeDescEffect'>Alien DNA Splicing Success Rate +1</div>No promises, but we're like 99% certain that the DNA we found on this stellar fragment is alien SHHHhhh!... jesus, don't say anything here, man. Look, don't be nervous, just act casual, okay? We know it's illegal, but <i>think</i> man, think of the possibilities! Look, we already did the research. We weren't going to tell you, but one thing led to another blah blah, anyway, it happened, and now we know how to splice alien DNA with clones so... look, don't overthink this, man. Just buy this alien-DNA-impregnated stellar fragment and let's make some freakin' gray-backs!",
             cost: 5e3
         },
         glieseStellarFragment: {
