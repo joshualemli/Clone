@@ -353,9 +353,16 @@ const CLONE_Game = (function(){
             selectedItemGameId = key
             selectedQuantity = 1
             dom.itemDetails.name.innerHTML = selectedItem.name || ""
-            dom.itemDetails.description.innerHTML = selectedItem.description || ""
+            // build effects div if needed, add description
+            var descriptionString = selectedItem.effects ? selectedItem.effects.map(e => `<div class="storeDescEffect">${e}</div>`) : ""
+            if (selectedItem.negativeEffects) descriptionString += selectedItem.negativeEffects.map(e => `<div class="storeDescEffect storeNegEffect">${e}</div>`)
+            if (descriptionString.length) descriptionString = `<div id="storeEffectsContainer">${descriptionString}</div>`
+            if (selectedItem.description) descriptionString += selectedItem.description
+            dom.itemDetails.description.innerHTML = descriptionString
+            // cost
             let costString = selectedItem.cost ? numberToCurrency(selectedItem.cost) : ""
             dom.itemDetails.cost.innerHTML = costString
+            // update other ui elements
             _adjustQuantity(0)
             _setOwnedQuantity()
         }
@@ -1120,7 +1127,8 @@ const CLONE_Game = (function(){
                 clone.cloningFailureChance -= 0.015
             },
             name: "Cybernetic Genitals",
-            effects: ["Cloning Rate +1.5%","Fertility Age x1/2"],
+            effects: ["Cloning Rate +1.5%"],
+            negativeEffects: ["Fertility Age x1/2"],
             description: `Once the swelling goes down and the risk of deadly infection has passed, you know the "upgrade" has been successful, so just kick back and... ahem... watch the fireworks.`,
             cost: 5e6
         },
@@ -1238,7 +1246,7 @@ const CLONE_Game = (function(){
             },
             name: "Red Mercury Cyclotron Engine",
             effects: ["World Radius +2"],
-            description: "Now 100% stable!<i>*</i><br><i>* Warning: Red mercury is extremely unstable and should be handled according to CFDA specification 1105f-4a.2 persuant to Clause-3, Subsection-8 of the Red-Mercury Catastrophe Treaty of 2026</i>",
+            description: "Now 100% stable!<i>*</i><br><br><i>* Warning: Red mercury is extremely unstable and should be handled according to CFDA specification 1105f-4a.2 persuant to Clause-3 Subsection-8 of the Red-Mercury Catastrophe Treaty of 2026</i>",
             cost: 2.3e3
         },
         cobaltFusionEngine: {

@@ -580,19 +580,21 @@ html,body {
     color:rgb(66, 164, 255);
 }
 #store-itemDetails-description {
-    margin:1em 0;
     font-size:1.2rem;
     color:#CBB;
 }
+    #storeEffectsContainer {
+        padding:0.5em;
+        font-weight:bold;
+    }
     .storeDescEffect {
         font-family:monospace;
         font-size:0.9em;
-        margin:0.25em 0;
         font-style:italic;
-        color:rgb(238, 94, 69);
+        color:rgb(128, 189, 102);
     }
     .storeNegEffect {
-        color:rgb(233, 140, 86);
+        color:rgb(192, 85, 85);
     }
 #store-itemDetails-purchaseArea {
     justify-content:center;
