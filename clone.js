@@ -31,7 +31,7 @@
     CLONE JavaScript file
     - - - - - - - - - - - - - - - - - - - */
         const
-        CLONE_VERSION = "0.5.0",
+        CLONE_VERSION = "0.5.1",
         CLONE_RELEASE = "beta",
         CLONE_EDITION = "nuclear dog";
     /* - - - - - - - - - - - - - - - - - - -
@@ -1005,7 +1005,8 @@ const CLONE_Game = (function(){
                 clone.maxAge += 500
             },
             name: "Ribonucleic Injection",
-            description: "<div class='storeDescEffect'>Max Age +500</div>Prolong -- wait, sorry, our mistake -- <i>extend</i> the happy, very happy, life of a clone!",
+            effects: ["Max Age +500"],
+            description: "Prolong -- wait, sorry, our mistake -- <i>extend</i> the happy, very happy, life of a clone!",
             cost: 10.50
         },
         psychicHarness: {
@@ -1013,7 +1014,8 @@ const CLONE_Game = (function(){
                 clone.production += 0.09
             },
             name: "Psychic Harness",
-            description: `<div class='storeDescEffect'>Production +0.09</div>Make no mistake, that little "+0.09" is pushing them to their breaking point.  You know, "psychologically" speaking.`,
+            effects: ["Production +0.09"],
+            description: `Make no mistake, that little "+0.09" is pushing them to their breaking point.  You know, "psychologically" speaking.`,
             cost: 15.99
         },
         longevityPump: {
@@ -1021,24 +1023,39 @@ const CLONE_Game = (function(){
                 clone.maxAge *= 9
             },
             name: "Longevity Pump",
-            description: "<div class='storeDescEffect'>Max Age x9</div>Works great!  And trust us, they barely notice the pump.  In fact, uh, clones love it.  Don't ask them about it though, they're selfish and would probably just want the next step up in our product line and seriously, who can afford that?  Oh but if you could, oh man.  That's the stuff.",
+            effects: ["Max Age x9"],
+            description: "Works great!  And trust us, they barely notice the pump.  In fact, uh, clones love it.  Don't ask them about it though, they're selfish and would probably just want the next step up in our product line and seriously, who can afford that?  Oh but if you could, oh man.  That's the stuff.",
             cost: 90
         },
         orificeInterconnectivitySystem: {
             use: clone => {
+                clone.maxAge -= 100
                 clone.production *= 4
             },
             name: "Orifice Interconnectivity System",
-            description: "<div class='storeDescEffect'>Production x4</div>This system ingeniously interconnects a clone's orifices, filtering and recycling waste directly back into the clone. Ah, the circle of life!",
-            cost: 175
+            effects: ["Production x4"],
+            negativeEffects: ["Max Age -100"],
+            description: "This system ingeniously interconnects a clone's orifices, filtering and recycling waste directly back into the clone. Ah, the circle of life!<br><i>*Warning: this process has been deemed hazardous to clones by the CFDA and may reduce lifespan.</i>",
+            cost: 165
         },
         organicTransmutation: {
             use: clone => {
                 clone.production *= 7
             },
             name: "Organic Transmutation",
-            description: `<div class='storeDescEffect'>Production x7</div>While this modification is, well, "difficult" on the clone, the potential rewards are fantastic.  For you.`,
+            effects: ["Production x7"],
+            description: `While this modification is, well, "difficult" on the clone, the potential rewards are fantastic.  For you.`,
             cost: 999.99
+        },
+        servitudeEngrams: {
+            use: clone => {
+                clone.maxAge += 110
+                clone.production += 0.007
+            },
+            name: "Servitude Engrams",
+            effects: ["Max Age +110","Production +0.007"],
+            description: `This will spice up your clone's life <i>and</i> increase their will to live.<p>"You’re a clone operative working undercover on an important mission. Clones are trying to kill you left and right! You meet this beautiful, exotic, clone. I don’t want to spoil it for you, clone, but you rest assured that by the time the trip is over, you get the clone, kill the bad guys, and save the entire petri dish."</p>`,
+            cost: 2e3
         },
         inorganicMelding: {
             use: clone => {
@@ -1046,7 +1063,8 @@ const CLONE_Game = (function(){
                 clone.production += 0.065
             },
             name: "Inorganic Melding",
-            description: `<div class='storeDescEffect'>Production x11</div>You may not recognize their... "face"... after this augmentation, but we're not selling dreams here, alright?  If this is wh`,
+            effects: ["Max Age x3","Production +0.065"],
+            description: `You may not recognize their... "face"... after this augmentation, but we're not selling dreams here, alright?`,
             cost: 5e3
         },
         sterilizationClamp: {
@@ -1054,21 +1072,24 @@ const CLONE_Game = (function(){
                 clone.fertileAge = Infinity
             },
             name: "Sterilization Clamp",
-            description: `<div class="storeDescEffect">Fertility Age &rarr; <b>&infin;</b></div>This non-surgical method inhibits production of reproductive biochemicals in a clone. You may notice they plump up a bit without a sex drive. The clamps are self-installing, so just place one within the vicinity of a clone and step back (way back).`,
-            cost: 6e3
+            negativeEffects: ["Fertility Age &rarr; <b>&infin;</b>"],
+            description: `This non-surgical method inhibits production of reproductive biochemicals in a clone. You may notice they plump up a bit without a sex drive. The clamps are self-installing, so just place one within the vicinity of a clone and step back (way back).`,
+            cost: 8.35e3
         },
         mtbde: {
             use: clone => {
                 clone.cloningFailureChance -= 0.01
             },
             name: "MTBDE",
-            description: `<div class="storeDescEffect">Cloning Rate +1%</div>Methyl-tribromodioxylic Ether (MTBDE) is an "all-natural" way of enhancing a clone's... reproductive capabilities.`,
+            effects: ["Cloning Rate +1%"],
+            description: `Methyl-tribromodioxylic Ether (MTBDE) is an "all-natural" way of enhancing a clone's... reproductive capabilities.`,
             cost: 34e3
         },
         geneticResequencingNodules: {
             use: clone => {},
             name: "Genetic Resequencing Nodules",
-            description: "<div class='storeDescEffect'>Mutation factor &rarr; 0</div>Only the finest implanted nodules crafted from 100% reprocessed... material.  Allows clone's organic sequences to stay intact, preventing mutant offspring (is that a paradox? hahahaha....).  Descendents do not inherit this augmentation.",
+            effects: ["Mutation factor &rarr; 0"],
+            description: "Only the finest implanted nodules crafted from 100% reprocessed... material.  Allows clone's organic sequences to stay intact, preventing mutant offspring (is that a paradox? hahahaha....).  Descendents do not inherit this augmentation.",
             cost: 100e3
         },
         alienMotivationBioimplant: {
@@ -1077,7 +1098,9 @@ const CLONE_Game = (function(){
                 if (!clone.alienSpliced) clone.maxAge /= 20
             },
             name: "Alien Motivational Bioimplant",
-            description: `<div class="storeDescEffect">Production x7</div><div class="storeDescEffect">Max Age x1/20 (non-alien-DNA-spliced clones)</div>We're not sure if the alien-DNA-spliced clones even feel pain so we've been doing the implant procedure sans-anaesthesia. Don't put this implant into clones without the extra alien DNA sequences, they'll, ah, <i>"reject"</i> the implant.`,
+            effects: ["Production x7"],
+            negativeEffects: ["Max Age x1/20 (non-alien-DNA-spliced clones)"],
+            description: `We're not even sure if the alien-DNA-spliced clones feel pain so we've been doing the implant procedure sans-anaesthesia. Don't put this implant into clones without the extra alien DNA sequences, they'll, ah, <i>"reject"</i> the implant.`,
             cost: 330e3
         },
         immortalitySerum: {
@@ -1087,7 +1110,8 @@ const CLONE_Game = (function(){
                 clone.draw()
             },
             name: "Immortality Serum",
-            description: "<div class='storeDescEffect'>Max Age &rarr; <b>&infin;</b></div>Literally, no shit, your clone will be immortal.  Will do nothing for their temperment, however.",
+            effects: ["Max Age &rarr; <b>&infin;</b>"],
+            description: "Literally, no sh*t, your clone will be immortal.  Will do nothing for their temperment, however.",
             cost: 900e3
         },
         cyberneticGenitals: {
@@ -1096,7 +1120,8 @@ const CLONE_Game = (function(){
                 clone.cloningFailureChance -= 0.015
             },
             name: "Cybernetic Genitals",
-            description: `<div class="storeDescEffect">Cloning Rate +1.5%</div><div class="storeDescEffect">Fertility Age x1/2</div>Once the swelling goes down and the risk of deadly infection has passed, you know the "upgrade" has been successful, so just kick back and... ahem... watch the fireworks.`,
+            effects: ["Cloning Rate +1.5%","Fertility Age x1/2"],
+            description: `Once the swelling goes down and the risk of deadly infection has passed, you know the "upgrade" has been successful, so just kick back and... ahem... watch the fireworks.`,
             cost: 5e6
         },
         allelopathicDeathTendrils: {
@@ -1114,19 +1139,22 @@ const CLONE_Game = (function(){
         hereditaryServitudeEngrams: {
             use: clone => {},
             name: "Hereditary Servitude Engrams",
-            description: "<div class='storeDescEffect'>Max Age +110 (descendants)</div><div class='storeDescEffect'>Production +0.005 (descendants)</div><div class='storeDescEffect'>+Hereditary Servitude Engrams (descendants)</div>Descendants will posses genotypes that increases longevity and productivity (they just won't know it).",
+            effects: ["+Servitude Engrams (descendants)","+Hereditary Servitude Engrams (descendants)"],
+            description: "Descendants will posses genotypes that increases longevity and productivity (they just won't know it). Let the matrix begin.",
             cost: 390e6
         },
         progenicResequencing: {
             use: clone => {},
             name: "Progenic Resequencing",
-            description: `<div class='storeDescEffect'>+Genetic Resequencing Nodules (descendants)</div><div class='storeDescEffect'>+Progenic Resequencing (descendants)</div>You know the old adage, "the apple never falls far from the tree"?  Well, now the apple will fall with subatomic-level precision, ensuring, um, I'm not sure exactly where this analogy is going but let's just say the clones might start looking a little, uh, even <i>more</i> homogenous.`,
+            effects: ["+Genetic Resequencing Nodules (descendants)","+Progenic Resequencing (descendants)"],
+            description: `You know the old adage, "the apple never falls far from the tree"?  Well, now the apple will fall with subatomic-level precision, ensuring, um, I'm not sure exactly where this analogy is going but let's just say the clones might start looking a little, uh, even <i>more</i> homogenous.`,
             cost: 3.7e9
         },
         exophagicOffspring: {
             use: clone => {},
             name: "Exophagic Offspring",
-            description: "<div class='storeDescEffect'>+Exophagic Afterbirth (descendants)</div><div class='storeDescEffect'>+Exophagic Offspring (descendants)</div>They're gunna f*ck sh*t up. Don't say we didn't warn you. Just don't make any godamned immortal exophagic nightmare clonepacolypse vampclones",
+            effects: ["+Exophagic Afterbirth (descendants)","+Exophagic Offspring (descendants)"],
+            description: "They're gunna f*ck sh*t up. Don't say we didn't warn you. Just don't make any godamned immortal exophagic nightmare clonepacolypse vampclones. (Or do it, we don't actually care.)",
             cost: 999e9
         },
     }
@@ -1136,8 +1164,8 @@ const CLONE_Game = (function(){
         netsOfUrizen: {
             use: () => {},
             name: "Nets of Urizen",
-            description: `<div class='storeDescEffect'>+.01 Production per living clone</div>
-                <i>
+            effects: ["+.01 Production per living clone"],
+            description: `<i>
                     Of the primeval Priests assum'd power,<br>
                     When Eternals spurn'd back his religion;<br>
                     And gave him a place in the north,<br>
@@ -1151,8 +1179,8 @@ const CLONE_Game = (function(){
         bookOfUrizen: {
             use: () => {},
             name: "Book of Urizen",
-            description: `<div class='storeDescEffect'>+.02 Production per living clone</div>
-                <i>
+            effects: ["+.02 Production per living clone"],
+            description: `<i>
                     Lo, a shadow of horror is risen<br>
                     In Eternity! Unknown, unprolific!<br>
                     Self-closd, all-repelling: what Demon<br>
@@ -1166,8 +1194,8 @@ const CLONE_Game = (function(){
         lightOfUrizen: {
             use: () => {},
             name: "Light of Urizen",
-            description: `<div class='storeDescEffect'>+.05 Production per living clone</div>
-                <i>
+            effects: ["+.05 Production per living clone"],
+            description: `<i>
                     In anguish dividing & dividing<br>
                     For pity divides the soul<br>
                     In pangs eternity on eternity<br>
@@ -1182,8 +1210,8 @@ const CLONE_Game = (function(){
         laborOfUrizen: {
             use: () => {},
             name: "Labor of Urizen",
-            description: `<div class='storeDescEffect'>+.01 Production per living clone of any type</div>
-                <i>
+            effects: ["+.01 Production per living clone of any type"],
+            description: `<i>
                     They began to weave curtains of darkness<br>
                     They erected large pillars round the Void<br>
                     With golden hooks fastend in the pillars<br>
@@ -1199,7 +1227,8 @@ const CLONE_Game = (function(){
                 Artist.redraw()
             },
             name: "Micro Fission Engine",
-            description: "<div class='storeDescEffect'>World Radius +1</div>Although it's not enough to improve the clones' quality of life, it is enough to cram a few more of 'em in there.",
+            effects: ["World Radius +1"],
+            description: "Although it's not enough to improve the clones' quality of life, it is enough to cram a few more of 'em in there.",
             cost: 760.55
         },
         redMercuryCyclotronEngine: {
@@ -1208,7 +1237,8 @@ const CLONE_Game = (function(){
                 Artist.redraw()
             },
             name: "Red Mercury Cyclotron Engine",
-            description: "<div class='storeDescEffect'>World Radius +2</div>",
+            effects: ["World Radius +2"],
+            description: "Now 100% stable!<i>*</i><br><i>* Warning: Red mercury is extremely unstable and should be handled according to CFDA specification 1105f-4a.2 persuant to Clause-3, Subsection-8 of the Red-Mercury Catastrophe Treaty of 2026</i>",
             cost: 2.3e3
         },
         cobaltFusionEngine: {
@@ -1217,7 +1247,8 @@ const CLONE_Game = (function(){
                 Artist.redraw()
             },
             name: "Cobalt Fusion Engine",
-            description: "<div class='storeDescEffect'>World Radius +3</div>Powered by cobalt fusion, the modern standard in energy delivery systems. The fusion chain produces only high-grade Terbium as a byproduct (and some high-intesity beta radiation, but the clones will soak most of that up).",
+            effects: ["World Radius +3"],
+            description: "Powered by cobalt fusion, the modern standard in energy delivery systems. The fusion chain produces only high-grade Terbium as a byproduct (and some high-intesity beta radiation, but the clones will soak most of that up).",
             cost: 9.2e3
         },
         hyperstaticInductionEngine: {
@@ -1226,7 +1257,8 @@ const CLONE_Game = (function(){
                 Artist.redraw()
             },
             name: "Hyper-static Induction Engine",
-            description: "<div class='storeDescEffect'>World Radius +4</div>We believe no stone should be left unturned, and we really turned up an ant-nest with this one.  Highly unstable but who can argue with the price?",
+            effects: ["World Radius +4"],
+            description: "We believe no stone should be left unturned, and we really turned up an ant-nest with this one.  Highly unstable but who can argue with the price?",
             cost: 20e3
         },
         bioschismaticExtractionEngine: {
@@ -1235,7 +1267,8 @@ const CLONE_Game = (function(){
                 Artist.redraw()
             },
             name: "Bioschismatic Extraction Engine",
-            description: "<div class='storeDescEffect'>World Radius +5</div>Directly harnesses the clones bioenergy.  Just give 'em an extra half scoop of feed at night, they'll be fine.",
+            effects: ["World Radius +5"],
+            description: "Directly harnesses the clones bioenergy.  Just give 'em an extra half scoop of feed at night, they'll be fine.",
             cost: 77e3,
         },
         leptonRuptureEngine: {
@@ -1244,7 +1277,8 @@ const CLONE_Game = (function(){
                 Artist.redraw()
             },
             name: "Lepton Rupture Engine",
-            description: "<div class='storeDescEffect'>World Radius +6</div>The best part about this engine is the maelstrom of superheated plasma. You can pretty much just toss stuff in from the observation deck and watch it erupt in a shower of flames! Not saying that an overabundance of clones should provide fodder for that sort of purile behavior but....",
+            effects: ["World Radius +6"],
+            description: "The best part about this engine is the maelstrom of superheated plasma. You can pretty much just toss stuff in from the observation deck and watch it erupt in a shower of flames! Not saying that an overabundance of clones should provide fodder for that sort of purile behavior but....",
             cost: 77e3,
         },
         darkEnergyTransmutationEngine: {
@@ -1253,7 +1287,8 @@ const CLONE_Game = (function(){
                 Artist.redraw()
             },
             name: "Dark Energy Transmutation Engine",
-            description: "<div class='storeDescEffect'>World Radius +7</div>Dirty whore of a cocksucker works great!",
+            effects: ["World Radius +7"],
+            description: "Dirty whore of a cocksucker works great!",
             cost: 1.5e6
         },
         chronofilamentEngine: {
@@ -1262,7 +1297,8 @@ const CLONE_Game = (function(){
                 Artist.redraw()
             },
             name: "Chrono-filament Engine",
-            description: "<div class='storeDescEffect'>World Radius +8</div>The inventor said the hyphen will dropped from the name in the future, but what does that egghead know? Bends spacetime (mostly the time part) to extract energy from the fabric of the universe itself. Extended use may shatter reality.",
+            effects: ["World Radius +8"],
+            description: "The inventor said the hyphen will dropped from the name in the future, but what does that egghead know? Bends spacetime (mostly the time part) to extract energy from the fabric of the universe itself. Extended use may shatter reality.",
             cost: 30e6,
         },
         hawkingCipollaExpansionLimitEngine: {
@@ -1271,38 +1307,44 @@ const CLONE_Game = (function(){
                 Artist.redraw()
             },
             name: "Hawking-Cipolla Expansion Limit Engine",
-            description: "<div class='storeDescEffect'>World Radius +11</div>Do NOT let the clones near the glow-zone (and trust us, they're gunna want to wander in there).  They come back... changed.",
+            effects: ["World Radius +11"],
+            description: "Do NOT let the clones near the glow-zone (and trust us, they're gunna want to wander in there).  They come back... changed.",
             cost: 75e9
         },
 
         cygniStellarFragment: {
             use: () => game.artifices.cygniStellarFragment ? 0.0000001 : 0,
             name: "Cygni Stellar Fragment",
-            description: "<div class='storeDescEffect'>Alien DNA Splicing Success Rate +1</div>No promises, but we're like 99% certain that the DNA we found on this stellar fragment is alien SHHHhhh!... jesus, don't say anything here, man. Look, don't be nervous, just act casual, okay? We know it's illegal, but <i>think</i> man, think of the possibilities! Look, we already did the research. We weren't going to tell you, but one thing led to another blah blah, anyway, it happened, and now we know how to splice alien DNA with clones so... look, don't overthink this, man. Just buy this alien-DNA-impregnated stellar fragment and let's make some freakin' gray-backs!",
+            effects: ["Alien DNA Splicing Success Rate +1"],
+            description: "No promises, but we're like 99% certain that the DNA we found on this stellar fragment is alien SHHHhhh!... jesus, don't say anything here, man. Look, don't be nervous, just act casual, okay? We know it's illegal, but <i>think</i> man, think of the possibilities! Look, we already did the research. We weren't going to tell you, but one thing led to another blah blah, anyway, it happened, and now we know how to splice alien DNA with clones so... look, don't overthink this, man. Just buy this alien-DNA-impregnated stellar fragment and let's make some freakin' gray-backs!",
             cost: 5e3
         },
         glieseStellarFragment: {
             use: () => game.artifices.glieseStellarFragment ? 0.0000001 : 0,
             name: "Gliese Stellar Fragment",
-            description: "<div class='storeDescEffect'>Alien DNA Splicing Success Rate +1</div>Okay, you did <i>not</i> tell anyone about this, right? 'Cause I feel like I'm being, I dunno man, being followed or something. They know about the fragments, man, I just got this feeling like GET DOWN! THEY'RE HERE GET no, sorry, man, false alarm, I thought they were coming but, seriously man, I know it's not just me, I have proof they were already there, man, they knew about it, they KNOW MAN! THEY FOUND US, WE GOTTA GET OUTA HERE JUST...<br>...Whew, did that just happen?  Sorry.  We have to flip this stellar fragment quick. Gliese has the worse biophasic radiation.",
+            effects: ["Alien DNA Splicing Success Rate +1"],
+            description: "Okay, you did <i>not</i> tell anyone about this, right? 'Cause I feel like I'm being, I dunno man, being followed or something. They know about the fragments, man, I just got this feeling like GET DOWN! THEY'RE HERE GET no, sorry, man, false alarm, I thought they were coming but, seriously man, I know it's not just me, I have proof they were already there, man, they knew about it, they KNOW MAN! THEY FOUND US, WE GOTTA GET OUTA HERE JUST...<br>...Whew, did that just happen?  Sorry.  We have to flip this stellar fragment quick. Gliese has the worse biophasic radiation.",
             cost: 11e3
         },
         pleiadesStellarFragment: {
             use: () => game.artifices.pleiadesStellarFragment ? 0.0000001 : 0,
             name: "Pleiades Stellar Fragment",
-            description: "<div class='storeDescEffect'>Alien DNA Splicing Success Rate +1</div>",
+            effects: ["Alien DNA Splicing Success Rate +1"],
+            description: "Have you been to the Pleiades? No? I don't normally <i>dig</i> alien clones, if you get my drift, but, I make an exception for them fine-ass Pleiades clones though, know'I'msayyyn?",
             cost: 65e3
         },
         westerlundStellarFragment: {
             use: () => game.artifices.westerlundStellarFragment ? 0.0000002 : 0,
             name: "Westerlund Stellar Fragment",
-            description: "<div class='storeDescEffect'>Alien DNA Splicing Success Rate +2</div>",
+            effects: ["Alien DNA Splicing Success Rate +2"],
+            description: "Stick your finger in there and taste it, man, taste that sh*t. You know that's some pure alien-DNA-rich sh*t right there.",
             cost: 35e6
         },
         magellanicStellarFragment: {
             use: () => game.artifices.magellanicStellarFragment ? 0.0000004 : 0,
             name: "Magellanic Stellar Fragment",
-            description: "<div class='storeDescEffect'>Alien DNA Splicing Success Rate +4</div>",
+            effects: ["Alien DNA Splicing Success Rate +4"],
+            description: "This extremely pure sample of magellanic material will yield vast improvements in your alien-splicing process. This stuff is hot, though. Seriously, like cosmic-contraband hot. Like, we gotta unload it before some magella-b*tch comes looking for it. As in now, like right now, man, you want this thing, right? Price is right, man, let's just do this thing, cmon.",
             cost: 109e6
         },
         //<div class='storeDescEffect'>Alien-spliced Clones x2 Production</div>",

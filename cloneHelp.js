@@ -169,8 +169,8 @@ const CloneHelp = (function(){
             item and your only initial way to earn revenue (<i>i.e.</i> by placing some clones).
             Open the tools interface, select "Genesis Pod", and click inside the world on an empty
             space to create a new clone.
-        <div>
         </div>
+        <div>
             I'll leave the rest of the tools for you to explore on your own.
         </div>
     `
