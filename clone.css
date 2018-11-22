@@ -208,7 +208,7 @@ html,body {
     overflow:hidden;
     background:black;
 }
-    #mainCanvas {
+#mainCanvas {
         display:block;
         width:100%;
         height:100%;
@@ -347,35 +347,44 @@ html,body {
 
 #menu-tools {
     flex:0 0 inherit;
-    background:linear-gradient(#533,#211);
+    /* background:linear-gradient(#533,#211); */
+    background:linear-gradient(rgb(41, 2, 21),rgb(75, 13, 26));
 }
 .menu-tools-tool {
-    margin:0.5em;
-    border:1px solid #777;
-    color:#CCC;
-    background-color:#411;
-    padding:0.2em;
+    flex:1 1 auto;
+    align-items:center;
+    margin:0.5rem;
+    font-size:1.2em;
+    border:2px solid #A33;
+    border-radius:0.5rem;
+    box-shadow:0.12em 0.12em 0.5em inset #000;
+    color:#AAA;
+    padding:0.1rem;
     cursor:pointer;
 }
 .menu-tools-tool:hover {
-
     color:#FFF;
 }
 .menu-tools-tool-label {
-    padding:0.1em;
+    display:flex;
+    flex:2 1 auto;
+    justify-content:center;
+    line-height:1em;
 }
 .menu-tools-tool-quantity {
-    margin-left:0.25em;
-    padding:0.2em 0.4em;
-    font-family:monospace;
-    background:#000;
-    color:#DDD;
-    border-radius:0.2em;
+    display:flex;
+    flex:1 1 auto;
+    color:#CCC;
+    font-size:1.2em;
 }
 .menu-tools-selectedTool {
-    color:#55F;
+    border-color:#FC9;
+    background-color:rgb(153, 8, 8);
+    color:#FFF;
 }
-
+.menu-tools-selectedTool:hover {
+    color:#FFF;
+}
 
 
 
@@ -431,6 +440,11 @@ html,body {
     display:flex;
     flex:0 1 auto;
     padding:0 0.2em;
+}
+.cloneUI-augmentations-item-effect {
+    font-family:monospace;
+    font-size:0.8em;
+    margin:0 0.5em;
 }
 .cloneUI-info {
     margin:0.5em;

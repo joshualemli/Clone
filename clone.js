@@ -519,12 +519,12 @@ const CLONE_Game = (function(){
                 // tools: "inspect"
                 dom.tools.inspect = createHtmlElement("div",{
                     className: "menu-tools-tool flexRow menu-tools-selectedTool",
-                    innerHTML: "<div class='menu-tools-tool-label'>INSPECT &ofcir;</div>"
+                    innerHTML: "<div class='menu-tools-tool-label'>&ofcir; INSPECT</div>"
                 })
                 dom.tools.container.appendChild(dom.tools.inspect)
                 dom.tools.inspect.onclick = event => {
                     dom.tools.container.querySelectorAll(".menu-tools-selectedTool").forEach( e => e.classList.remove("menu-tools-selectedTool") )
-                    dom.tools.inspect.children[0].classList.add("menu-tools-selectedTool")
+                    dom.tools.inspect.classList.add("menu-tools-selectedTool")
                     Input.setSelectedTool(null)
                     Input.setClickMode(0)
                 }
@@ -539,11 +539,11 @@ const CLONE_Game = (function(){
                         dom.tools.container.querySelectorAll(".menu-tools-selectedTool").forEach( e => e.classList.remove("menu-tools-selectedTool") )
                         if (!Input.setSelectedTool(key) || game.tools[key] === 0) {
                             Input.setClickMode(0)
-                            dom.tools.inspect.children[0].classList.add("menu-tools-selectedTool")
+                            dom.tools.inspect.classList.add("menu-tools-selectedTool")
                         }
                         else {
                             Input.setClickMode(game.tools[key] ? 1 : 0)
-                            toolElement.children[0].classList.add("menu-tools-selectedTool")
+                            toolElement.classList.add("menu-tools-selectedTool")
                         }
                     }
                     dom.tools[key] = toolElement.children[1]
@@ -616,11 +616,14 @@ const CLONE_Game = (function(){
             clone.draw()
         }
         const _augElem = (key,quantity) => {
+            let aug = Augmentations[key]
             let augElem = createHtmlElement("div",{
                 className: "cloneUI-augmentations-item flexRow",
-                innerHTML: `<div class="cloneUI-augmentations-item-name">${Augmentations[key].name}</div><div class="cloneUI-augmentations-item-count">${quantity}</div>`
+                innerHTML: `<div class="cloneUI-augmentations-item-name">${aug.name}</div><div class="cloneUI-augmentations-item-count">${quantity}</div>`
             })
             augElem.dataset.key = key
+            if (aug.effects) aug.effects.forEach(effect => augElem.firstElementChild.innerHTML += `<div class="cloneUI-augmentations-item-effect">${effect}</div>`)
+            if (aug.negativeEffects) aug.negativeEffects.forEach(effect => augElem.firstElementChild.innerHTML += `<div class="cloneUI-augmentations-item-effect">${effect}</div>`)
             return augElem
         }
         const updateAugmentations = () => {
