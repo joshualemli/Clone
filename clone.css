@@ -293,7 +293,6 @@ html,body {
     background:linear-gradient(0deg,#335,#112);
     padding:0.3em;
 }
-
     .menu-readout-item {
         align-items:center;
         margin:0.25em;
@@ -307,9 +306,14 @@ html,body {
     }
     #menu-production {
     }
-    #menu-artifices {
+    #menu-artifices {}
+    .readoutArtifice {
         color:#4C8;
+        padding:0.1em 0.3em;
+        margin:0.15em 0.3em;
+        background-color:#222;
     }
+
 
 .menu-readout-countArea {
     text-align:center;

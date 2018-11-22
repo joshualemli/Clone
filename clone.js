@@ -321,7 +321,7 @@ const CLONE_Game = (function(){
                     if (game.artifices[selectedItemGameId]) return null
                     else game.artifices[selectedItemGameId] = 1
                     Artifices[selectedItemGameId].use()
-                    Menu.updateArtifices()
+                    Menu.updateArtifices(true)
                 }
                 else if (game[selectedItemGameCategory][selectedItemGameId]) game[selectedItemGameCategory][selectedItemGameId] += selectedQuantity
                 else game[selectedItemGameCategory][selectedItemGameId] = selectedQuantity
@@ -354,8 +354,8 @@ const CLONE_Game = (function(){
             selectedQuantity = 1
             dom.itemDetails.name.innerHTML = selectedItem.name || ""
             // build effects div if needed, add description
-            var descriptionString = selectedItem.effects ? selectedItem.effects.map(e => `<div class="storeDescEffect">${e}</div>`) : ""
-            if (selectedItem.negativeEffects) descriptionString += selectedItem.negativeEffects.map(e => `<div class="storeDescEffect storeNegEffect">${e}</div>`)
+            var descriptionString = selectedItem.effects ? selectedItem.effects.map(e => `<div class="storeDescEffect">${e}</div>`).join("") : ""
+            if (selectedItem.negativeEffects) descriptionString += selectedItem.negativeEffects.map(e => `<div class="storeDescEffect storeNegEffect">${e}</div>`).join("")
             if (descriptionString.length) descriptionString = `<div id="storeEffectsContainer">${descriptionString}</div>`
             if (selectedItem.description) descriptionString += selectedItem.description
             dom.itemDetails.description.innerHTML = descriptionString
@@ -462,9 +462,10 @@ const CLONE_Game = (function(){
                 while (dom.readout.artifices.firstElementChild) dom.readout.artifices.removeChild(dom.readout.artifices.firstElementChild)
                 dom.readout.artificeItems = {}
             }
-            for (let key in game.artifices) if (!dom.readout.artificeItems[key]) {
+            for (let key in Artifices) if (game.artifices[key] && !dom.readout.artificeItems[key]) {
                 dom.readout.artificeItems[key] = createHtmlElement("div",{
-                    innerHTML: Artifices[key].name
+                    innerHTML: Artifices[key].name,
+                    className: "readoutArtifice"
                 })
                 dom.readout.artifices.appendChild(dom.readout.artificeItems[key])
             }
@@ -747,11 +748,11 @@ const CLONE_Game = (function(){
         this.age = override.age || 0
         this.maxAge = override.maxAge || 50
         this.generation = override.generation || 1
-        // type
-        this.mutant = override.mutant !== undefined ? override.mutant : (Math.random() > 1 - this.generation / 1e7 ? true : false)
-        this.foreign = override.foreign || false
         // augmentations
         this.augmentations = override.augmentations || {}
+        // type
+        this.mutant = override.mutant !== undefined ? override.mutant : (Math.random() > 1 - (this.generation + (override.usedMtbde ? 7e5 : 0)) / 1e7 ? true : false)
+        this.foreign = override.foreign || false
         // cloning
         this.fertileAge = override.fertileAge || 20
         this.cloningFailureChance = override.cloningFailureChance || (0.965 * (this.mutant ? 0.99 : 1))
@@ -832,6 +833,7 @@ const CLONE_Game = (function(){
             foreign: this.foreign,
             alienSpliced: this.alienSpliced
         }
+        if (this.augmentations.mtbde) hereditaryTraits.usedMtbde = true
         if (this.augmentations.geneticResequencingNodules) hereditaryTraits.mutant = false
         else if (this.mutant) hereditaryTraits.mutant = true
         new Clone(hash.x, hash.y, hereditaryTraits)
@@ -1088,17 +1090,18 @@ const CLONE_Game = (function(){
         },
         mtbde: {
             use: clone => {
-                clone.cloningFailureChance -= 0.01
+                clone.cloningFailureChance -= 0.06
             },
             name: "MTBDE",
-            effects: ["Cloning Rate +1%"],
-            description: `Methyl-tribromodioxylic Ether (MTBDE) is an "all-natural" way of enhancing a clone's... reproductive capabilities.`,
+            effects: ["Cloning Rate +6%"],
+            negativeEffects: ["Increased Mutation Factor"],
+            description: `This incredibly powerful hormonal stimulant is an "all-natural" way of enhancing a clone's reproductive... capabilities.<i>* **</i><br><br><i>* Methyl-tribromodioxylic Ether (MTBDE) is 100% synthetic.<br>** Warning: MTBDE is known to increase the likelihood of mutagenic offspring.</i>`,
             cost: 34e3
         },
         geneticResequencingNodules: {
             use: clone => {},
             name: "Genetic Resequencing Nodules",
-            effects: ["Mutation factor &rarr; 0"],
+            effects: ["Mutation Factor &rarr; 0"],
             description: "Only the finest implanted nodules crafted from 100% reprocessed... material.  Allows clone's organic sequences to stay intact, preventing mutant offspring (is that a paradox? hahahaha....).  Descendents do not inherit this augmentation.",
             cost: 100e3
         },
@@ -1113,6 +1116,17 @@ const CLONE_Game = (function(){
             description: `We're not even sure if the alien-DNA-spliced clones feel pain so we've been doing the implant procedure sans-anaesthesia. Don't put this implant into clones without the extra alien DNA sequences, they'll, ah, <i>"reject"</i> the implant.`,
             cost: 330e3
         },
+        cyberneticGenitals: {
+            use: clone => {
+                clone.fertileAge = Math.round(clone.fertileAge/2)
+                clone.cloningFailureChance -= 0.019
+            },
+            name: "Cybernetic Genitals",
+            effects: ["Cloning Rate +1.9%"],
+            negativeEffects: ["Fertility Age x1/2"],
+            description: `Once the swelling goes down and the risk of deadly infection has passed, you know the "upgrade" has been successful, so just kick back and... ahem... watch the fireworks.`,
+            cost: 750e3
+        },
         immortalitySerum: {
             use: clone => {
                 clone.maxAge = Infinity
@@ -1122,18 +1136,7 @@ const CLONE_Game = (function(){
             name: "Immortality Serum",
             effects: ["Max Age &rarr; <b>&infin;</b>"],
             description: "Literally, no sh*t, your clone will be immortal.  Will do nothing for their temperment, however.",
-            cost: 900e3
-        },
-        cyberneticGenitals: {
-            use: clone => {
-                clone.fertileAge = Math.round(clone.fertileAge/2)
-                clone.cloningFailureChance -= 0.015
-            },
-            name: "Cybernetic Genitals",
-            effects: ["Cloning Rate +1.5%"],
-            negativeEffects: ["Fertility Age x1/2"],
-            description: `Once the swelling goes down and the risk of deadly infection has passed, you know the "upgrade" has been successful, so just kick back and... ahem... watch the fireworks.`,
-            cost: 5e6
+            cost: 1.5e6
         },
         allelopathicDeathTendrils: {
             use: clone => {},
@@ -1162,10 +1165,14 @@ const CLONE_Game = (function(){
             cost: 3.7e9
         },
         exophagicOffspring: {
-            use: clone => {},
+            use: clone => {
+                clone.production *= 4/5
+                clone.cloningFailureChance += (1 - clone.cloningFailureChance) * 2/3
+            },
             name: "Exophagic Offspring",
             effects: ["+Exophagic Afterbirth (descendants)","+Exophagic Offspring (descendants)"],
-            description: "They're gunna f*ck sh*t up. Don't say we didn't warn you. Just don't make any godamned immortal exophagic nightmare clonepacolypse vampclones. (Or do it, we don't actually care.)",
+            negativeEffects: ["Production x4/5","Cloning Rate x1/3"],
+            description: "Slows clone metabolism.  But they're gunna f*ck sh*t up. Don't say we didn't warn you. Just don't make any godamned immortal exophagic nightmare clonepacolypse vampclones.",
             cost: 999e9
         },
     }
@@ -1478,7 +1485,7 @@ const CLONE_Game = (function(){
         Input.enable()
     }
     
-    window.cht = () => game.resources += 100e9
+    window.cht = () => game.resources += 1e15
 
     return function() {
         // initialization
