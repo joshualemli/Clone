@@ -855,7 +855,13 @@ const CLONE_Game = (function(){
             // if (Object.keys(this.augmentations).length) Artist.outlineCircle(this.worldPosition.x,this.worldPosition.y,this.radius-0.05,0.1,"#0F0")
             // augs
             if (this.hasAugs(["ribonucleicInjection", "mtbde"])) Artist.fillRectangle(this.worldPosition.x-0.1,this.worldPosition.y+0.1,0.05,0.05,"#911")
-            if (this.hasAugs(["psychicHarness", "longevityPump", "alienMotivationBioimplant"])) Artist.arc(this.worldPosition.x,this.worldPosition.y,this.radius,0.3,1.1,false,0.07,"#08E")
+            if (this.hasAugs(["psychicHarness", "longevityPump", "alienMotivationBioimplant"])) Artist.arc(this.worldPosition.x,this.worldPosition.y,this.radius,0.3,1.1,false,0.07,"#CCC")
+            if (this.augmentations.organicTransmutation) Artist.arc(this.worldPosition.x,this.worldPosition.y,0.25,0.75,1.25,false,0.03,"rgb(249, 122, 188)")
+            if (this.augmentations.inorganicMelding) Artist.arc(this.worldPosition.x,this.worldPosition.y,0.25,0.25,1.75,true,0.03,"#000")
+            if (this.augmentations.orificeInterconnectivitySystem) {
+                Artist.arc(this.worldPosition.x-0.09,this.worldPosition.y-0.04,0.25,1.57,2,false,0.02,"#00F")
+                Artist.arc(this.worldPosition.x+0.15,this.worldPosition.y+0.15,0.38,0.9,1.6,false,0.02,"#60F")
+            }
         }
     }
     Clone.prototype.step = function(){
