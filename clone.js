@@ -261,7 +261,7 @@ const CLONE_Game = (function(){
                     yMax: view.yPos + yOffset,
                 }
             },
-            fillRect: (xCenter,yCenter,xDim,yDim,color) => {
+            fillRectangle: (xCenter,yCenter,xDim,yDim,color) => {
                 context.fillStyle = color
                 context.fillRect(xCenter-xDim/2,yCenter-yDim/2,xDim,yDim)
             },
@@ -277,6 +277,13 @@ const CLONE_Game = (function(){
                 context.beginPath()
                 context.arc(x,y,r,0,2*Math.PI,false)
                 context.fill()
+            },
+            arc: (x,y,r,start,finish,ccw,width,color) => {
+                context.strokeStyle = color
+                context.lineWidth = width
+                context.beginPath()
+                context.arc(x,y,r,start*Math.PI,finish*Math.PI,ccw)
+                context.stroke()
             },
             clipCircle: (x,y,r) => {
                 context.save()
@@ -455,7 +462,7 @@ const CLONE_Game = (function(){
             if (game.artifices.LightOfUrizen) production += game.extantClones * 0.05
             if (game.artifices.LaborOfUrizen) production += cloneMap.size * 0.01
             production *= Framerate.fps()
-            dom.readout.production.innerHTML = `${numberToCurrency(production)}/s`
+            dom.readout.production.innerHTML = `$${production.toFixed(3)}/s`
         }
         const updateArtifices = (clearExisting) => {
             if (clearExisting) {
@@ -836,6 +843,7 @@ const CLONE_Game = (function(){
         new Clone(hash.x, hash.y, hereditaryTraits)
         this.descendants += 1
     }
+    Clone.prototype.hasAugs = function(augs) { return augs.some( aug => this.augmentations[aug] ) }
     Clone.prototype.draw = function(){
         if (
             this.worldPosition.x + this.radius > view.bounds.xMin &&
@@ -844,7 +852,10 @@ const CLONE_Game = (function(){
             this.worldPosition.y - this.radius < view.bounds.yMax
         ) {
             Artist.fillCircle(this.worldPosition.x,this.worldPosition.y,this.radius,this._color)
-            if (Object.keys(this.augmentations).length) Artist.outlineCircle(this.worldPosition.x,this.worldPosition.y,this.radius-0.05,0.1,"#0F0")
+            // if (Object.keys(this.augmentations).length) Artist.outlineCircle(this.worldPosition.x,this.worldPosition.y,this.radius-0.05,0.1,"#0F0")
+            // augs
+            if (this.hasAugs(["ribonucleicInjection", "mtbde"])) Artist.fillRectangle(this.worldPosition.x-0.1,this.worldPosition.y+0.1,0.05,0.05,"#911")
+            if (this.hasAugs(["psychicHarness", "longevityPump", "alienMotivationBioimplant"])) Artist.arc(this.worldPosition.x,this.worldPosition.y,this.radius,0.3,1.1,false,0.07,"#08E")
         }
     }
     Clone.prototype.step = function(){
@@ -1062,8 +1073,8 @@ const CLONE_Game = (function(){
                 clone.production += 0.007
             },
             name: "Servitude Engrams",
-            effects: ["Max Age +110","Production +0.007"],
-            description: `This will spice up your clone's life <i>and</i> increase their will to live.<p>"You’re a clone operative working undercover on an important mission. Clones are trying to kill you left and right! You meet this beautiful, exotic, clone. I don’t want to spoil it for you, clone, but you rest assured that by the time the trip is over, you get the clone, kill the bad guys, and save the entire petri dish."</p>`,
+            effects: ["Max Age +325","Production +0.05"],
+            description: `<i>"You’re a clone operative working undercover on an important mission. Clones are trying to kill you left and right! You meet this beautiful, exotic, clone. I don’t want to spoil it for you, clone, but you rest assured that by the time the trip is over, you get the clone, kill the bad guys, and save the entire petri dish."</i><br><br>We didn't say they'd be boring.  Ahhh, there's nothing like a little artificial memory to bolster the will to live. Now you tell me: isn't that worth a measly two-thousand credits?`,
             cost: 2e3
         },
         inorganicMelding: {
