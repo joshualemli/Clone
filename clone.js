@@ -474,7 +474,7 @@ const CLONE_Game = (function(){
             for (var key in game.tools) dom.tools[key].innerHTML = game.tools[key]
             if (useInspect) {
                 dom.tools.container.querySelectorAll(".menu-tools-selectedTool").forEach( e => e.classList.remove("menu-tools-selectedTool") )
-                dom.tools.inspect.children[0].classList.add("menu-tools-selectedTool")
+                dom.tools.inspect.classList.add("menu-tools-selectedTool")
             }
         }
         const update = () => {
@@ -537,12 +537,9 @@ const CLONE_Game = (function(){
                     })
                     dom.tools.container.appendChild(toolElement)
                     toolElement.onclick = event => {
-                        dom.tools.container.querySelectorAll(".menu-tools-selectedTool").forEach( e => e.classList.remove("menu-tools-selectedTool") )
-                        if (!Input.setSelectedTool(key) || game.tools[key] === 0) {
-                            Input.setClickMode(0)
-                            dom.tools.inspect.classList.add("menu-tools-selectedTool")
-                        }
+                        if (!Input.setSelectedTool(key) || game.tools[key] === 0) dom.tools.inspect.onclick()
                         else {
+                            dom.tools.container.querySelectorAll(".menu-tools-selectedTool").forEach( e => e.classList.remove("menu-tools-selectedTool") )
                             Input.setClickMode(game.tools[key] ? 1 : 0)
                             toolElement.classList.add("menu-tools-selectedTool")
                         }
@@ -1463,7 +1460,7 @@ const CLONE_Game = (function(){
             perishedMutant:0,
             perishedForeign:0,
             tools:{
-                genesisPod: 7,
+                genesisPod: 10,
                 genesisRay: 0,
                 smitingBolt: 0,
                 deionizer: 0,
