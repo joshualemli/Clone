@@ -31,9 +31,9 @@
     CLONE JavaScript file
     - - - - - - - - - - - - - - - - - - - */
         const
-        CLONE_VERSION = "0.5.1",
+        CLONE_VERSION = "0.6.0",
         CLONE_RELEASE = "beta",
-        CLONE_EDITION = "nuclear dog";
+        CLONE_EDITION = "big ol' dog";
     /* - - - - - - - - - - - - - - - - - - -
 
 
@@ -260,6 +260,14 @@ const CLONE_Game = (function(){
                     yMin: view.yPos - yOffset,
                     yMax: view.yPos + yOffset,
                 }
+            },
+            line: (x0,y0,x1,y1,width,color) => {
+                context.strokeStyle = color
+                context.lineWidth = width
+                context.beginPath()
+                context.moveTo(x0,y0)
+                context.lineTo(x1,y1)
+                context.stroke()
             },
             fillRectangle: (xCenter,yCenter,xDim,yDim,color) => {
                 context.fillStyle = color
@@ -855,7 +863,8 @@ const CLONE_Game = (function(){
             // if (Object.keys(this.augmentations).length) Artist.outlineCircle(this.worldPosition.x,this.worldPosition.y,this.radius-0.05,0.1,"#0F0")
             // augs
             if (this.hasAugs(["ribonucleicInjection", "mtbde"])) Artist.fillRectangle(this.worldPosition.x-0.1,this.worldPosition.y+0.1,0.05,0.05,"#911")
-            if (this.hasAugs(["psychicHarness", "longevityPump", "alienMotivationBioimplant"])) Artist.arc(this.worldPosition.x,this.worldPosition.y,this.radius,0.3,1.1,false,0.07,"#CCC")
+            if (this.hasAugs(["psychicHarness", "alienMotivationBioimplant"])) Artist.arc(this.worldPosition.x,this.worldPosition.y,this.radius,0.3,1.1,false,0.07,"#CCC")
+            if (this.augmentations.longevityPump) Artist.line(this.worldPosition.x-0.24,this.worldPosition.y+0.24,this.worldPosition.x-0.32,this.worldPosition.y+0.32,0.15,"#529")
             if (this.augmentations.organicTransmutation) Artist.arc(this.worldPosition.x,this.worldPosition.y,0.25,0.75,1.25,false,0.03,"rgb(249, 122, 188)")
             if (this.augmentations.inorganicMelding) Artist.arc(this.worldPosition.x,this.worldPosition.y,0.25,0.25,1.75,true,0.03,"#000")
             if (this.augmentations.orificeInterconnectivitySystem) {

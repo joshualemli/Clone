@@ -64,15 +64,19 @@ const CloneHelp = (function(){
     `
     content["Basics / Getting Started"] = `
         <div>
-            The game revolves around clones, which for all you care are just cells/dots/entities that have a chance to reproduce ("clone" themselves).
-            The clones exist within the "world", which is basically a big circle on your screen.
-            This is the clones' world.  It is all they will ever know.
+            The game revolves around clones, which for all you care are just cells/dots/entities on your screen.
+            Clones have a chance to reproduce -- to "clone" themselves.  That's the core mechanic here.  Get it?
+        </div>
+        <div>
+            The clones exist within a circular region called the "world".
+            This is the clones' home.  It is all they will ever know.
+            You can increase the world size drastically as you progress through the game.
         </div>
         <div>
             There are no rules to the gameplay. It's important to try new things.  <b>Exploration is key!</b>
         </div>
         <div>
-            Basically you create, destroy, and augment clones.  And watch them reproduce and die.
+            Basically you create, destroy, and augment clones.  And watch them reproduce.  And die.
             You can also buy <i>artifices</i> that permanently alter gameplay, typically in your favor.
         </div>
         <div>
@@ -137,7 +141,8 @@ const CloneHelp = (function(){
             occupy space on the world that could otherwise be utilized by your own precious clones.
         </div>
         <div>
-            "Mutant" clones are purple, and have an increasing chance of occurring as clones increase in generation.
+            "Mutant" clones are purple, and have an increasing chance of occurring with each successive generation.
+            (You can see the generation of a clone by using the "Inspect" tool.)
             Mutant clones can spawn from regular or foreign clones any time they reproduce.
             Certain artifices and augmentations can change the generational latency or likelihood of the mutagenic factor.
         </div>
