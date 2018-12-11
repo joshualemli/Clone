@@ -84,6 +84,47 @@ const CLONE_Game = (function(){
     })()
 
 
+    var Music = (function(){
+        // <filename> : <track title>
+        const tracks = {
+            Alchemy: "Alchemy",
+            History: "History of truth [FAKE SONG!]",
+            OpenBayDoors: "Open Bay Doors"
+        }
+        var song, stopping = false
+        return {
+            isPlaying: () => (song && !stopping),
+            play: (title) => {
+                Music.stop().then( () => {
+                    if (!title) {
+                        let titles = Object.keys(tracks)
+                        title = titles[ Math.floor(Math.random()*titles.length) ]
+                    }
+                    song = new Audio(`music/${title}.mp3`)
+                    var play = song.play()
+                    if (play !== undefined) {
+                        play.then( () => console.log(`playing song "${tracks[title]}" by Joshua A. Lemli`) ).catch( err => song = null )
+                    }
+                })
+            },
+            stop: () => new Promise( (resolve,reject) => {
+                if (!song || stopping) return resolve(false)
+                stopping = true
+                var stopInterval = setInterval(function(){
+                    if (song.volume > 0.1) song.volume -= 0.05
+                    else {
+                        clearInterval(stopInterval)
+                        song.pause()
+                        song = null
+                        stopping = false
+                        resolve(true)
+                    }
+                },50)
+            })
+        }
+    })()
+
+
     var Input = (function(){
         
         var enabled = false, clickMode = 0, selectedTool = null
@@ -880,9 +921,14 @@ const CLONE_Game = (function(){
         // clone self
         if (this.age > this.fertileAge && Math.random() > this.cloningFailureChance) return this.clone()
         // augmented behavior
-        // if (this.augmentations.allelopathicDeathTendrils && Math.random() > 0.9) {
-            //     let p = this._getRandomPosition()
-        // }
+        if (this.augmentations.allelopathicDeathTendrils && Math.random() > 0.5) {
+            let hash = this._getHashFromPosition(this._randomPosition())
+            let neighbor = cloneMap.get(`${hash.x.toString()}_${hash.y.toString()}`)
+            if (neighbor && (this.foreign != neighbor.foreign || this.mutant != neighbor.mutant)) { // || Math.random() > 0.999) ) {
+                neighbor.perish()
+                new Sprites.deathTendrils(this.worldPosition,neighbor.worldPosition)
+            }
+        }
         // production
         game.resources += this.production
         this.lifetimeProduction += this.production
@@ -908,7 +954,8 @@ const CLONE_Game = (function(){
     // SPRITES
 
     const Sprites = {
-        _SEED:0
+        _SEED:0,
+        _getId: () => (Sprites._SEED++).toString()
     }
     // -- WORLD BOUNDARY --
     Sprites.worldBoundary = function() {
@@ -945,6 +992,30 @@ const CLONE_Game = (function(){
     }
     Sprites.cloneHighlight.prototype.step = function() {
         return null
+    }
+    // -- DEATH TENDRILS --
+    Sprites.deathTendrils = function(p0,p1) {
+        this.id = Sprites._getId()
+        this.x0 = p0.x
+        this.y0 = p0.y
+        this.x1 = (p0.x + p1.x) / 2
+        this.y1 = (p0.y + p1.y) / 2
+        this.x2 = p1.x
+        this.y2 = p1.y
+        this.age = 0
+        spriteMap.set(this.id,this)
+    }
+    Sprites.deathTendrils.prototype.step = function() {
+        if (Math.random() > 0.5) {
+            let x1 = this.x1 + Math.random() * 0.5 - 0.25
+            let y1 = this.y1 + Math.random() * 0.5 - 0.25
+            let x2 = this.x2 + Math.random() * 0.5 - 0.25
+            let y2 = this.y2 + Math.random() * 0.5 - 0.25
+            Artist.line(this.x0,this.y0,x1,y1,0.01,"#F05")
+            Artist.line(x1,y1,x2,y2,0.01,"#F05")
+        }
+        this.age += 1
+        if (this.age > 10) spriteMap.delete(this.id)
     }
 
 
@@ -1037,10 +1108,10 @@ const CLONE_Game = (function(){
     var Augmentations = {
         ribonucleicInjection: {
             use: clone => {
-                clone.maxAge += 500
+                clone.maxAge += 400
             },
             name: "Ribonucleic Injection",
-            effects: ["Max Age +500"],
+            effects: ["Max Age +400"],
             description: "Prolong -- wait, sorry, our mistake -- <i>extend</i> the happy, very happy, life of a clone!",
             cost: 10.50
         },
@@ -1050,7 +1121,7 @@ const CLONE_Game = (function(){
             },
             name: "Psychic Harness",
             effects: ["Production +0.09"],
-            description: `Make no mistake, that little "+0.09" is pushing them to their breaking point.  You know, "psychologically" speaking.`,
+            description: `We'd go higher, but that little "+0.09" is pushing them to their breaking point.  You know, "psychologically" speaking.`,
             cost: 15.99
         },
         longevityPump: {
@@ -1064,8 +1135,8 @@ const CLONE_Game = (function(){
         },
         orificeInterconnectivitySystem: {
             use: clone => {
-                clone.maxAge -= 100
                 clone.production *= 4
+                clone.maxAge -= 100
             },
             name: "Orifice Interconnectivity System",
             effects: ["Production x4"],
@@ -1084,21 +1155,21 @@ const CLONE_Game = (function(){
         },
         servitudeEngrams: {
             use: clone => {
-                clone.maxAge += 110
-                clone.production += 0.007
+                clone.maxAge += 95
+                clone.production += 0.013
             },
             name: "Servitude Engrams",
-            effects: ["Max Age +325","Production +0.05"],
+            effects: ["Max Age +95","Production +0.013"],
             description: `<i>"You’re a clone operative working undercover on an important mission. Clones are trying to kill you left and right! You meet this beautiful, exotic, clone. I don’t want to spoil it for you, clone, but you rest assured that by the time the trip is over, you get the clone, kill the bad guys, and save the entire petri dish."</i><br><br>We didn't say they'd be boring.  Ahhh, there's nothing like a little artificial memory to bolster the will to live. Now you tell me: isn't that worth a measly two-thousand credits?`,
             cost: 2e3
         },
         inorganicMelding: {
             use: clone => {
                 clone.maxAge *= 3
-                clone.production += 0.065
+                clone.production += 0.022
             },
             name: "Inorganic Melding",
-            effects: ["Max Age x3","Production +0.065"],
+            effects: ["Max Age x3","Production +0.022"],
             description: `You may not recognize their... "face"... after this augmentation, but we're not selling dreams here, alright?`,
             cost: 5e3
         },
@@ -1122,7 +1193,7 @@ const CLONE_Game = (function(){
             cost: 34e3
         },
         geneticResequencingNodules: {
-            use: clone => {},
+            use: clone => { /* passive */},
             name: "Genetic Resequencing Nodules",
             effects: ["Mutation Factor &rarr; 0"],
             description: "Only the finest implanted nodules crafted from 100% reprocessed... material.  Allows clone's organic sequences to stay intact, preventing mutant offspring (is that a paradox? hahahaha....).  Descendents do not inherit this augmentation.",
@@ -1147,14 +1218,13 @@ const CLONE_Game = (function(){
             name: "Cybernetic Genitals",
             effects: ["Cloning Rate +1.9%"],
             negativeEffects: ["Fertility Age x1/2"],
-            description: `Once the swelling goes down and the risk of deadly infection has passed, you know the "upgrade" has been successful, so just kick back and... ahem... watch the fireworks.`,
+            description: `Once the swelling goes down and the risk of life-threatening infection has passed, you know the "upgrade" has been successful, so just kick back and... ahem... watch the fireworks.`,
             cost: 750e3
         },
         immortalitySerum: {
             use: clone => {
                 clone.maxAge = Infinity
                 clone._color = "rgb(255,215,0)"
-                clone.draw()
             },
             name: "Immortality Serum",
             effects: ["Max Age &rarr; <b>&infin;</b>"],
@@ -1164,7 +1234,7 @@ const CLONE_Game = (function(){
         allelopathicDeathTendrils: {
             use: clone => {},
             name: "Allelopathic Death Tendrils",
-            description: "Gives your clone an automatic defense net that will strike out at dissimilar clones. What could go wrong?",
+            description: "Gives your clone an automatic defense net that will randomly strike out at dissimilar clones. What could go wrong?",
             cost: 7e6
         },
         exophagicAfterbirth: {
@@ -1506,6 +1576,7 @@ const CLONE_Game = (function(){
         Menu.updateArtifices(true)
         Framerate.reset()
         Input.enable()
+        Music.play("History")
     }
     
     window.cht = () => game.resources += 1e15
@@ -1552,6 +1623,9 @@ const CLONE_Game = (function(){
         })
         Menu.toggle.readout()
         let splashscreen = document.getElementById("splashscreen")
+        splashscreen.onmousemove = () => {
+            if (!Music.isPlaying()) Music.play("OpenBayDoors")
+        }
         splashscreen.onclick = () => {
             Menu.toggle.readout()
             load()
